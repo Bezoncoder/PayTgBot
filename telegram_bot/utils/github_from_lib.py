@@ -7,14 +7,14 @@ import github3
 # Client ID
 # Ov23liSqhkZegg27aQBe
 # Secret key
-# c9e20e0c1e7feca02d1d889cef19ea0f186788a7
+#
 # Classik !!!
-# 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
+#
 
-GITHUB_TOKEN = "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"
-OWNER = "halltape"
-REPO = "InfraSharing"
-USERNAME = "Bezoncoder"
+# GITHUB_TOKEN =
+# OWNER = "halltape"
+# REPO = "InfraSharing"
+# USERNAME = "Bezoncoder"
 
 
 # https://api.github.com/repos/OWNER/REPO/collaborators/USERNAME
