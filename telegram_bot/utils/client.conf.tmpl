@@ -1,0 +1,38 @@
+client
+resolv-retry infinite
+nobind
+remote 95.139.82.47 1194
+proto tcp
+dev tun
+comp-lzo
+tls-client
+float
+keepalive 10 120
+persist-key
+persist-tun
+tun-mtu 1500
+mssfix 1620
+cipher AES-256-GCM
+verb 3
+route 172.24.0.1 255.255.255.255
+dhcp-option DOMAIN roadmappers.ru
+dhcp-option ADAPTER_DOMAIN_SUFFIX roadmappers.ru
+
+<ca>
+{{ca.pem}}
+</ca>
+
+<cert>
+{{тут сгенерированный тобой сертификат}}
+</cert>
+<key>
+{{тут сгенерированный тобой ключ}}
+</key>
+<tls-auth>
+{{ta.key}}
+</tls-auth>
+
+key-direction 1
+
+#up /etc/openvpn/update-resolv-conf
+#down /etc/openvpn/update-resolv-conf
