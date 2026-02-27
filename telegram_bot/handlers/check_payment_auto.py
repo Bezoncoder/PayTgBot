@@ -53,7 +53,7 @@ import os
 
 router = Router()
 
-veles = UserVelesManagerAPI()
+
 
 
 # check_pay:{stream_id}:{price} check_pay
@@ -155,6 +155,9 @@ async def check_pay(callback: CallbackQuery, state: FSMContext):
             expiredate_to_db = expire_date
 
         #################### Vles VPN ###############################
+
+        base_url = product_info.base_url
+        veles = UserVelesManagerAPI(base_url=base_url)
 
         vless_user_name = str(payment_data.operation_id)
         link = veles.add_user(username=str(payment_data.operation_id))

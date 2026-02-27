@@ -56,7 +56,7 @@ import os
 
 router = Router()
 
-veles = UserVelesManagerAPI()
+
 
 @router.message(OrderPay.send_check, F.content_type.in_({"document", "photo"}))
 async def send_check(message: Message, state: FSMContext):
@@ -178,6 +178,9 @@ async def approve_check(callback: CallbackQuery, state: FSMContext):
         expiredate_to_db = expire_date
 
     #################### Vles VPN ###############################
+
+    base_url = product_info.base_url
+    veles = UserVelesManagerAPI(base_url=base_url)
 
     vless_user_name = str(payment_data.operation_id)
     link = veles.add_user(username=str(payment_data.operation_id))
