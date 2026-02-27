@@ -211,3 +211,8 @@ telegram_bot/*.log*
 telegram_bot/migration/versions/
 telegram_bot/source/certs/
 telegram_bot/videos/
+.python-version
+telegram_bot/alembic.ini
+telegram_bot/migration/env.py
+telegram_bot/migration/script.py.mako
+telegram_bot/texts.txt
