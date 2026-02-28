@@ -1,4 +1,4 @@
-from settings.config import MERCHANT_ID, SECRET_KEY
+from settings.config import MERCHANT_ID, PLATEGA_SECRET_KEY
 
 import requests
 import time
@@ -331,7 +331,7 @@ if __name__ == "__main__":
     logging.getLogger().setLevel(logging.INFO)
 
     try:
-        a=PlategaAPI(MERCHANT_ID, SECRET_KEY)
+        a=PlategaAPI(MERCHANT_ID, PLATEGA_SECRET_KEY)
         link = a.create_payment(payment_method=PaymentMethod.CARD_ACQUIRING, amount=10, description='test')
         print(f"link = {link.get('redirect')}")
     except Exception as e:

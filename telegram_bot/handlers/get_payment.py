@@ -10,7 +10,7 @@ import asyncio
 
 from db.add_methods_dao import add_payments_operation
 # from db.update_methods_dao import update_user_email
-from keyboards.get_menu import get_payment_notification_button, get_fake_menu_button
+from keyboards.get_menu import get_payment_notification_button, get_fake_menu_button, get_errors_button
 from db.select_methods import get_user_info_by_tg_id, get_stream_info
 # from utils.banking_operations import get_card_creds
 
@@ -58,25 +58,6 @@ async def get_pay(callback: CallbackQuery, state: FSMContext):
     stream_id_int = int(list_data_buttons[1])
     price = int(list_data_buttons[2])
 
-
-    # if list_data_buttons[4] and list_data_buttons[4] != '':
-    #     directions_id = int(list_data_buttons[3])
-    # else:
-    #     directions_id = None
-
-
-    # user_pay_data = dict(stream_id_int=stream_id_int,
-    #                      price=price,
-    #                      directions_id=directions_id)
-    #
-    # user_key = StorageKey(
-    #     bot_id=callback.bot.id,
-    #     chat_id=callback.from_user.id,  # личный чат пользователя
-    #     user_id=callback.from_user.id,  # сам пользователь
-    # )
-    #
-    # await state.storage.update_data(key=user_key, data=user_pay_data)
-
     ######################## ФОРМИРУЕМ USER_KEY ########################
 
     user_key = StorageKey(
@@ -86,7 +67,6 @@ async def get_pay(callback: CallbackQuery, state: FSMContext):
     )
 
     #################### ПОЛУЧАЕМ ДАННЫЕ ПО ОПЛАТЕ #####################
-
 
     user_pay_data = await state.storage.get_data(key=user_key)
 
@@ -124,13 +104,26 @@ async def get_pay(callback: CallbackQuery, state: FSMContext):
                           "user_id": user_info_dict["id"]}
 
     #################### Добавляем в БД запись об оплате и получаем ссылку на оплату ###########################
+
     payment_data_from_db = await add_payments_operation(payments_data=payments_data_dict)
 
-    ########################### Получаем Данные о платеже от Провайдера эквайринга #############################
+    ########################### Получаем Данные о платеже от Провайдера Эквайринга #############################
 
     payments_data_from_bd = get_payment_link_data(payment_method=PaymentMethod.CARD_ACQUIRING, amount=float(price))
-
-    url_pay_from_provider = payments_data_from_bd.get('payment_link', 'Что-то пошло не так... повторите попытку позже.')
+    try:
+        url_pay_from_provider = payments_data_from_bd.get('payment_link',
+                                                      'Что-то пошло не так... повторите попытку позже.')
+    except Exception as exception_text:
+        # < code > текст < / code >
+        buttons = get_errors_button()
+        await callback.message.edit_caption(caption=f"❌ <b>Что-то пошло не так</b>… Повторите попытку позже\n\n"
+                                                    f"📢 <b>Сообщите в поддержку</b> и прикрепите текст ошибки\n\n"
+                                                    f"💡 <i>Чтобы скопировать — просто нажмите на текст</i>\n\n"
+                                                    f"🔴 <b>Ошибка:</b>\n"
+                                                    f"<code>{exception_text}</code>",
+                                            parse_mode="HTML",
+                                            reply_markup=buttons)
+        return
 
     ###################### Сохраняем данные Пользователю в FSM #########################
 

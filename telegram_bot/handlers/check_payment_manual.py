@@ -17,7 +17,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.filters import StateFilter
 
 from db.update_methods_dao import update_payment_data
-from keyboards.get_menu import get_payment_verification_button, get_back_button
+from keyboards.get_menu import get_payment_verification_button, get_back_button, get_errors_button
 from utils.get_links import get_subscribe_link
 from utils.payments import tochka_bank
 # from utils.payments_operations import check_payment_status
@@ -180,10 +180,25 @@ async def approve_check(callback: CallbackQuery, state: FSMContext):
     #################### Vles VPN ###############################
 
     base_url = product_info.base_url
-    veles = UserVelesManagerAPI(base_url=base_url)
 
-    vless_user_name = str(payment_data.operation_id)
-    link = veles.add_user(username=str(payment_data.operation_id))
+    try:
+        veles = UserVelesManagerAPI(base_url=base_url)
+        vless_user_name = str(payment_data.operation_id)
+        link = veles.add_user(username=str(payment_data.operation_id))
+
+    except Exception as exception_text:
+        # < code > текст < / code >
+        buttons = get_errors_button()
+        await callback.message.edit_caption(caption=f"❌ <b>Что-то пошло не так</b>… Повторите попытку позже\n\n"
+                                                    f"📢 <b>Сообщите в поддержку</b> и прикрепите текст ошибки\n\n"
+                                                    f"💡 <i>Чтобы скопировать — просто нажмите на текст</i>\n\n"
+                                                    f"🔴 <b>Ошибка:</b>\n"
+                                                    f"<code>{exception_text}</code>",
+                                            parse_mode="HTML",
+                                            reply_markup=buttons)
+        return
+
+
     vles_text_list = link.split("\n")
 
     if len(vles_text_list) > 1:

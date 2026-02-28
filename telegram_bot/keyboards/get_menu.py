@@ -25,8 +25,8 @@ async def get_start_menu(list_for_menu, one_user_info: dict) -> InlineKeyboardMa
     builder.button(
         text="📦 Мои покупки", callback_data=f"get_my_subscribe:{one_user_info['id']}"
     )
-    # builder.button(text="👩‍💻 Тех поддержка", url="https://t.me/QuantumTurboVPN")
-    builder.button(text="👩‍💻 Тех поддержка", url="https://t.me/user_post")
+    builder.button(text="👩‍💻 Тех поддержка", url="https://t.me/QuantumTurboVPN")
+    # builder.button(text="👩‍💻 Тех поддержка", url="https://t.me/user_post")
     builder.adjust(1)
 
     return builder.as_markup(resize_keyboard=True)
@@ -190,6 +190,19 @@ def get_fake_menu_button() -> InlineKeyboardMarkup:
 
     builder.button(text="Назад",
                    callback_data=" ")
+
+    builder.adjust(1)
+
+    return builder.as_markup(resize_keyboard=True)
+
+def get_errors_button() -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+
+    builder.button(text="👩‍💻 Тех поддержка",
+                   url="https://t.me/QuantumTurboVPN")
+
+    builder.button(text="Главное меню",
+                   callback_data=f"set: start")
 
     builder.adjust(1)
 

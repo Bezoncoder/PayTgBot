@@ -1,12 +1,12 @@
 from pprint import pprint
 from typing import Any
 from utils.plategaio import PlategaAPI
-from settings.config import MERCHANT_ID, SECRET_KEY
+from settings.config import MERCHANT_ID, PLATEGA_SECRET_KEY
 
 
 
 
-platega = PlategaAPI(MERCHANT_ID, SECRET_KEY)
+platega = PlategaAPI(MERCHANT_ID, PLATEGA_SECRET_KEY)
 
 def get_payment_link_data(payment_method, amount) -> dict:
 
