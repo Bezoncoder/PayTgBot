@@ -8,7 +8,7 @@ import asyncio
 
 from keyboards.get_menu import get_products_menu
 from db.select_methods import get_all_product_from_direction_id
-
+from settings.config import URL
 # from utils.jira_functional.jira_functions import onboard_user_with_tasks
 
 from utils.gen_ssl_key import get_signed_cert
@@ -49,7 +49,7 @@ async def set_group(callback: CallbackQuery, state: FSMContext):
 
     products_buttons = await get_products_menu(list_of_products=list_products_pydantic)
     photo = FSInputFile('source/pictures/choose_product.png')
-    URL = 'http://213.139.229.165:8000/'
+
     media = InputMediaPhoto(
         media=photo,
         caption=f"✅ Отличный выбор!\n\n"
@@ -58,7 +58,7 @@ async def set_group(callback: CallbackQuery, state: FSMContext):
                 f"⚡ Ускорение Интернета.\n"
                 f"🛡️ Техподдержка 24/7 в чате.\n"
                 f"🎯 У нас есть {choice_text} для тебя!!!\n\n"
-                f'🌐 Все детали на <a href="{URL}">https://roadmappers.ru</a>\n\n'
+                f'🌐 Все детали на <a href="{URL}">https://QuantumTurboVPN.ru</a>\n\n'
                 f"👇 Выбери то, что тебе нужно\n",
         parse_mode='HTML'
     )
