@@ -109,8 +109,8 @@ async def get_pay(callback: CallbackQuery, state: FSMContext):
 
     ########################### Получаем Данные о платеже от Провайдера Эквайринга #############################
 
-    payments_data_from_bd = get_payment_link_data(payment_method=PaymentMethod.CARD_ACQUIRING, amount=float(price))
     try:
+        payments_data_from_bd = get_payment_link_data(payment_method=PaymentMethod.CARD_ACQUIRING, amount=float(price))
         url_pay_from_provider = payments_data_from_bd.get('payment_link',
                                                       'Что-то пошло не так... повторите попытку позже.')
     except Exception as exception_text:
