@@ -18,11 +18,13 @@ from aiogram.filters import StateFilter
 
 from db.update_methods_dao import update_payment_data
 from keyboards.get_menu import get_payment_verification_button, get_back_button, get_errors_button
+from utils.calculate_expire_date import get_expire_time_sec
 from utils.get_links import get_subscribe_link
 from utils.payments import tochka_bank
 from utils.payments_operations import check_payment_status
 
-from settings.config import TECH_CHANNEL
+from settings.config import TECH_CHANNEL, HOST, USER, PASSWORD, PORT, WEBPATH
+
 
 from db.add_methods_dao import set_pay, add_new_enrollments
 from utils.user_veles_manager import UserVelesManagerAPI
@@ -44,6 +46,8 @@ import calendar
 import locale
 
 import os
+
+from utils.vlessuiapi import XUIClient
 
 """
 
@@ -170,15 +174,23 @@ async def check_pay(callback: CallbackQuery, state: FSMContext):
         else:
             expiredate_to_db = expire_date
 
+        expire_time_sec = get_expire_time_sec(expire_data=expire_date)
+
         #################### Vles VPN ###############################
 
         base_url = product_info.base_url
+        # https://155.212.228.65:49699/IIVMNd0IoCAcUBOuKK
 
         try:
-            veles = UserVelesManagerAPI(base_url=base_url)
-            vless_user_name = str(payment_data.operation_id)
-            link = veles.add_user(username=str(payment_data.operation_id))
+            vless_client = XUIClient(base_url=base_url,
+                              port=int(base_url.split(":")[2].split("/")[0]),
+                              username=USER,
+                              password=PASSWORD)
 
+            client_uuid_from_payment = str(payment_data.operation_id)
+            link = vless_client.add_client(client_uuid=client_uuid_from_payment,
+                                           expiry_time=expire_time_sec,
+                                           email=f"{callback.from_user.id}@vless.com").get('vless_link')
         except Exception as exception_text:
             # < code > текст < / code >
             buttons = get_errors_button()
@@ -191,13 +203,6 @@ async def check_pay(callback: CallbackQuery, state: FSMContext):
                                                 reply_markup=buttons)
             return
 
-        vles_text_list = link.split("\n")
-
-        if len(vles_text_list)>1:
-            vles_text_link = vles_text_list[1]
-        else:
-            vles_text_link = vles_text_list[0]
-
         ############### Запись в БД Enrollments ################
 
         enrollment_data = dict(
@@ -207,8 +212,8 @@ async def check_pay(callback: CallbackQuery, state: FSMContext):
                             title_product=product_info.title,
                             product_id=stream_info.product_id,
                             stream_id=stream_info.id,
-                            vless_user_name=vless_user_name,
-                            vless_link=vles_text_link
+                            vless_user_name=client_uuid_from_payment,
+                            vless_link=link
         )
 
         new_enrollment = await add_new_enrollments(enrollment_data=enrollment_data)

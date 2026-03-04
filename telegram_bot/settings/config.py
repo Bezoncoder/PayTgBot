@@ -7,5 +7,11 @@ TECH_CHANNEL = os.getenv("TECH_CHANNEL")
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 URL = os.getenv("URL")
 
+USER = "a6LIzDCDEd"
+PASSWORD = "QEQwYlcbJc"
+PORT = 28001
+WEBPATH = "ylzqeXtdnca0tHr2ng"
+HOST = "illiriaakva.ru"
+
 # Тестовый бот
-# BOT_TOKEN = "7914615054:AAFDqsItpNGotBnaoyYjsRnSFuWbyC2ho9E"
+BOT_TOKEN = "7914615054:AAFDqsItpNGotBnaoyYjsRnSFuWbyC2ho9E"
