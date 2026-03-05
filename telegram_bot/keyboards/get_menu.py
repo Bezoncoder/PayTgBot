@@ -7,6 +7,7 @@ import datetime as DT
 
 from db.schemas import ProductPydantic, StreamPydantic, EnrollmentPydantic
 from db.select_methods import get_list_directions, get_enrollments_count_stream_id, get_product_info
+from utils.plategaio import PaymentMethod
 
 
 # from utils.jira_functional.jira_functions import ensure_user, JIRA_BASE
@@ -97,11 +98,31 @@ def get_payment_notification_button(
         text=f"Я оплатил",
         callback_data=f"check_pay:{stream_id}:{price}:{directions_id}",
     )
+
+    # back_callback_menu = f"get_choosing_method:{stream_id}:{price_menu}:{product_id}"
+
     if directions_id is None:
         builder.button(text="Назад", callback_data=f"set_stream:{stream_id}:{price}")
     else:
         builder.button(text="Назад", callback_data=f"set_group:{directions_id}")
     builder.adjust(1)
+
+    return builder.as_markup(resize_keyboard=True)
+
+def get_choosing_pay_method_buttons(price: str, stream_id_int: int, directions_id: int = None,
+                                    pay_method: PaymentMethod = None) -> InlineKeyboardMarkup:
+    # get_pay:{stream_id_int}:{price_menu}:{directions_id}:{pay_method}
+
+    builder = InlineKeyboardBuilder()
+    for method in PaymentMethod:
+        builder.button(text=f"{method.name}",
+                       callback_data=f"get_pay:{stream_id_int}:{price}:{directions_id}:{method.value}")
+    if directions_id is None:
+        builder.button(text="Назад", callback_data=f"set_stream:{stream_id_int}:{price}")
+    else:
+        builder.button(text="Назад", callback_data=f"set_group:{directions_id}")
+    builder.adjust(1)
+    builder.button(text="Главное меню", callback_data=f"set: start")
 
     return builder.as_markup(resize_keyboard=True)
 
@@ -133,7 +154,7 @@ def get_stream_payment_buttons(price_menu: str = None,
     builder = InlineKeyboardBuilder()
 
     ######################### ПЕРЕХОД К ФОРМИРОВАНИЮ ОПЛАТЫ ######################
-    callback_menu = f"get_pay:{stream_id}:{price_menu}:{product_id}"
+    callback_menu = f"get_choosing_method:{stream_id}:{price_menu}:{product_id}"
     builder.button(text=f"Продолжить и принять условия оферты", callback_data=callback_menu)
     builder.button(text="Назад", callback_data=f"set_product:{product_id}")
     builder.adjust(1)

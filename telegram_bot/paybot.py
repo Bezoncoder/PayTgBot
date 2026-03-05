@@ -5,7 +5,8 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from handlers import (greetings, get_subscribe, check_payment_auto, check_payment_manual,
                       get_creds, github_check_subscribe,
                       choosing_direction, choosing_product,
-                      get_payment, choosing_stream, check_fio, how_to_pay, check_email)
+                      get_payment, choosing_stream, check_fio, how_to_pay, check_email,
+                      choosing_payment_method)
 # from middleware.UserInternalIdMiddleware import UserInternalIdMiddleware
 import datetime as dt
 
@@ -14,15 +15,13 @@ import logging
 import colorlog
 
 from settings.config import BOT_TOKEN
-from utils.github_api import GitHubRepoManager, parse_repo_url
 from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
 from db.select_methods import (
     get_userinfo_to_ban,
     get_users_enrollments_to_ban,
     get_streaminfo_to_ban,
-    get_product_info,
-)
+    get_product_info)
 
 bot = Bot(token=BOT_TOKEN)
 
@@ -95,7 +94,8 @@ async def main():
                        get_payment.router,
                        choosing_stream.router,
                        how_to_pay.router,
-                       check_email.router)
+                       check_email.router,
+                       choosing_payment_method.router)
 
     # Запускаем бота и пропускаем все накопленные входящие
     await bot.delete_webhook(drop_pending_updates=True)

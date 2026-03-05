@@ -18,11 +18,12 @@ from aiogram.filters import StateFilter
 
 from db.update_methods_dao import update_payment_data
 from keyboards.get_menu import get_payment_verification_button, get_back_button, get_errors_button
+from utils.calculate_expire_date import get_expire_time_sec
 from utils.get_links import get_subscribe_link
 from utils.payments import tochka_bank
 # from utils.payments_operations import check_payment_status
 
-from settings.config import TECH_CHANNEL
+from settings.config import TECH_CHANNEL, USER, PASSWORD
 
 from db.add_methods_dao import set_pay, add_new_enrollments
 
@@ -46,7 +47,7 @@ import locale
 
 import os
 
-
+from utils.vlessuiapi import XUIClient
 
 """
 
@@ -152,7 +153,7 @@ async def approve_check(callback: CallbackQuery, state: FSMContext):
     payment_data = await update_payment_data(
         payment_id=user_data.get("payment_id"),
         new_operation_id=user_data.get("operation_id"),
-        new_status="MANUAL",
+        new_status="APPROVED_MANUAL",
     )
 
     logging.info("Получена оплата:\n%s", payment_data)
@@ -170,41 +171,47 @@ async def approve_check(callback: CallbackQuery, state: FSMContext):
         expire_date = today + relativedelta(years=1)
     else:
         expire_date = today
-
+    logging.debug(f"expire_date = {expire_date}")
     # Нормализуем к дате
     if isinstance(expire_date, DT.datetime):
         expiredate_to_db = expire_date.date()
     else:
         expiredate_to_db = expire_date
 
+    expire_time_sec = get_expire_time_sec(expire_date=expire_date)
+
     #################### Vles VPN ###############################
 
     base_url = product_info.base_url
+    # https://155.212.228.65:49699/IIVMNd0IoCAcUBOuKK
 
     try:
-        veles = UserVelesManagerAPI(base_url=base_url)
-        vless_user_name = str(payment_data.operation_id)
-        link = veles.add_user(username=str(payment_data.operation_id))
+        vless_client = XUIClient(base_url=base_url,
+                                 # port=int(base_url.split(":")[2].split("/")[0]),
+                                 username=USER,
+                                 password=PASSWORD)
 
+        client_uuid_from_payment = str(payment_data.operation_id)
+        link = vless_client.add_client(client_uuid=client_uuid_from_payment,
+                                       inbound_id="1",
+                                       expiry_time=expire_time_sec,
+                                       email=f"{user_telegram_id}_{client_uuid_from_payment}").get('vless_link')
     except Exception as exception_text:
         # < code > текст < / code >
         buttons = get_errors_button()
-        await callback.message.edit_caption(caption=f"❌ <b>Что-то пошло не так</b>… Повторите попытку позже\n\n"
-                                                    f"📢 <b>Сообщите в поддержку</b> и прикрепите текст ошибки\n\n"
-                                                    f"💡 <i>Чтобы скопировать — просто нажмите на текст</i>\n\n"
-                                                    f"🔴 <b>Ошибка:</b>\n"
-                                                    f"<code>{exception_text}</code>",
+        new_caption = f"❌ <b>Что-то пошло не так</b>… Повторите попытку позже\n\n"
+        f"📢 <b>Сообщите в поддержку</b> и прикрепите текст ошибки\n\n"
+        f"💡 <i>Чтобы скопировать — просто нажмите на текст</i>\n\n"
+        f"🔴 <b>Ошибка:</b>\n"
+        f"<code>{exception_text}</code>"
+        await callback.message.edit_caption(caption=new_caption,
                                             parse_mode="HTML",
                                             reply_markup=buttons)
+
+        await callback.bot.send_message(text=new_caption,
+                                        chat_id=user_telegram_id,
+                                        reply_markup=buttons)
         return
-
-
-    vles_text_list = link.split("\n")
-
-    if len(vles_text_list) > 1:
-        vles_text_link = vles_text_list[1]
-    else:
-        vles_text_link = vles_text_list[0]
 
     ############### Запись в БД Enrollments ################
 
@@ -215,8 +222,8 @@ async def approve_check(callback: CallbackQuery, state: FSMContext):
         title_product=product_info.title,
         product_id=stream_info.product_id,
         stream_id=stream_info.id,
-        vless_user_name=vless_user_name,
-        vless_link=vles_text_link
+        vless_user_name=client_uuid_from_payment,
+        vless_link=link
     )
 
     new_enrollment = await add_new_enrollments(enrollment_data=enrollment_data)
