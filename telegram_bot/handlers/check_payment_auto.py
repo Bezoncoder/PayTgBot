@@ -23,7 +23,7 @@ from utils.get_links import get_subscribe_link
 from utils.payments import tochka_bank
 from utils.payments_operations import check_payment_status
 
-from settings.config import TECH_CHANNEL, HOST, USER, PASSWORD, PORT, WEBPATH
+from settings.config import USER, PASSWORD
 
 
 from db.add_methods_dao import set_pay, add_new_enrollments
@@ -189,6 +189,7 @@ async def check_pay(callback: CallbackQuery, state: FSMContext):
 
             client_uuid_from_payment = str(payment_data.operation_id)
             link = vless_client.add_client(client_uuid=client_uuid_from_payment,
+                                           flow="xtls-rprx-vision",
                                            inbound_id="1",
                                            expiry_time=expire_time_sec,
                                            email=f"{callback.from_user.id}_{client_uuid_from_payment}").get('vless_link')
