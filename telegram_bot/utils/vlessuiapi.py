@@ -160,8 +160,8 @@ class XUIClient:
         settings = json.dumps({"clients": [client_data]})
         data = {'id': inbound_id, 'settings': settings}
         result = self._make_request("inbounds/addClient", data=data)
-
-        if result.get("success"):
+        success = result.get('success', False)
+        if success is True:
             new_result = result
             vless_link = self._generate_vless_url(client_uuid=final_id,
                                      host=self.host,
@@ -210,4 +210,23 @@ class XUIClient:
         self.session.cookies.clear()
         logger.info("👋 Сессия закрыта")
         return True
+
+if __name__ == "__main__":
+    base_url = "https://193.242.109.208:29861/9RWEJRPGmKLSZojNjB"
+    expire_time = 86400
+    USER = "sBcdl7KQt9"
+    PASSWORD = "8Dgwr0u6Cw"
+    port = int(base_url.split(":")[2].split("/")[0])
+    print(port)
+    vless_client = XUIClient(base_url=base_url,
+                             # port=port,
+                             username=USER,
+                             password=PASSWORD)
+
+    print(vless_client.add_client(email="NEW_TEST_USER",
+                                  inbound_id="1",
+                                  flow="xtls-rprx-vision",
+                                  expiry_time=1775505600000))
+
+    # print(vless_client.add_client(email="ShustDE", inbound_id="1", flow="xtls-rprx-vision"))
 

@@ -12,7 +12,7 @@ from urllib.parse import urlparse
 
 # Настройка логирования
 # logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 
 HTTP_STATUS_EMOJIS = {
     200: "✅", 201: "✨", 204: "📥",
@@ -71,9 +71,7 @@ class PaymentStatus(Enum):
 
 class PaymentMethod(Enum):
     SBP_QR = 2
-    CARDS_RUB = 10
     CARD_ACQUIRING = 11
-    INTERNATIONAL_ACQUIRING = 12
     CRYPTOCURRENCY = 13
 
 
@@ -215,7 +213,7 @@ class PlategaAPI:
     def create_payment(self, amount: float, description: str,
                        currency: str = 'RUB', success_url: str = '',
                        fail_url: str = '', payload: str = '',
-                       payment_method: PaymentMethod = PaymentMethod.SBP_QR) -> Dict[str, Any]:
+                       payment_method: int = 2) -> Dict[str, Any]:
         """
         Создает транзакцию с правильной структурой для Platega API
         """
@@ -246,7 +244,7 @@ class PlategaAPI:
         payload_data = {
             "command": "create",
             "id": payment_uuid,
-            "paymentMethod": payment_method.value,
+            "paymentMethod": int(payment_method),
             "paymentDetails": {
                 "amount": round(amount, 2),
                 "currency": currency
@@ -329,10 +327,14 @@ class PlategaAPI:
 # Тестовый блок
 if __name__ == "__main__":
     logging.getLogger().setLevel(logging.INFO)
-
+    # SBP_QR = 2
+    #
+    # CARD_ACQUIRING = 11
+    #
+    # CRYPTOCURRENCY = 13
     try:
         a=PlategaAPI(MERCHANT_ID, PLATEGA_SECRET_KEY)
-        link = a.create_payment(payment_method=PaymentMethod.CARD_ACQUIRING, amount=10, description='test')
+        link = a.create_payment(payment_method=12, amount=10, description='test')
         print(f"link = {link.get('redirect')}")
     except Exception as e:
         print(e)

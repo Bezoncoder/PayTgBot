@@ -70,14 +70,17 @@ async def set_stream(callback: CallbackQuery, state: FSMContext):
     #                f"Нажимая кнопку «Оплатить», вы соглашаетесь с условиями оферты {link_part}.\n\n"
     #                f'\n⚠️ Оплата производится исключительно с карты физического лица!\n\n')
 
+    politika_url = "https://telegra.ph/Politika-konfidencialnosti-08-15-17"
+    polzovatelskoe_url = "https://telegra.ph/Politika-konfidencialnosti-08-15-17"
+
     new_caption = (f"🧾 Вы выбрали: {stream_info.title} за {stream_info.price} ₽.\n\n"
                    f"✅ Нажмите «Продолжить» для перехода к оплате!\n\n"
                    f"📚 Пакет включает доступ и поддержку на весь период!\n\n"
                    f"🚀 Ждём вас на высоких скоростях! ✨\n\n"
                    f"📜 Политика конфиденциальности:\n"
-                   f"https://telegra.ph/Politika-konfidencialnosti-08-15-17\n\n"
+                   f"<a href='{politika_url}'>политика</a>\n\n"
                    f"⚖️ Пользовательское соглашение:\n"
-                   f"https://telegra.ph/Polzovatelskoe-soglashenie-08-15-10\n\n"
+                   f"<a href='{polzovatelskoe_url}'>соглашение</a>\n\n"
                    f"Нажимая продолжить, Вы принимаете условия оферты.\n")
 
     buttons = get_stream_payment_buttons(price_menu=price,
@@ -85,4 +88,4 @@ async def set_stream(callback: CallbackQuery, state: FSMContext):
                                          stream_id=stream_id)
 
 
-    await callback.message.edit_caption(caption=new_caption, reply_markup=buttons)
+    await callback.message.edit_caption(caption=new_caption, reply_markup=buttons, parse_mode="HTML")

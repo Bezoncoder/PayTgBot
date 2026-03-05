@@ -153,7 +153,7 @@ async def approve_check(callback: CallbackQuery, state: FSMContext):
     payment_data = await update_payment_data(
         payment_id=user_data.get("payment_id"),
         new_operation_id=user_data.get("operation_id"),
-        new_status="MANUAL",
+        new_status="APPROVED_MANUAL",
     )
 
     logging.info("Получена оплата:\n%s", payment_data)
@@ -171,14 +171,14 @@ async def approve_check(callback: CallbackQuery, state: FSMContext):
         expire_date = today + relativedelta(years=1)
     else:
         expire_date = today
-
+    logging.debug(f"expire_date = {expire_date}")
     # Нормализуем к дате
     if isinstance(expire_date, DT.datetime):
         expiredate_to_db = expire_date.date()
     else:
         expiredate_to_db = expire_date
 
-    expire_time_sec = get_expire_time_sec(expire_data=expire_date)
+    expire_time_sec = get_expire_time_sec(expire_date=expire_date)
 
     #################### Vles VPN ###############################
 
@@ -187,24 +187,30 @@ async def approve_check(callback: CallbackQuery, state: FSMContext):
 
     try:
         vless_client = XUIClient(base_url=base_url,
-                                 port=int(base_url.split(":")[2].split("/")[0]),
+                                 # port=int(base_url.split(":")[2].split("/")[0]),
                                  username=USER,
                                  password=PASSWORD)
 
         client_uuid_from_payment = str(payment_data.operation_id)
         link = vless_client.add_client(client_uuid=client_uuid_from_payment,
+                                       inbound_id="1",
                                        expiry_time=expire_time_sec,
-                                       email=f"{callback.from_user.id}@vless.com").get('vless_link')
+                                       email=f"{user_telegram_id}_{client_uuid_from_payment}").get('vless_link')
     except Exception as exception_text:
         # < code > текст < / code >
         buttons = get_errors_button()
-        await callback.message.edit_caption(caption=f"❌ <b>Что-то пошло не так</b>… Повторите попытку позже\n\n"
-                                                    f"📢 <b>Сообщите в поддержку</b> и прикрепите текст ошибки\n\n"
-                                                    f"💡 <i>Чтобы скопировать — просто нажмите на текст</i>\n\n"
-                                                    f"🔴 <b>Ошибка:</b>\n"
-                                                    f"<code>{exception_text}</code>",
+        new_caption = f"❌ <b>Что-то пошло не так</b>… Повторите попытку позже\n\n"
+        f"📢 <b>Сообщите в поддержку</b> и прикрепите текст ошибки\n\n"
+        f"💡 <i>Чтобы скопировать — просто нажмите на текст</i>\n\n"
+        f"🔴 <b>Ошибка:</b>\n"
+        f"<code>{exception_text}</code>"
+        await callback.message.edit_caption(caption=new_caption,
                                             parse_mode="HTML",
                                             reply_markup=buttons)
+
+        await callback.bot.send_message(text=new_caption,
+                                        chat_id=user_telegram_id,
+                                        reply_markup=buttons)
         return
 
     ############### Запись в БД Enrollments ################

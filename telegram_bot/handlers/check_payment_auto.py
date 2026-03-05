@@ -183,14 +183,15 @@ async def check_pay(callback: CallbackQuery, state: FSMContext):
 
         try:
             vless_client = XUIClient(base_url=base_url,
-                              port=int(base_url.split(":")[2].split("/")[0]),
+                              # port=int(base_url.split(":")[2].split("/")[0]),
                               username=USER,
                               password=PASSWORD)
 
             client_uuid_from_payment = str(payment_data.operation_id)
             link = vless_client.add_client(client_uuid=client_uuid_from_payment,
+                                           inbound_id="1",
                                            expiry_time=expire_time_sec,
-                                           email=f"{callback.from_user.id}@vless.com").get('vless_link')
+                                           email=f"{callback.from_user.id}_{client_uuid_from_payment}").get('vless_link')
         except Exception as exception_text:
             # < code > текст < / code >
             buttons = get_errors_button()

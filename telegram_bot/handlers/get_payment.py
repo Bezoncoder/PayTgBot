@@ -34,9 +34,10 @@ router = Router()
 
 '''
 
-
-# get_pay:{stream_id_int}:{price_menu}:{directions_id} or '' get_payment
 # set_stream:{stream_id}:{price}  <- get_payment check_pay:{stream_id}:{price}:{directions_id} -> check_pay
+# get_pay:{stream_id_int}:{price_menu}:{directions_id} or '' get_payment
+# get_pay:{stream_id_int}:{price_menu}:{directions_id}:{method.value} NEW
+
 
 
 ################################# ФОРМИРОВАНИЕ ПЛАТЕЖА И ПЕРЕХОД К ОПЛАТЕ ###########################################
@@ -57,6 +58,8 @@ async def get_pay(callback: CallbackQuery, state: FSMContext):
     list_data_buttons = callback.data.split(':')
     stream_id_int = int(list_data_buttons[1])
     price = int(list_data_buttons[2])
+    pay_method = list_data_buttons[4]  # "PaymentMethod.CARD_ACQUIRING:"
+
 
     ######################## ФОРМИРУЕМ USER_KEY ########################
 
@@ -67,9 +70,9 @@ async def get_pay(callback: CallbackQuery, state: FSMContext):
     )
 
     #################### ПОЛУЧАЕМ ДАННЫЕ ПО ОПЛАТЕ #####################
-
+    logging.debug(f"Получаем Данные об Оплате")
     user_pay_data = await state.storage.get_data(key=user_key)
-
+    logging.debug(f"user_pay_data={user_pay_data}")
     # stream_id_int = user_pay_data.get("stream_id_int")
 
     # email = user_pay_data.get("email", None)
@@ -88,9 +91,9 @@ async def get_pay(callback: CallbackQuery, state: FSMContext):
     # stream_info = await get_stream_info(id_stream=stream_id_int)
 
     ######################## Получаем Информаци о пользователе #################
-
+    logging.debug(f"Получаем Информаци о пользователе")
     user_info_dict = await get_user_info_by_tg_id(tg_user_id=callback.from_user.id)
-
+    logging.debug(f"user_info_dict={user_info_dict}")
     ############################ Обновляем Email ###############################
 
     # await update_user_email(user_id_from_db=user_info_dict['id'], new_email=email)
@@ -110,9 +113,11 @@ async def get_pay(callback: CallbackQuery, state: FSMContext):
     ########################### Получаем Данные о платеже от Провайдера Эквайринга #############################
 
     try:
-        payments_data_from_bd = get_payment_link_data(payment_method=PaymentMethod.CARD_ACQUIRING, amount=float(price))
-        url_pay_from_provider = payments_data_from_bd.get('payment_link',
+        logging.debug("Подключаемся к платежному шлюзу")
+        payments_data_from_provider = get_payment_link_data(payment_method=pay_method, amount=float(price))
+        url_pay_from_provider = payments_data_from_provider.get('payment_link',
                                                       'Что-то пошло не так... повторите попытку позже.')
+
     except Exception as exception_text:
         # < code > текст < / code >
         buttons = get_errors_button()
@@ -129,7 +134,7 @@ async def get_pay(callback: CallbackQuery, state: FSMContext):
 
     user_data = dict(stream_id_int=stream_id_int,
                      price=price,
-                     operation_id=payments_data_from_bd.get('operation_id_from_provider', 'none_operation_id'),
+                     operation_id=payments_data_from_provider.get('operation_id_from_provider', 'none_operation_id'),
                      payment_id=payment_data_from_db.id)
 
     await state.storage.update_data(user_key, data=user_data)  # <— сохраняем для ЭТОГО пользователя
@@ -137,7 +142,7 @@ async def get_pay(callback: CallbackQuery, state: FSMContext):
     ############################## Платежные Реквизиты ##############################
 
     payment_details = (
-        f"Способ оплаты: КАРТА РФ 🇷🇺\n\n"
+        f"Способ оплаты: {pay_method}\n\n"
         f"К оплате: {price} 🇷🇺RUB\n"
         f"Ваш ID: {user_info_dict['telegram_id']}\n\n"
         "Реквизиты для оплаты:\n\n"
@@ -163,7 +168,7 @@ if __name__ == "__main__":
     logging.getLogger().setLevel(logging.INFO)
 
     try:
-        payments_operation_data = get_payment_link_data(payment_method=PaymentMethod.CARD_ACQUIRING, amount=10)
+        payments_operation_data = get_payment_link_data(payment_method=int(PaymentMethod.CRYPTOCURRENCY.value), amount=10)
         print(payments_operation_data)
     except Exception as e:
         print(e)
