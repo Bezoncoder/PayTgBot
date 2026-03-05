@@ -1,7 +1,7 @@
 import logging
 
 from aiogram import Router, F
-from aiogram.types import CallbackQuery, FSInputFile, InputMediaPhoto, Message
+from aiogram.types import CallbackQuery, FSInputFile, InputMediaPhoto, Message, InputMediaAnimation
 
 from aiogram.fsm.storage.base import StorageKey
 
@@ -44,9 +44,17 @@ router = Router()
 @router.callback_query(F.data.startswith("get_pay:"))
 async def get_pay(callback: CallbackQuery, state: FSMContext):
 
-    await callback.bot.edit_message_caption(chat_id=callback.from_user.id,
-                                            message_id=callback.message.message_id,
-                                            caption="⏳ Формируем данные для оплаты...")
+    new_gif = FSInputFile("source/pictures/animation.gif")
+
+    await callback.bot.edit_message_media(chat_id=callback.from_user.id,
+                                          message_id=callback.message.message_id,
+                                          media=InputMediaAnimation(media=new_gif,
+                                                                    caption="⏳ Формируем данные для оплаты...")
+                                          )
+
+    # await callback.bot.edit_message_caption(chat_id=callback.from_user.id,
+    #                                         message_id=callback.message.message_id,
+    #                                         caption="⏳ Формируем данные для оплаты...")
     await callback.message.edit_reply_markup(reply_markup=get_fake_menu_button())
     await callback.answer(text=f"⏳ Формируем данные для оплаты...")
 
