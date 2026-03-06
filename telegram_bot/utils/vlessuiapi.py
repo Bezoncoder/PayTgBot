@@ -91,9 +91,13 @@ class XUIClient:
         return str(uuid.uuid4())
 
     @staticmethod
-    def _generate_vless_url(client_uuid: str, host: str, emai: str = "", port: int = 443, flow: str = "") -> str:
+    def _generate_vless_url(client_uuid: str, host: str, emai: str = "", port: int = 6443, flow: str = "") -> str:
         """Генерирует VLESS URL из данных inbound + client"""
-
+#vless://7afd825f-d5e0-407d-aae6-d62422339531@193.242.109.208:6443?
+        # type=tcp&encryption=none&security=reality&pbk=
+        # BMf_HacRVKEqSeGZSkFH1Y3dhvl88gnILTuTBNkMAHk&fp=
+        # chrome&sni=ya.ru&sid=f150d1&spx=%2F&flow=
+        # xtls-rprx-vision#litva2-Vk_client
         # Базовая VLESS ссылка
         vless_url = f"vless://{client_uuid}@{host}:{port}"
         # Параметры TLS + flow
@@ -219,14 +223,14 @@ if __name__ == "__main__":
     port = int(base_url.split(":")[2].split("/")[0])
     print(port)
     vless_client = XUIClient(base_url=base_url,
-                             # port=port,
+                             port=port,
                              username=USER,
                              password=PASSWORD)
 
-    print(vless_client.add_client(email="NEW_TEST_USER",
-                                  inbound_id="1",
-                                  flow="xtls-rprx-vision",
-                                  expiry_time=1775505600000))
+    # print(vless_client.add_client(email="NEW_TEST_USER",
+    #                               inbound_id="1",
+    #                               flow="xtls-rprx-vision",
+    #                               expiry_time=1775505600000))
 
-    # print(vless_client.add_client(email="ShustDE", inbound_id="1", flow="xtls-rprx-vision"))
+    print(vless_client.add_client(email="Shu", inbound_id="1", flow="xtls-rprx-vision"))
 
