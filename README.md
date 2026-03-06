@@ -15,3 +15,13 @@ docker compose build --no-cache roadmappers_bot && docker compose up -d --force-
 docker compose up -d --build roadmappers_bot
 ```
 
+
+```bash
+sudo docker stop bot-postgres
+```
+
+```bash
+sudo docker start bot-postgres
+```
+
+

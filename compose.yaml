@@ -6,7 +6,7 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: botuser
-      POSTGRES_PASSWORD: botpass
+      POSTGRES_PASSWORD: bezoncoder_1986
       POSTGRES_DB: botdb
     ports:
       - "5432:5432"

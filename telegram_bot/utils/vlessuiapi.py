@@ -1,5 +1,6 @@
 from os import name
 from pprint import pprint
+from urllib.parse import urlparse
 from types import new_class
 
 import requests
@@ -7,7 +8,9 @@ import json
 import time
 import logging
 import uuid
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional
+import pandas as pd
+import json
 
 # Настройка логирования
 # logging.basicConfig(
@@ -22,21 +25,32 @@ logger = logging.getLogger(__name__)
 
 
 class XUIClient:
-    def __init__(self, base_url: str = None, host: str = "localhost", port: int = 2053, path: str = "randompath",
+    def __init__(self, base_url_from_panel: str = None,
+                 public_inbound_key: str = None, sid: str = None, sni: str = "ya.ru",
                  username: str = None, password: str = None, two_factor: str = None,
-                 use_https: bool = False, verify_ssl: bool = False, auto_login: bool = True):
-        self.host = host
-        self.port = port
-        self.path = path
+                 verify_ssl: bool = False, auto_login: bool = True):
+
+        # 🔍 ПАРСИМ base_url → host, port, web_path, protocol
+        parsed = urlparse(base_url_from_panel.rstrip('/'))
+
+
+        # Серверные параметры (из 3X-UI Reality)
+        self.server_params = {
+            'pbk': public_inbound_key,
+            'sid': sid,
+            'sni': sni
+        }
+
+        self.base_url = base_url_from_panel
+        self.host = parsed.hostname
+        self.port = parsed.port or (443 if parsed.scheme == 'https' else 80)
+        self.web_path = parsed.path.rstrip('/') if parsed.path else ''
+        self.use_https = parsed.scheme == 'https'
         self.username = username
         self.password = password
         self.two_factor = two_factor
-        self.use_https = use_https
         self.verify_ssl = verify_ssl
 
-        # HTTPS или HTTP
-        protocol = "https" if use_https else "http"
-        self.base_url = base_url or f"{protocol}://{host}:{port}/{path}"
         self.session = requests.Session()
         self.session.headers.update({
             'Accept': 'application/json',
@@ -90,20 +104,84 @@ class XUIClient:
         """Генерация уникального UUID для клиента"""
         return str(uuid.uuid4())
 
-    @staticmethod
-    def _generate_vless_url(client_uuid: str, host: str, emai: str = "", port: int = 6443, flow: str = "") -> str:
-        """Генерирует VLESS URL из данных inbound + client"""
-#vless://7afd825f-d5e0-407d-aae6-d62422339531@193.242.109.208:6443?
-        # type=tcp&encryption=none&security=reality&pbk=
-        # BMf_HacRVKEqSeGZSkFH1Y3dhvl88gnILTuTBNkMAHk&fp=
-        # chrome&sni=ya.ru&sid=f150d1&spx=%2F&flow=
-        # xtls-rprx-vision#litva2-Vk_client
-        # Базовая VLESS ссылка
-        vless_url = f"vless://{client_uuid}@{host}:{port}"
-        # Параметры TLS + flow
-        params = f"?security=tls&flow={flow}&fp=chrome&type=tcp#{emai}"
+    def _generate_vless_link(self, client_uuid: str,
+                             profile_name: str,
+                             host: str,
+                             vless_port: int = 443) -> str:
+        """
+        Генератор VLESS Reality ссылок для 3X-UI
 
-        return vless_url + params
+        ОБЯЗАТЕЛЬНЫЕ ПАРАМЕТРЫ и ГДЕ ИХ БРАТЬ:
+
+        ╔══════════════════════════════════════════════════════════════╗
+        ║ 1. uuid                   │ 3X-UI → Inbounds → Клиенты → ID  ║
+        ║                           │ remark: "678efafd-36c5-..."       ║
+        ╚══════════════════════════════════════════════════════════════╝
+
+        ╔══════════════════════════════════════════════════════════════╗
+        ║ 2. host                   │ IP сервера (155.212.228.65)       ║
+        ║                           │ Где угодно (известно заранее)     ║
+        ╚══════════════════════════════════════════════════════════════╝
+
+        ╔══════════════════════════════════════════════════════════════╗
+        ║ 3. port                   │ 3X-UI → Inbounds → Port (6443)    ║
+        ║                           │ Настройки подключения             ║
+        ╚══════════════════════════════════════════════════════════════╝
+
+        ╔══════════════════════════════════════════════════════════════╗
+        ║ 4. public_inbound_key     │ 3X-UI → Inbounds → Reality        ║
+        ║     (pbk)                 │    → Public Key                   ║
+        ║                           │ "lFJfqBItMEQ_cRFJxCsWor..."       ║
+        ╚══════════════════════════════════════════════════════════════╝
+
+        ╔══════════════════════════════════════════════════════════════╗
+        ║ 5. sid (Short ID)         │ 3X-UI → Inbounds → Reality        ║
+        ║     ★ОБЯЗАТЕЛЬНО★        │    → Short ID (d35ff639)          ║
+        ║                           │ БЕЗ него Reality НЕ РАБОТАЕТ!     ║
+        ╚══════════════════════════════════════════════════════════════╝
+
+        ╔══════════════════════════════════════════════════════════════╗
+        ║ 6. sni (Dest/Target)      │ 3X-UI → Inbounds → Reality        ║
+        ║     ★ОБЯЗАТЕЛЬНО★        │    → Dest (ya.ru)                 ║
+        ║                           │ БЕЗ него Reality НЕ РАБОТАЕТ!     ║
+        ╚══════════════════════════════════════════════════════════════╝
+
+        ╔══════════════════════════════════════════════════════════════╗
+        ║ 7. profile_name           │ Email клиента из 3X-UI            ║
+        ║                           │ "litva1-halltape"                 ║
+        ╚══════════════════════════════════════════════════════════════╝
+        ╚══════════════════════════════════════════════════════════════╝
+        """
+
+        # Фиксированные параметры (не меняются)
+        # self.fixed_params = {
+        #     'type': 'tcp',
+        #     'encryption': 'none',
+        #     'security': 'reality',
+        #     'fp': 'chrome',
+        #     'spx': '/',
+        #     'flow': 'xtls-rprx-vision'
+        # }
+
+
+        server_params = self.server_params
+
+        # ✅ ФИКСИРОВАННЫЙ ПОРЯДОК как в твоем примере:
+        params_order = {
+            'type': 'tcp',
+            'encryption': 'none',
+            'security': 'reality',
+            'pbk': server_params['pbk'],
+            'fp': 'chrome',
+            'sni': server_params['sni'],
+            'sid': server_params['sid'],
+            'spx': '%2F',  # ← URL-encoded "/"
+            'flow': 'xtls-rprx-vision'
+        }
+
+        params_str = '&'.join(f"{k}={v}" for k, v in params_order.items())
+
+        return f"vless://{client_uuid}@{host}:{vless_port}?{params_str}#{profile_name}"
 
     def login(self, username: str = None, password: str = None, two_factor: str = "") -> bool:
         """Авторизация в 3X-UI"""
@@ -142,7 +220,7 @@ class XUIClient:
 
     def add_client(self, inbound_id: str = "1", client_uuid: str = None, email: str = "",
                    total_gb: float = 0, limit_ip: int = 2, enable: bool = True,
-                   comment: str = "", expiry_time: int = 0, flow: str = "") -> Optional[Dict[str, Any]]:
+                   comment: str = "", expiry_time: int = 0, flow: str = "xtls-rprx-vision") -> Optional[Dict[str, Any]]:
         """Добавить клиента"""
         final_id = client_uuid if client_uuid else self._generate_client_uuid()
 
@@ -167,10 +245,9 @@ class XUIClient:
         success = result.get('success', False)
         if success is True:
             new_result = result
-            vless_link = self._generate_vless_url(client_uuid=final_id,
-                                     host=self.host,
-                                     emai=email,
-                                     flow=flow)
+            vless_link = self._generate_vless_link(client_uuid=final_id,
+                                                   host=self.host,
+                                                   profile_name=email)
             new_result["vless_link"] = vless_link
         else:
             new_result = result
@@ -215,22 +292,47 @@ class XUIClient:
         logger.info("👋 Сессия закрыта")
         return True
 
+
+
 if __name__ == "__main__":
-    base_url = "https://193.242.109.208:29861/9RWEJRPGmKLSZojNjB"
+    base_url = "https://155.212.228.65:49699/9RWEJRPGmKLSZojNjB"
     expire_time = 86400
     USER = "sBcdl7KQt9"
     PASSWORD = "8Dgwr0u6Cw"
-    port = int(base_url.split(":")[2].split("/")[0])
-    print(port)
-    vless_client = XUIClient(base_url=base_url,
-                             port=port,
-                             username=USER,
-                             password=PASSWORD)
+    # SEERVER PARAMS
+    PUBLIC_KEY = "QZ63wahdkxh_n8HoY6M10zcGuT6Ig6-PDZh-sFBhAWo"
+
+    SID = "482faa37e9"
+
+    # port = int(base_url.split(":")[2].split("/")[0] )
+    # print(port)
+    # vless_client = XUIClient(base_url_from_panel=base_url,
+    #                          username=USER,
+    #                          password=PASSWORD,
+    #                          verify_ssl = True,
+    #                          public_inbound_key=PUBLIC_KEY,
+    #                          sid=SID)
 
     # print(vless_client.add_client(email="NEW_TEST_USER",
     #                               inbound_id="1",
     #                               flow="xtls-rprx-vision",
     #                               expiry_time=1775505600000))
 
-    print(vless_client.add_client(email="Shu", inbound_id="1", flow="xtls-rprx-vision"))
+    # print(vless_client.add_client(email="Shu", inbound_id="1", flow="xtls-rprx-vision"))
+    # pprint(vless_client.get_list_inbounds())
+
+    # print(vless_client.add_client(email="TEST_SUKA_NAHUI_NEW",
+    #                               expiry_time=1775505600000,
+    #                               inbound_id="2").get('vless_link',"None"))
+
+    # 🎯 ПРИМЕР использования:
+    # link = generate_vless_link(
+    #     uuid="678efafd-36c5-4263-9da7-995a9e44f621",
+    #     profile_name="litva1-halltape",
+    #     host="155.212.228.65",
+    #     port=6443,
+    #     public_inbound_key="lFJfqBItMEQ_cRFJxCsWor-oaUsPRBOBQPq24vCfojI",
+    #     sid="d35ff639",
+    #     sni="ya.ru"
+    # )
 
