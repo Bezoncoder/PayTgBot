@@ -174,7 +174,7 @@ async def check_pay(callback: CallbackQuery, state: FSMContext):
         else:
             expiredate_to_db = expire_date
 
-        expire_time_sec = get_expire_time_sec(expire_data=expire_date)
+        expire_time_sec = get_expire_time_sec(expire_date=expire_date)
 
         #################### Vles VPN ###############################
 

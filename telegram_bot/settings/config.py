@@ -9,6 +9,9 @@ URL = os.getenv("URL")
 USER = os.getenv("USER")
 PASSWORD = os.getenv("PASSWORD")
 
+
+
+
 # DB LOCAL
 
 # DB_HOST=localhost
