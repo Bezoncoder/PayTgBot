@@ -163,19 +163,15 @@ class XUIClient:
         #     'flow': 'xtls-rprx-vision'
         # }
 
-
         server_params = self.server_params
 
-        # ✅ ФИКСИРОВАННЫЙ ПОРЯДОК как в твоем примере:
+        # ✅ НОВЫЙ ПОРЯДОК как в твоём примере (TLS вместо Reality):
         params_order = {
             'type': 'tcp',
             'encryption': 'none',
-            'security': 'tls',
-            'pbk': server_params['pbk'],
+            'security': 'tls',  # Изменено с 'reality'
             'fp': 'chrome',
-            'sni': server_params['sni'],
-            'sid': server_params['sid'],
-            'spx': '%2F',  # ← URL-encoded "/"
+            'alpn': 'http%2F1.1',  # Добавлен новый параметр
             'flow': 'xtls-rprx-vision'
         }
 
