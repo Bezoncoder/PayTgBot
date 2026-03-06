@@ -58,7 +58,7 @@ async def set_group(callback: CallbackQuery, state: FSMContext):
                 f"⚡ Ускорение Интернета.\n"
                 f"🛡️ Техподдержка 24/7 в чате.\n"
                 f"🎯 У нас есть {choice_text} для тебя!!!\n\n"
-                f'🌐 Все детали на:\n<a href="{URL}">https://QuantumTurboVPN.ru</a>\n\n'
+                f'🌐 Все детали на:\n\n https://quantumturbovpn.ddns.net/\n\n'
                 f"👇 Выбери то, что тебе нужно\n",
         parse_mode='HTML'
     )
