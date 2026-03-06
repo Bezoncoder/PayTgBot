@@ -63,8 +63,8 @@ class Product(Base):  # Продукты по направлениям
     capacity: Mapped[int | None]
     direction_id: Mapped[int] = mapped_column(ForeignKey('directions.id'))  # Внешний ключ
     base_url: Mapped[str | None]
-    public_key: Mapped[str] = mapped_column(Text)
-    short_id: Mapped[str] = mapped_column(Text)
+    public_key: Mapped[str | None] = mapped_column(Text)
+    short_id: Mapped[str | None] = mapped_column(Text)
 
     # Связь один-ко-многим с Stream
     streams: Mapped[list["Stream"]] = relationship(
