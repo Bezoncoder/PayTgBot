@@ -170,7 +170,7 @@ class XUIClient:
         params_order = {
             'type': 'tcp',
             'encryption': 'none',
-            'security': 'tlc',
+            'security': 'tls',
             'pbk': server_params['pbk'],
             'fp': 'chrome',
             'sni': server_params['sni'],
