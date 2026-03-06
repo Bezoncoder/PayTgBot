@@ -24,8 +24,6 @@ class ProductPydantic(BaseModel):  # Продукты по направлени�
     capacity: int | None
     direction_id: int
     base_url: str | None
-    public_key: str | None
-    short_id: str | None
     streams: list[StreamPydantic] | None
 
     model_config = ConfigDict(from_attributes=True, use_enum_values=True)
