@@ -188,7 +188,10 @@ async def approve_check(callback: CallbackQuery, state: FSMContext):
     try:
         vless_client = XUIClient(base_url_from_panel=base_url,
                                  username=USER,
-                                 password=PASSWORD)
+                                 password=PASSWORD,
+                                 verify_ssl=True,
+                                 public_inbound_key=product_info.public_key,
+                                 sid=product_info.short_id)
 
         client_uuid_from_payment = str(payment_data.operation_id)
         link = vless_client.add_client(client_uuid=client_uuid_from_payment,
