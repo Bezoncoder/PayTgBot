@@ -187,7 +187,8 @@ async def approve_check(callback: CallbackQuery, state: FSMContext):
 
     try:
         vless_client = XUIClient(base_url=base_url,
-                                 # port=int(base_url.split(":")[2].split("/")[0]),
+                                 host=base_url.split(":")[1].strip("/"),
+                                 port=int(base_url.split(":")[2].split("/")[0]),
                                  username=USER,
                                  password=PASSWORD)
 

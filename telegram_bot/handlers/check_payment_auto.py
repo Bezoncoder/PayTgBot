@@ -183,9 +183,10 @@ async def check_pay(callback: CallbackQuery, state: FSMContext):
 
         try:
             vless_client = XUIClient(base_url=base_url,
-                              # port=int(base_url.split(":")[2].split("/")[0]),
-                              username=USER,
-                              password=PASSWORD)
+                                     host=base_url.split(":")[1].strip("/"),
+                                     port=int(base_url.split(":")[2].split("/")[0]),
+                                     username=USER,
+                                     password=PASSWORD)
 
             client_uuid_from_payment = str(payment_data.operation_id)
             link = vless_client.add_client(client_uuid=client_uuid_from_payment,
