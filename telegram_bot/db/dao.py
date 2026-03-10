@@ -111,8 +111,8 @@ class EnrollmentDAO(BaseDAO):
         return enrolments
 
     @classmethod
-    async def get_count_stream_enrollments(cls, session: AsyncSession, stream_id: int):
-        query = select(func.count(cls.model.id)).filter(cls.model.stream_id == int(stream_id))
+    async def get_count_stream_enrollments(cls, session: AsyncSession, product_id: int):
+        query = select(func.count(cls.model.id)).filter(cls.model.product_id == int(product_id))
         result = await session.execute(query)
         count = result.scalars().all()
         logging.debug("get_count_stream_enrollments %s", count)

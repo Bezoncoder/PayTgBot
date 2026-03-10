@@ -175,8 +175,8 @@ async def get_enrollmet_info(session, id_enrollment: int):
     return enrollment
 
 @connection
-async def get_enrollments_count_stream_id(session, stream_id: int) -> int:
-    enrollments_count = await EnrollmentDAO.get_count_stream_enrollments(session=session,  stream_id=stream_id)
+async def get_enrollments_count_stream_id(session, product_id: int) -> int:
+    enrollments_count = await EnrollmentDAO.get_count_stream_enrollments(session=session,  product_id=product_id)
     # for enrollment in enrollments:
     #     enrollments_list.append(EnrollmentPydantic.model_validate(enrollment))
     return enrollments_count[0]

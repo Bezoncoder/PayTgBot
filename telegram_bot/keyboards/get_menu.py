@@ -48,14 +48,14 @@ async def get_products_menu(
     return builder.as_markup(resize_keyboard=True)
 
 
-async def get_stream_products_menu(price_menu: str, product_capacity: int,
+async def get_stream_products_menu(enrollments_count: int, price_menu: str, product_capacity: int,
                                    streams_list: list[StreamPydantic] | None, directions_id: int = 1) -> InlineKeyboardMarkup:
     logging.debug("get_stream_products_menu")
     builder = InlineKeyboardBuilder()
 
     if len(streams_list) > 1:
         for stream in streams_list:
-            enrollments_count = await get_enrollments_count_stream_id(stream_id=stream.id)
+            # enrollments_count = await get_enrollments_count_stream_id(stream_id=stream.id)
             # TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             ########################### PRODUCT CAPACITY ############################
             if product_capacity > enrollments_count:
@@ -115,8 +115,17 @@ def get_choosing_pay_method_buttons(price: str, stream_id_int: int, directions_i
 
     builder = InlineKeyboardBuilder()
     for method in PaymentMethod:
-        builder.button(text=f"{method.name}",
+
+        if method == PaymentMethod.SBP_QR:
+            text_button = "🏦 СБП"
+        elif method == PaymentMethod.CARD_ACQUIRING:
+            text_button = "💳 Оплата картой"
+        else:
+            text_button = "💰 Криптовалюта"
+
+        builder.button(text=f"{text_button}",
                        callback_data=f"get_pay:{stream_id_int}:{price}:{directions_id}:{method.value}")
+
     if directions_id is None:
         builder.button(text="Назад", callback_data=f"set_stream:{stream_id_int}:{price}")
     else:

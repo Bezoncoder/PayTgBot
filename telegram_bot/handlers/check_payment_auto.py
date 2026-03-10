@@ -240,7 +240,7 @@ async def check_pay(callback: CallbackQuery, state: FSMContext):
             f"📱 < Главное меню -> Мои покупки >\n\n"
             f"🚀 Мы рады видеть тебя в нашей команде! 🎊"
         )
-        animation = FSInputFile("source/pictures/successful_payment.png")
+        animation = FSInputFile("source/pictures/successful_payment.jpg")
         media = InputMediaPhoto(media=animation, caption=caption)
         await state.clear()
 
@@ -289,7 +289,7 @@ async def check_pay(callback: CallbackQuery, state: FSMContext):
             f"⚠️ Спам = блокировка"
         )
 
-        animation = FSInputFile("source/pictures/payment_not_success.png")
+        animation = FSInputFile("source/pictures/payment_not_success.jpg")
         media = InputMediaPhoto(media=animation, caption=caption)
 
         user_data["message_id"] = callback.message.message_id

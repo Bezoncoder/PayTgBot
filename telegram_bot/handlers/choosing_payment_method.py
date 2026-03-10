@@ -91,8 +91,8 @@ async def choosing_pay_method(callback: CallbackQuery, state: FSMContext):
     buttons = get_choosing_pay_method_buttons(price=f"{price}",
                                               stream_id_int=stream_id_int,
                                               directions_id=directions_id,
-                                              pay_method=PaymentMethod)
-    photo = FSInputFile('source/pictures/payment.png')
+                                              pay_method=None)
+    photo = FSInputFile('source/pictures/choosing_payment_method.jpg')
     media = InputMediaPhoto(
         media=photo,
         caption=new_caption,

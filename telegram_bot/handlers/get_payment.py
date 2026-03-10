@@ -161,7 +161,7 @@ async def get_pay(callback: CallbackQuery, state: FSMContext):
     directions_id = user_pay_data.get("directions_id")
 
     buttons = get_payment_notification_button(price=f"{price}", stream_id=stream_id_int, directions_id=directions_id)
-    photo = FSInputFile('source/pictures/payment.png')
+    photo = FSInputFile('source/pictures/payment.jpg')
     media = InputMediaPhoto(
         media=photo,
         caption=payment_details,

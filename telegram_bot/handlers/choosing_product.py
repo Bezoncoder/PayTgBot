@@ -74,20 +74,21 @@ async def set_product(callback: CallbackQuery, state: FSMContext):
     product_description = str(product_pydantic.description)
 
     ################################### PRICE #############################################
-    price = str(100)
+    price = str(100) # Не используется
     # product_title_normalized = (product_pydantic.title or "").strip().lower()
 
     ################# Формируем сообщение и кнопки для пользователя ######################
-
+    enrollments_count = await get_enrollments_count_stream_id(product_id=product_pydantic.id)
     # new_photo = FSInputFile(f"source/pictures/{product_pydantic.title.lower()}.png")
-    new_photo = FSInputFile(f"source/pictures/vpn_main_menu.jpg")
+    new_photo = FSInputFile(f"source/pictures/choose_tariff.jpg")
     buttons = await get_stream_products_menu(
         streams_list=product_pydantic.streams,
         product_capacity=product_pydantic.capacity,
         directions_id=product_pydantic.direction_id,
         price_menu=price,
-    )
-    if len(product_pydantic.streams)>1:
+        enrollments_count=enrollments_count)
+
+    if product_pydantic.capacity > enrollments_count:
         new_caption = product_description.replace("|", "\n")
     else:
         new_caption_product = product_description.replace("|", "\n")

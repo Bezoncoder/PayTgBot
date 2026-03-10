@@ -1,7 +1,7 @@
 import logging
 
 from aiogram import Router, F
-from aiogram.types import CallbackQuery
+from aiogram.types import CallbackQuery, FSInputFile, InputMediaPhoto
 from aiogram.fsm.storage.base import StorageKey
 from aiogram.fsm.context import FSMContext
 
@@ -88,4 +88,13 @@ async def set_stream(callback: CallbackQuery, state: FSMContext):
                                          stream_id=stream_id)
 
 
-    await callback.message.edit_caption(caption=new_caption, reply_markup=buttons, parse_mode="HTML")
+    # await callback.message.edit_caption(caption=new_caption, reply_markup=buttons, parse_mode="HTML")
+    # buttons = get_payment_notification_button(price=f"{price}", stream_id=stream_id_int, directions_id=directions_id)
+    photo = FSInputFile('source/pictures/confirmation_payment_details.jpg')
+    media = InputMediaPhoto(
+        media=photo,
+        caption=new_caption,
+        parse_mode='HTML'
+    )
+
+    await callback.message.edit_media(media=media, reply_markup=buttons)

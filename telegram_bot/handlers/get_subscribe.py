@@ -56,7 +56,7 @@ async def get_creds_subscribe(callback: CallbackQuery, state: FSMContext):
             f"✅ Ключи станут доступны здесь автоматически"
         )
 
-    photo = FSInputFile("source/pictures/my_subscribe.png")
+    photo = FSInputFile("source/pictures/my_subscribe.jpg")
 
     # Вариант с изменением сообщения без удаления.
     media = InputMediaPhoto(
