@@ -34,8 +34,10 @@ async def check_user_and_add(user_data: dict, session: AsyncSession):
         logging.info("Пользователь TG_ID = %s уже существует с ID: %s ", telegram_id, rez.id)
         return rez.to_dict()
     else:
-        password = get_password(8)
-        user_data["password"] = password
+        if user_data.get("password") == "":
+            password = get_password(8)
+            user_data["password"] = password
+
         logging.debug("Создан новый пользователь user_data: %s ", user_data)
         new_user = await UserDAO.add(session=session, **user_data)
         logging.info("Добавлен новый пользователь с ID: %s ", new_user.id)

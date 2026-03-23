@@ -2,6 +2,7 @@ import logging
 from pprint import pprint
 
 from aiogram import Router, F
+from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import (
     CallbackQuery,
     FSInputFile,
@@ -84,9 +85,20 @@ async def send_check(message: Message, state: FSMContext):
             + f"{user_data.get('stream_id_int', 0)}"
     )
 
-    await message.bot.delete_messages(
-        chat_id=message.from_user.id, message_ids=[user_data.get("message_id", 0)]
-    )
+###################################################################################################
+
+
+    try:
+        if user_data.get("message_id"):
+            await message.bot.delete_messages(chat_id=message.from_user.id,
+                                              message_ids=[user_data.get("message_id")])
+    except TelegramBadRequest:
+        logging.debug("Не удалось удалить старое сообщение:")
+
+
+    # await message.bot.delete_messages(
+    #     chat_id=message.from_user.id, message_ids=[user_data.get("message_id", 0)]
+    # )
 
     user_data["message_id"] = message.message_id
     await state.storage.update_data(key=key, data=user_data)
@@ -149,7 +161,7 @@ async def approve_check(callback: CallbackQuery, state: FSMContext):
     product_info = await get_product_info(id_product=stream_info.product_id)
 
     # Обновляем запись в БД об оплате
-
+    # TODO payment_id
     payment_data = await update_payment_data(
         payment_id=user_data.get("payment_id"),
         new_operation_id=user_data.get("operation_id"),
@@ -256,7 +268,7 @@ async def approve_check(callback: CallbackQuery, state: FSMContext):
     await callback.bot.delete_messages(
         chat_id=TECH_CHANNEL, message_ids=[callback.message.message_id]
     )
-
+    # TODO ПРОДУМАТЬ УДАЛЕНИЯ И ЗАМЕНИТЬ
     await callback.bot.delete_messages(
         chat_id=user_telegram_id, message_ids=[user_data.get("message_id", 0)]
     )

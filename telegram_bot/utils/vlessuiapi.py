@@ -77,6 +77,7 @@ class XUIClient:
         logger.info(url)
         try:
             logger.debug(f"Запрос: {method} {endpoint}")
+            print(url)
             response = self.session.request(method, url, timeout=30, **kwargs)
 
             if response.status_code == 200:
@@ -288,10 +289,26 @@ class XUIClient:
         logger.info("👋 Сессия закрыта")
         return True
 
+    def get_client_ips(self, inbound_id: str, email: str) -> Optional[Dict[str, Any]]:
+        """GET /panel/api/inbounds/1/clientIps/TEST_ODIN_SUKANAHUI"""
+        # url = f"{self.base_url}/panel/api/inbounds/{inbound_id}/clientIps/{email}"
+        # /clientIps/:email
+
+        # url = "http://localhost:2053/randompath/panel/api/inbounds/clientIps/s729v2km"
+        #
+        # payload = {}
+        # headers = {
+        #     'Accept': 'application/json'
+        # }
+        #
+        # response = requests.request("POST", url, headers=headers, data=payload)
+        return self._make_request(method="POST", endpoint=f"inbounds/clientIps/{email}")
+
 
 
 if __name__ == "__main__":
-    base_url = "https://155.212.228.65:49699/9RWEJRPGmKLSZojNjB"
+    base_url = "https://quantumturbovpn.ddns.net:49699/9RWEJRPGmKLSZojNjB"
+
     expire_time = 86400
     USER = "sBcdl7KQt9"
     PASSWORD = "8Dgwr0u6Cw"
@@ -316,11 +333,13 @@ if __name__ == "__main__":
 
     # print(vless_client.add_client(email="Shu", inbound_id="1", flow="xtls-rprx-vision"))
     # pprint(vless_client.get_list_inbounds())
-
-    # print(vless_client.add_client(email="TEST_SUKA_NAHUI_NEW",
-    #                               expiry_time=1775505600000,
-    #                               inbound_id="2").get('vless_link',"None"))
-
+    # vless://8edc1e1a-5673-4fad-a5b3-43f13966d66f@quantumturbovpn.ddns.net:443?type=tcp&encryption=none&security=tls&fp=chrome&alpn=http%2F1.1&sni=google.com&flow=xtls-rprx-vision#litva1-911699354_8edc1e1a-5673-4fad-a5b3-43f13966d66f
+    # print(vless_client.get_client_ips(inbound_id="1",email="litva1-911699354_8edc1e1a-5673-4fad-a5b3-43f13966d66f"))
+    # print(vless_client.add_client(client_uuid="smndas,mnc,ansc",
+    #                                        flow="xtls-rprx-vision",
+    #                                         limit_ip=1,
+    #                                        inbound_id="1",
+    #                                        email=f"TEST_ODIN_SUKA_ODIN").get('vless_link'))
     # 🎯 ПРИМЕР использования:
     # link = generate_vless_link(
     #     uuid="678efafd-36c5-4263-9da7-995a9e44f621",
@@ -331,4 +350,10 @@ if __name__ == "__main__":
     #     sid="d35ff639",
     #     sni="ya.ru"
     # )
+
+
+
+
+
+
 
