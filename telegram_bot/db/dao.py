@@ -40,7 +40,8 @@ class UserDAO(BaseDAO):
         logging.info("Делаем запрос данных пользователя в БД")
         result = await session.execute(query)
         logging.info("Получен Ответ из БД")
-        user_info = result.scalar_one_or_none()
+        user_info = result.unique().scalar_one_or_none()
+        # user_info = result.scalars().unique().scalar_one_or_none()
         logging.debug("user_info %s", user_info)
         return user_info
 
