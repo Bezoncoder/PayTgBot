@@ -189,6 +189,21 @@ def get_back_button(stream_id: int, price: int, product_id: int, directions_id: 
     return builder.as_markup(resize_keyboard=True)
 
 
+
+def get_start_button() -> InlineKeyboardMarkup:
+
+    builder = InlineKeyboardBuilder()
+
+    builder.button(
+        text="Главное меню", callback_data=f"set: start"
+    )
+
+    builder.adjust(1)
+
+    return builder.as_markup(resize_keyboard=True)
+
+
+
 def get_subscribe_menu(enrolments: list[EnrollmentPydantic] = None) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     if enrolments:

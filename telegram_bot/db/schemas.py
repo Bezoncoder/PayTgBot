@@ -56,19 +56,12 @@ class EnrollmentPydantic(BaseModel):  # Наборы/Покупки Пользо
 
     model_config = ConfigDict(from_attributes=True, use_enum_values=True)
 
-
-
-
-
-
 class UserPydantic(BaseModel):
     id: int
     telegram_id: int | str | None
     username: str | None
     password: str | None
-    full_name: str | None
-    git_link: str | None
-
+    enrollments: list[EnrollmentPydantic] = []
     model_config = ConfigDict(from_attributes=True, use_enum_values=True)
 
 

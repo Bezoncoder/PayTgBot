@@ -26,6 +26,8 @@ class User(Base):  # Пользователи
     enrollments: Mapped[list["Enrollment"]] = relationship(
         "Enrollment",
         back_populates="user",
+        uselist=True,
+        lazy="joined",
         cascade="all, delete-orphan"  # При удалении User удаляются и связанные Enrollment
     )
 

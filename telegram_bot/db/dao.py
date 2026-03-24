@@ -19,7 +19,7 @@ class UserDAO(BaseDAO):
         result = await session.execute(query)
 
         # Извлекаем записи как объекты модели
-        records = result.scalars().all()
+        records = result.scalars().unique().all()
 
         # Возвращаем список всех пользователей
         return records

@@ -36,7 +36,7 @@ START_CAPTION = (f'🚀 **Добро пожаловать!**\n\n'
 @router.message(CommandStart(deep_link=True))
 async def start_with_param(message: Message, command: CommandObject, state: FSMContext):
 
-    #https://t.me/QuantumTurboVPNBot?start=serega_vk_9999999
+    #https://t.me/QuantumTurboVPNBot?start=seregavk_9999999
 
     # start="{refer_name}_{user_id}" -> set_start
 

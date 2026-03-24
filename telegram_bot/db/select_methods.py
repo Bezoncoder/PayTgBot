@@ -20,8 +20,17 @@ async def select_username_id(session):
 
 
 @connection
-async def select_all_users(session):
-    return await UserDAO.get_all_users(session)
+async def select_all_users(session) -> list[UserPydantic]:
+    raw_users = await UserDAO.get_all_users(session)
+    users =[]
+    if not raw_users:
+        return users
+
+    for raw_user in raw_users:
+        product = UserPydantic.model_validate(raw_user)
+
+        users.append(product)
+    return users
 
 
 @connection
@@ -214,9 +223,13 @@ if "__main__" == __name__:
         format="%(asctime)s [%(levelname)s] %(message)s"
     )
     # print(date.today())
-    rez = run(get_enrollments_count_stream_id(stream_id=1))
+    rez = run(select_all_users())
     print(type(rez))
     print(rez)
+    for user in rez:
+        print(user.telegram_id)
+        print(user.enrollments)
+        print()
 
 
 
