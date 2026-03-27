@@ -26,8 +26,8 @@ router = Router()
 START_CAPTION = (f'🚀 **Добро пожаловать!**\n\n'
                 f'✅ Отличный выбор!\n\n'
                 f'📡 Самый быстрый VPN с серверами по всему миру и защитой.\n\n'
-                f'🌐 Наш Сайт: <a href="https://quantumturbovpn.ddns.net/">QuantumTurboVPN</a>\n\n'
-                f'📺 Как подключить: <a href="https://t.me/QuantumTurboVPN/351">смотреть видео</a>\n\n'
+                f'🌐 Наш Сайт: <a href="https://quantumturbovpn.ddns.net/">QuantumTurboVPN</a>.\n\n'
+                f'📺 Как подключить: <a href="https://t.me/QuantumTurboVPN/351">Смотреть видео</a>.\n\n'
                 f'🛠️️ Техподдержка 24/7 в чате.\n\n'
                 f'👇 Выбери нужный вариант!\n\n')
 
