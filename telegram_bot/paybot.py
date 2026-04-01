@@ -62,16 +62,16 @@ async def check_and_posting():
         f"🔗 Нажми Главное меню."
     )
     for user_info in users_to_posting_rek:
-        if not user_info.enrollments:
-            try:
-                await bot.send_photo(chat_id=user_info.telegram_id,
-                                     photo=rek_photo,
-                                     caption=caption,
-                                     reply_markup=get_start_button(),
-                                     parse_mode="HTML")
-                logging.info(f"✅ Отправлено рекламное сообщение пользователю user_name = {user_info.username}")
-            except Exception as e:
-                logging.debug(f"⚠️ Ошибка при отпрвке сообщения:\n{e}")
+        # if not user_info.enrollments:
+        #     try:
+        #         await bot.send_photo(chat_id=user_info.telegram_id,
+        #                              photo=rek_photo,
+        #                              caption=caption,
+        #                              reply_markup=get_start_button(),
+        #                              parse_mode="HTML")
+        #         logging.info(f"✅ Отправлено рекламное сообщение пользователю user_name = {user_info.username}")
+        #     except Exception as e:
+        #         logging.debug(f"⚠️ Ошибка при отпрвке сообщения:\n{e}")
 
 
     photo = FSInputFile('source/pictures/vpn_main_menu.jpg')

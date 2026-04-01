@@ -54,7 +54,7 @@ docker compose logs postgres
 ```
 5. Подключиться к БД
 ```
-docker compose exec postgres psql -U botuser -d botdb
+docker exec -it bot-postgres psql -U botuser -d botdb
 ```
 # Запуск Бота
 
