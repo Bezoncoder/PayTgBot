@@ -19,6 +19,8 @@ async def get_start_menu(list_for_menu, one_user_info: dict) -> InlineKeyboardMa
 
     builder = InlineKeyboardBuilder()
     for button in buttons:
+        if button['title'] != "VPN":
+            continue
         call_data = f"set_group:{button['id']}"  # Передаем выбранную Группу/Направление
         builder.button(text=f"🌐 {button['title']} Меню", callback_data=call_data)
         logging.debug(call_data)
