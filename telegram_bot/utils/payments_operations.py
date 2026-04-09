@@ -44,4 +44,4 @@ if __name__ == "__main__":
     # status = check_payment_status(operation_id_from_provider="ae6c4033-baed-4616-af8f-b2268682c9d1")
     # print()
     # pprint(status)
-    print(platega.create_payment(amount=10, description="TEST", payment_method=PaymentMethod.SBP_QR))
+    print(platega.create_payment(amount=10, description="TEST", payment_method=11))

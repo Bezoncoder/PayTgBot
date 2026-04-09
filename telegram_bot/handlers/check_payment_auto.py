@@ -118,7 +118,7 @@ async def check_pay(callback: CallbackQuery, state: FSMContext):
         # payment_status = check_payment_status(operation_id_from_link=user_data.get("operation_id_from_link"))
         try:
 
-            payment_status = check_payment_status(operation_id_from_provider=user_data.get("operation_id"))
+            payment_status = check_payment_status(operation_id_from_provider=user_data.get("operation_id", 000))
 
         except Exception as exception_text:
             # < code > текст < / code >

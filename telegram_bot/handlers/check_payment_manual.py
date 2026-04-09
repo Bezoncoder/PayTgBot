@@ -162,11 +162,16 @@ async def approve_check(callback: CallbackQuery, state: FSMContext):
 
     # Обновляем запись в БД об оплате
     # TODO payment_id
-    payment_data = await update_payment_data(
-        payment_id=user_data.get("payment_id"),
-        new_operation_id=user_data.get("operation_id"),
-        new_status="APPROVED_MANUAL",
-    )
+    try:
+        payment_data = await update_payment_data(
+            payment_id=user_data.get("payment_id", 000),
+            new_operation_id=user_data.get("operation_id", 000),
+            new_status="APPROVED_MANUAL",
+        )
+    except Exception as e:
+        logging.error(f"⚠️ ОШИБКА await update_payment_data\n"
+                      f"user_data = {user_data}\n"
+                      f"{e}\n")
 
     logging.info("Получена оплата:\n%s", payment_data)
 
