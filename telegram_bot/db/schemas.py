@@ -38,6 +38,7 @@ class PaymentPydantic(BaseModel):  # Оплата
     operation_id: str | None
     amount: int
     status: str
+    stream_id: int | None
     user_id: int  # Внешний ключ
 
     model_config = ConfigDict(from_attributes=True, use_enum_values=True)

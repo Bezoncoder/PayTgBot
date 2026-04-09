@@ -37,7 +37,7 @@ class Payment(Base):  # Покупки Пользователей
     operation_id: Mapped[str | None]
     amount: Mapped[float]
     status: Mapped[str]
-
+    stream_id: Mapped[int | None]
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'))  # Внешний ключ
 
     # Связь многие-к-одному с User
