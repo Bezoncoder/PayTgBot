@@ -92,6 +92,7 @@ class BaseDAO:
             logging.error(e)
             raise e
         return new_instance
+
     @classmethod
     async def update_one_by_id(cls, session: AsyncSession, data_id: int, values: BaseModel):
         values_dict = values.model_dump(exclude_unset=True)

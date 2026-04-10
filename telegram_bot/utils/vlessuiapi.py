@@ -28,6 +28,7 @@ class XUIClient:
     def __init__(self, base_url_from_panel: str = None,
                  public_inbound_key: str = None, sid: str = None, sni: str = "ya.ru",
                  username: str = None, password: str = None, two_factor: str = None,
+                 sub_path: str = ":2096/1AWEJRPGmKLSZojNjB",
                  verify_ssl: bool = False, auto_login: bool = True):
 
         # 🔍 ПАРСИМ base_url → host, port, web_path, protocol
@@ -50,7 +51,7 @@ class XUIClient:
         self.password = password
         self.two_factor = two_factor
         self.verify_ssl = verify_ssl
-
+        self.sub_path = sub_path
         self.session = requests.Session()
         self.session.headers.update({
             'Accept': 'application/json',
@@ -77,7 +78,7 @@ class XUIClient:
         logger.info(url)
         try:
             logger.debug(f"Запрос: {method} {endpoint}")
-            print(url)
+            # print(url)
             response = self.session.request(method, url, timeout=30, **kwargs)
 
             if response.status_code == 200:
@@ -216,7 +217,7 @@ class XUIClient:
             return False
 
     def add_client(self, inbound_id: str = "1", client_uuid: str = None, email: str = "",
-                   total_gb: float = 0, limit_ip: int = 2, enable: bool = True,
+                   total_gb: float = 0, limit_ip: int = 2, enable: bool = True, sub_id: str = None,
                    comment: str = "", expiry_time: int = 0, flow: str = "xtls-rprx-vision") -> Optional[Dict[str, Any]]:
         """Добавить клиента"""
         final_id = client_uuid if client_uuid else self._generate_client_uuid()
@@ -230,7 +231,7 @@ class XUIClient:
             "expiryTime": expiry_time,
             "enable": enable,
             "tgId": "",
-            "subId": f"sub-{int(time.time())}",
+            "subId": sub_id or f"sub-{int(time.time())}",
             "comment": comment,
             "reset": 0
         }
@@ -246,6 +247,11 @@ class XUIClient:
                                                    host=self.host,
                                                    profile_name=email)
             new_result["vless_link"] = vless_link
+            new_base_url_list = str(self.base_url).split(":")
+            # sub_path: str = ":2096/1AWEJRPGmKLSZojNjB",
+            new_result["subscription_link"] = (new_base_url_list[0]+":"
+                                               +new_base_url_list[1]+self.sub_path
+                                               +"/"+str(client_data.get("subId")))
         else:
             new_result = result
             raise ValueError(new_result.get('msg'))
@@ -316,6 +322,16 @@ if __name__ == "__main__":
     PUBLIC_KEY = "QZ63wahdkxh_n8HoY6M10zcGuT6Ig6-PDZh-sFBhAWo"
 
     SID = "482faa37e9"
+
+    "vless_link': 'vless://a400fbb6-fa9b-447c-8575-a4a1828425cf@illiriaakva.ru:443?type=tcp&encryption=none&security=tls&fp=chrome&alpn=http%2F1.1&flow=xtls-rprx-vision#aaaaff111fkkkk"
+    "https://illiriaakva.ru:49699/9RWEJRPGmKLSZojNjB"
+    "https://illiriaakva.ru:2096/9RWEJRPGmKLSZojNjB/sub-1775848081"
+
+
+
+    client_mew = XUIClient(base_url_from_panel=base_url, username=USER, password=PASSWORD)
+    pprint(client_mew.add_client(email="NEW_TEST0999007TestT").get("subscription_link"))
+
 
     # port = int(base_url.split(":")[2].split("/")[0] )
     # print(port)

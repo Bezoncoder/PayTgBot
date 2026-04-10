@@ -7,12 +7,13 @@ from db.schemas import PaymentPydantic, UserPydantic
 
 
 @connection
-async def update_payment_data(session: AsyncSession, payment_id, new_operation_id: str, new_status: str):
+async def update_payment_data(session: AsyncSession, payment_id, new_operation_id: str, new_status: str, stream_id: int = None):
     ValueModel = create_model('ValueModel', operation_id=(str, ...), status=(str, ...))
     payment = await PaymentDAO.update_one_by_id(session=session,
                                                 data_id=int(payment_id),
                                                 values=ValueModel(operation_id=new_operation_id,
-                                                                  status=new_status))
+                                                                  status=new_status,
+                                                                  stream_id=stream_id))
     return PaymentPydantic.model_validate(payment)
 
 

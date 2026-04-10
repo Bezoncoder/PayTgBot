@@ -96,7 +96,7 @@ async def get_pay(callback: CallbackQuery, state: FSMContext):
 
     ######################## Получаем Информаци о потоке #######################
 
-    # stream_info = await get_stream_info(id_stream=stream_id_int)
+    stream_info = await get_stream_info(id_stream=stream_id_int)
 
     ######################## Получаем Информаци о пользователе #################
     logging.debug(f"Получаем Информаци о пользователе")
@@ -112,7 +112,8 @@ async def get_pay(callback: CallbackQuery, state: FSMContext):
                           "amount": price,
                           "operation_id": "",
                           "status": "CREATE",
-                          "user_id": user_info_dict["id"]}
+                          "user_id": user_info_dict["id"],
+                          "stream_id": stream_info.id}
 
     #################### Добавляем в БД запись об оплате и получаем ссылку на оплату ###########################
 

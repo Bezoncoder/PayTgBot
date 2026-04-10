@@ -167,6 +167,7 @@ async def approve_check(callback: CallbackQuery, state: FSMContext):
             payment_id=user_data.get("payment_id", 000),
             new_operation_id=user_data.get("operation_id", 000),
             new_status="APPROVED_MANUAL",
+            stream_id=stream_info.id
         )
     except Exception as e:
         logging.error(f"⚠️ ОШИБКА await update_payment_data\n"

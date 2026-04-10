@@ -150,6 +150,8 @@ async def check_pay(callback: CallbackQuery, state: FSMContext):
             payment_id=user_data.get("payment_id"),
             new_operation_id=user_data.get("operation_id"),
             new_status=payment_status,
+            stream_id=stream_info.id
+
         )
 
         logging.info("Получена оплата:\n%s", payment_data)
@@ -259,7 +261,8 @@ async def check_pay(callback: CallbackQuery, state: FSMContext):
 
         payment_data = await update_payment_data(payment_id=user_data.get("payment_id", '000000'),
                                                  new_operation_id=user_data.get("operation_id", "None"),
-                                                 new_status=payment_status)
+                                                 new_status=payment_status,
+                                                 stream_id=stream_info.id)
 
         logging.info("Проверка оплаты не прошла:\n%s", payment_data)
 
