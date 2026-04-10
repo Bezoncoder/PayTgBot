@@ -196,7 +196,7 @@ async def check_pay(callback: CallbackQuery, state: FSMContext):
                                            flow="xtls-rprx-vision",
                                            inbound_id="1",
                                            expiry_time=expire_time_sec,
-                                           email=f"{callback.from_user.id}_{client_uuid_from_payment}").get('vless_link')
+                                           email=f"{callback.from_user.id}_{client_uuid_from_payment}").get('subscription_link')
         except Exception as exception_text:
             # < code > текст < / code >
             buttons = get_errors_button()
