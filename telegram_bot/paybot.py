@@ -79,10 +79,22 @@ async def check_and_posting():
     for i in range(3, 0, -1):
         user_ids=[]
         date_to_check = datetime.now() + timedelta(days=i)
-        users_enrollments_to_posting = await get_users_enrollments_to_ban(now_date=date_to_check.date())
+
+        try:
+            users_enrollments_to_posting = await get_users_enrollments_to_ban(now_date=date_to_check.date())
+        except Exception as e:
+            logging.error(f"⚠️  Ошибка при get_users_enrollments_to_ban\n{e}")
+            users_enrollments_to_posting = []
+
+
         for enrollment_paydantic in users_enrollments_to_posting:
             user_ids.append(enrollment_paydantic.id)
-        users_to_post_paydantic = await get_userinfo_to_ban(user_ids=user_ids)
+        try:
+            users_to_post_paydantic = await get_userinfo_to_ban(user_ids=user_ids)
+        except Exception as e:
+            logging.error(f"⚠️  Ошибка при get_userinfo_to_ban\n{e}")
+            users_to_post_paydantic = []
+
         if i>1:
             days_str = f"{i} дня"
         else:
