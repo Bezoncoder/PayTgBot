@@ -51,7 +51,7 @@ class UserDAO(BaseDAO):
         logging.info(f"Делаем запрос данных пользователей в БД для {len(ids_list)} id")
         result = await session.execute(query)
         logging.info("Получен ответ из БД")
-        user_info_list = result.scalars().all()
+        user_info_list = result.scalars().unique()
         logging.debug("user_info_list: %s", user_info_list)
         return user_info_list
 

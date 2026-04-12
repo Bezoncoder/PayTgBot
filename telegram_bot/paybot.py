@@ -79,7 +79,7 @@ async def check_and_posting():
     for i in range(3, 0, -1):
         user_ids=[]
         date_to_check = datetime.now() + timedelta(days=i)
-        users_enrollments_to_posting = await get_users_enrollments_to_ban(now_date=date_to_check)
+        users_enrollments_to_posting = await get_users_enrollments_to_ban(now_date=date_to_check.date())
         for enrollment_paydantic in users_enrollments_to_posting:
             user_ids.append(enrollment_paydantic.id)
         users_to_post_paydantic = await get_userinfo_to_ban(user_ids=user_ids)
@@ -118,7 +118,7 @@ async def main():
 
     # Запуск кода в определенные часы:
 
-    scheduler.add_job(func=check_and_posting, trigger="cron", hour=14, minute=15)
+    scheduler.add_job(func=check_and_posting, trigger="cron", hour=19, minute=15)
 
     # Запуск кода через определенный интервал
     # now_time = DT.datetime.now() + DT.timedelta(seconds=15)
