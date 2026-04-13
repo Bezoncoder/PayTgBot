@@ -192,11 +192,21 @@ async def check_pay(callback: CallbackQuery, state: FSMContext):
                                      sid=product_info.short_id)
 
             client_uuid_from_payment = str(payment_data.operation_id)
-            link = vless_client.add_client(client_uuid=client_uuid_from_payment,
-                                           flow="xtls-rprx-vision",
-                                           inbound_id="1",
-                                           expiry_time=expire_time_sec,
-                                           email=f"{callback.from_user.id}_{client_uuid_from_payment}").get('subscription_link')
+
+            obj = vless_client.get_client_traffic_by_id(client_uuid=client_uuid_from_payment).get("obj")
+
+            if isinstance(obj, list) and not obj:
+                logging.info(f"Создаем ссылку для клиента с UUID = {client_uuid_from_payment}")
+                link = vless_client.add_client(client_uuid=client_uuid_from_payment,
+                                               flow="xtls-rprx-vision",
+                                               inbound_id="1",
+                                               expiry_time=expire_time_sec,
+                                               email=f"{callback.from_user.id}_{client_uuid_from_payment}").get('subscription_link')
+            else:
+                logging.info(f"Клиент c UUID = {client_uuid_from_payment} уже есть в 3xui")
+                logging.debug(obj)
+                link = None
+
         except Exception as exception_text:
             # < code > текст < / code >
             buttons = get_errors_button()
@@ -210,21 +220,21 @@ async def check_pay(callback: CallbackQuery, state: FSMContext):
             return
 
         ############### Запись в БД Enrollments ################
+        if link:
+            enrollment_data = dict(
+                                active=True,
+                                user_id=payment_data.user_id,
+                                expire_date=expiredate_to_db,
+                                title_product=product_info.title,
+                                product_id=stream_info.product_id,
+                                stream_id=stream_info.id,
+                                vless_user_name=client_uuid_from_payment,
+                                vless_link=link
+            )
 
-        enrollment_data = dict(
-                            active=True,
-                            user_id=payment_data.user_id,
-                            expire_date=expiredate_to_db,
-                            title_product=product_info.title,
-                            product_id=stream_info.product_id,
-                            stream_id=stream_info.id,
-                            vless_user_name=client_uuid_from_payment,
-                            vless_link=link
-        )
+            new_enrollment = await add_new_enrollments(enrollment_data=enrollment_data)
 
-        new_enrollment = await add_new_enrollments(enrollment_data=enrollment_data)
-
-        logging.debug("Сделана запись в Enrollments:\n%s", new_enrollment)
+            logging.debug("Сделана запись в Enrollments:\n%s", new_enrollment)
 
         # user_info = await get_userinfo_by_id(user_id=payment_data.user_id)
         # await restore_chat_access(

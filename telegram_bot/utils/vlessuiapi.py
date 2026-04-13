@@ -75,6 +75,7 @@ class XUIClient:
             return None
 
         url = f"{self.base_url}/panel/api/{endpoint}"
+        print(url)
         logger.info(url)
         try:
             logger.debug(f"Запрос: {method} {endpoint}")
@@ -273,20 +274,35 @@ class XUIClient:
         data = {'id': inbound_id, 'settings': settings}
         return self._make_request("inbounds/updateClient", data=data)
 
+    def get_client_traffic_by_id(self, client_uuid: str):
+        # panel / api / inbounds / getClientTrafficsById / {uuid}
+        endpoint = f"inbounds/getClientTrafficsById/{client_uuid}"
+        # "https://quantumturbovpn.ddns.net:49699/9RWEJRPGmKLSZojNjB/panel/api/inbounds/getClientTrafficsById/63130ad0-c089-4b5a-a7e4-33bb1e671c24"
+        payload = {}
+        headers = {
+            'Accept': 'application/json'
+        }
+
+        return self._make_request(endpoint=endpoint, data=payload, method="GET")
+
     def get_list_inbounds(self) -> Optional[Dict[str, Any]]:
         """Список всех inbounds"""
         logger.info("Получение списка inbounds")
         return self._make_request("inbounds/list", method="GET")
 
-    def get_inbound(self, inbound_id: str) -> Optional[Dict[str, Any]]:
+    def get_inbound(self, inbound_id: int) -> Optional[Dict[str, Any]]:
         """Информация об inbound"""
         logger.info(f"Получение inbound {inbound_id}")
-        data = {'id': inbound_id}
+        data = {}
         # https://illiriaakva.ru:28001/ylzqeXtdnca0tHr2ng/panel/api/inbounds/get/1
         # https://illiriaakva.ru:28001/ylzqeXtdnca0tHr2ng/panel/inbounds
         # https://155.212.228.65:49699/IIVMNd0IoCAcUBOuKK/panel/api/inbounds/get/1
         # http: // localhost: 2053 / randompath / panel / api / inbounds / get / {inboundId}
-        return self._make_request(endpoint=f"inbounds/get/{inbound_id}", method="POST", data=data)
+        # url = f"{self.base_url}/panel/api/{endpoint}"
+        # inbounds / get / {inboundId}
+        # / panel / api / inbounds
+
+        return self._make_request(endpoint=f"inbounds/get/{inbound_id}", method="GET", data=data)
 
     def logout(self) -> bool:
         """Выход из системы"""
@@ -323,14 +339,26 @@ if __name__ == "__main__":
 
     SID = "482faa37e9"
 
-    "vless_link': 'vless://a400fbb6-fa9b-447c-8575-a4a1828425cf@illiriaakva.ru:443?type=tcp&encryption=none&security=tls&fp=chrome&alpn=http%2F1.1&flow=xtls-rprx-vision#aaaaff111fkkkk"
-    "https://illiriaakva.ru:49699/9RWEJRPGmKLSZojNjB"
-    "https://illiriaakva.ru:2096/9RWEJRPGmKLSZojNjB/sub-1775848081"
+    # "vless_link': 'vless://a400fbb6-fa9b-447c-8575-a4a1828425cf@illiriaakva.ru:443?type=tcp&encryption=none&security=tls&fp=chrome&alpn=http%2F1.1&flow=xtls-rprx-vision#aaaaff111fkkkk"
+    # "https://illiriaakva.ru:49699/9RWEJRPGmKLSZojNjB"
+    # "https://illiriaakva.ru:2096/9RWEJRPGmKLSZojNjB/sub-1775848081"
 
 
 
     client_mew = XUIClient(base_url_from_panel=base_url, username=USER, password=PASSWORD)
-    pprint(client_mew.add_client(email="NEW_TEST0999007TestT").get("subscription_link"))
+    # pprint(client_mew.add_client(email="NEW_TEST0999007TestT").get("subscription_link"))
+    # pprint(client_mew.get_list_inbounds())
+    # pprint(client_mew.get_inbound(inbound_id=1))
+    uuid = '63130ad0-c089-4b5a-a7e4-33bb1e671c24'
+
+    # # {'msg': '', 'obj': [], 'success': True}
+    # obj = client_mew.get_client_traffic_by_id(client_uuid=uuid).get("obj")
+    #
+    # if isinstance(obj, list) and not obj:
+    #     print("Вернулся пустой список")
+    # else:
+    #     print("Это не пустой список")
+    #     pprint(obj)
 
 
     # port = int(base_url.split(":")[2].split("/")[0] )
