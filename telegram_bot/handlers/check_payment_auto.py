@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from pprint import pprint
 
@@ -182,7 +183,23 @@ async def check_pay(callback: CallbackQuery, state: FSMContext):
 
         base_url = product_info.base_url
         # https://155.212.228.65:49699/IIVMNd0IoCAcUBOuKK
-
+        try:
+            await callback.message.edit_caption(caption=f"⏳ <b>Выполняется проверка оплаты</b>\n\n"
+                                                        f"Пожалуйста, подождите несколько секунд\n\n"
+                                                        f"💡 <i>Не закрывайте окно и не обновляйте страницу</i>\n\n"
+                                                        f"🔄 <b>Статус:</b>\n"
+                                                        f"<code>Проверка в процессе...</code>",
+                                                parse_mode="HTML")
+        except Exception as exception_text:
+            buttons = get_errors_button()
+            await callback.message.edit_caption(caption=f"❌ <b>Что-то пошло не так</b>… Повторите попытку позже\n\n"
+                                                        f"📢 <b>Сообщите в поддержку</b> и прикрепите текст ошибки\n\n"
+                                                        f"💡 <i>Чтобы скопировать — просто нажмите на текст</i>\n\n"
+                                                        f"🔴 <b>Ошибка:</b>\n"
+                                                        f"<code>{exception_text}</code>",
+                                                parse_mode="HTML",
+                                                reply_markup=buttons)
+        await asyncio.sleep(3)
         try:
             vless_client = XUIClient(base_url_from_panel=base_url,
                                      username=USER,
