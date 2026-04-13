@@ -71,7 +71,7 @@ class EnrollmentDAO(BaseDAO):
     async def get_user_info_to_ban(cls, session: AsyncSession, now_date: date):
         query = select(cls.model).where(
             cls.model.active.is_(True),
-            cls.model.expire_date < now_date,
+            cls.model.expire_date == now_date,
         )
         logging.debug("get_user_info_to_ban %s", query)
         result = await session.execute(query)

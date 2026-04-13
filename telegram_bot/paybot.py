@@ -77,23 +77,10 @@ async def check_and_posting():
 
     photo = FSInputFile('source/pictures/vpn_main_menu.jpg')
     for i in range(3, 0, -1):
-        user_ids=[]
+        user_ids = []
         date_to_check = datetime.now() + timedelta(days=i)
-
-        try:
-            users_enrollments_to_posting = await get_users_enrollments_to_ban(now_date=date_to_check.date())
-        except Exception as e:
-            logging.error(f"⚠️  Ошибка при get_users_enrollments_to_ban\n{e}")
-            users_enrollments_to_posting = []
-
-
-        for enrollment_paydantic in users_enrollments_to_posting:
-            user_ids.append(enrollment_paydantic.id)
-        try:
-            users_to_post_paydantic = await get_userinfo_to_ban(user_ids=user_ids)
-        except Exception as e:
-            logging.error(f"⚠️  Ошибка при get_userinfo_to_ban\n{e}")
-            users_to_post_paydantic = []
+        logging.info(f"Начинаем рассылку о продлении ключа VPN.")
+        logging.info(f"date_to_check = {date_to_check}")
 
         if i>1:
             days_str = f"{i} дня"
@@ -106,6 +93,21 @@ async def check_and_posting():
             f"️✨ Продли сейчас и продолжай серфить безопасно!\n\n"
             f"🔗 Открой Главное меню.\n\n"
         )
+
+        try:
+            users_enrollments_to_posting = await get_users_enrollments_to_ban(now_date=date_to_check.date())
+        except Exception as e:
+            logging.error(f"⚠️  Ошибка при get_users_enrollments_to_ban\n{e}")
+            users_enrollments_to_posting = []
+
+        for enrollment_paydantic in users_enrollments_to_posting:
+            user_ids.append(enrollment_paydantic.user_id)
+
+        try:
+            users_to_post_paydantic = await get_userinfo_to_ban(user_ids=user_ids)
+        except Exception as e:
+            logging.error(f"⚠️  Ошибка при get_userinfo_to_ban\n{e}")
+            users_to_post_paydantic = []
 
         for user_info in users_to_post_paydantic:
             try:
@@ -121,6 +123,7 @@ async def check_and_posting():
 
 
 
+
 async def main():
     logging.info("Старт Bot Loging")
 
@@ -130,7 +133,7 @@ async def main():
 
     # Запуск кода в определенные часы:
 
-    scheduler.add_job(func=check_and_posting, trigger="cron", hour=19, minute=15)
+    scheduler.add_job(func=check_and_posting, trigger="cron", hour=21, minute=10)
 
     # Запуск кода через определенный интервал
     # now_time = DT.datetime.now() + DT.timedelta(seconds=15)
