@@ -200,7 +200,7 @@ async def check_pay(callback: CallbackQuery, state: FSMContext):
                                                         f"<code>{exception_text}</code>",
                                                 parse_mode="HTML",
                                                 reply_markup=buttons)
-        await asyncio.sleep(5)
+        await asyncio.sleep(10)
         try:
             vless_client = XUIClient(base_url_from_panel=base_url,
                                      username=USER,
