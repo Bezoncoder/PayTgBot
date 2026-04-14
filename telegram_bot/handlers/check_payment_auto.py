@@ -213,7 +213,7 @@ async def check_pay(callback: CallbackQuery, state: FSMContext):
 
             obj = vless_client.get_client_traffic_by_id(client_uuid=client_uuid_from_payment).get("obj")
 
-            if isinstance(obj, list) and obj!=[]:
+            if isinstance(obj, list) and obj==[]:
                 logging.info(f"📢 Создаем ссылку для клиента с UUID = {client_uuid_from_payment}")
                 link = vless_client.add_client(client_uuid=client_uuid_from_payment,
                                                flow="xtls-rprx-vision",
