@@ -106,19 +106,6 @@ async def get_pay(callback: CallbackQuery, state: FSMContext):
 
     # await update_user_email(user_id_from_db=user_info_dict['id'], new_email=email)
 
-    ######################## Записываем Данные об оплате ######################
-
-    payments_data_dict = {"provider": "PLATEGA",
-                          "amount": price,
-                          "operation_id": "",
-                          "status": "CREATE",
-                          "user_id": user_info_dict["id"],
-                          "stream_id": stream_info.id}
-
-    #################### Добавляем в БД запись об оплате и получаем ссылку на оплату ###########################
-
-    payment_data_from_db = await add_payments_operation(payments_data=payments_data_dict)
-
     ########################### Получаем Данные о платеже от Провайдера Эквайринга #############################
 
     try:
@@ -139,14 +126,32 @@ async def get_pay(callback: CallbackQuery, state: FSMContext):
                                             reply_markup=buttons)
         return
 
+
+    ######################## Записываем Данные об оплате ######################
+
+    operation_id_from_provider = payments_data_from_provider.get('operation_id_from_provider',
+                                                                 'none_operation_id')
+
+    payments_data_dict = {"provider": "PLATEGA",
+                          "amount": price,
+                          "operation_id": operation_id_from_provider,
+                          "status": "CREATE",
+                          "user_id": user_info_dict["id"],
+                          "stream_id": stream_info.id}
+
+    #################### Добавляем в БД запись об оплате и получаем ссылку на оплату ###########################
+
+    payment_data_from_db = await add_payments_operation(payments_data=payments_data_dict)
+
     ###################### Сохраняем данные Пользователю в FSM #########################
 
     user_data = dict(stream_id_int=stream_id_int,
                      price=price,
-                     operation_id=payments_data_from_provider.get('operation_id_from_provider', 'none_operation_id'),
+                     operation_id=operation_id_from_provider,
                      payment_id=payment_data_from_db.id)
 
     await state.storage.update_data(user_key, data=user_data)  # <— сохраняем для ЭТОГО пользователя
+
 
     ############################## Платежные Реквизиты ##############################
 
