@@ -190,6 +190,7 @@ async def check_pay(callback: CallbackQuery, state: FSMContext):
                                                         f"🔄 <b>Статус:</b>\n"
                                                         f"<code>Проверка в процессе...</code>",
                                                 parse_mode="HTML")
+            logging.info(f"💡 Отправлено сообщение о выполнении операции")
         except Exception as exception_text:
             buttons = get_errors_button()
             await callback.message.edit_caption(caption=f"❌ <b>Что-то пошло не так</b>… Повторите попытку позже\n\n"
@@ -199,7 +200,7 @@ async def check_pay(callback: CallbackQuery, state: FSMContext):
                                                         f"<code>{exception_text}</code>",
                                                 parse_mode="HTML",
                                                 reply_markup=buttons)
-        await asyncio.sleep(3)
+        await asyncio.sleep(5)
         try:
             vless_client = XUIClient(base_url_from_panel=base_url,
                                      username=USER,
@@ -212,15 +213,15 @@ async def check_pay(callback: CallbackQuery, state: FSMContext):
 
             obj = vless_client.get_client_traffic_by_id(client_uuid=client_uuid_from_payment).get("obj")
 
-            if isinstance(obj, list) and not obj:
-                logging.info(f"Создаем ссылку для клиента с UUID = {client_uuid_from_payment}")
+            if isinstance(obj, list) and obj!=[]:
+                logging.info(f"📢 Создаем ссылку для клиента с UUID = {client_uuid_from_payment}")
                 link = vless_client.add_client(client_uuid=client_uuid_from_payment,
                                                flow="xtls-rprx-vision",
                                                inbound_id="1",
                                                expiry_time=expire_time_sec,
                                                email=f"{callback.from_user.id}_{client_uuid_from_payment}").get('subscription_link')
             else:
-                logging.info(f"Клиент c UUID = {client_uuid_from_payment} уже есть в 3xui")
+                logging.info(f"💡 Клиент c UUID = {client_uuid_from_payment} уже есть в 3xui")
                 logging.debug(obj)
                 link = None
 
