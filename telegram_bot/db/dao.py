@@ -104,7 +104,7 @@ class EnrollmentDAO(BaseDAO):
         now_date: date | None,
         id_user: int,
     ):
-        query = select(cls.model).where(cls.model.user_id == int(id_user)).where(cls.model.expire_date>now_date)
+        query = select(cls.model).where(cls.model.user_id == int(id_user)).where(cls.model.expire_date>=now_date)
 
         logging.debug("get_enrolmets_userid %s", query)
         result = await session.execute(query)

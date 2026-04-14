@@ -166,13 +166,13 @@ async def get_stream_info(session, id_stream: int) -> StreamPydantic:
 @connection
 async def get_enrollmets_from_user_id(session, id_user: int,
                                       today_date: date = None) -> list[EnrollmentPydantic]:
-    logging.debug("Запрос get_stream id = %s", id_user)
+    logging.debug("Запрос get_enrollmets_userid id = %s", id_user)
 
     enrollments_raw = await EnrollmentDAO.get_enrollmets_userid(
         session=session,
         now_date=today_date,
         id_user=id_user)
-    logging.debug("Ответ на get_stream получен: %s", enrollments_raw)
+    logging.debug("Ответ на get_enrollmets_userid получен:\n%s", enrollments_raw)
     enrolments_list = []
     for enrollment_raw in enrollments_raw:
         enrolments_list.append(EnrollmentPydantic.model_validate(enrollment_raw))

@@ -1,9 +1,9 @@
 import asyncio
 from pydantic import create_model
 from sqlalchemy.ext.asyncio import AsyncSession
-from db.dao import PaymentDAO, UserDAO
+from db.dao import PaymentDAO, UserDAO, EnrollmentDAO
 from db.database import connection
-from db.schemas import PaymentPydantic, UserPydantic
+from db.schemas import PaymentPydantic, UserPydantic, EnrollmentPydantic
 
 
 @connection
@@ -24,6 +24,14 @@ async def update_user_email(session: AsyncSession, user_id_from_db, new_email: s
                                           data_id=int(user_id_from_db),
                                           values=UserModel(mail_info=new_email))
     return UserPydantic.model_validate(user)
+
+@connection
+async def update_enrollment_data(session: AsyncSession, enrollment_id, new_active_status: bool):
+    ValueModel = create_model('ValueModel', active=(bool, ...))
+    enrollment = await EnrollmentDAO.update_one_by_id(session=session,
+                                                data_id=int(enrollment_id),
+                                                values=ValueModel(active=new_active_status))
+    return EnrollmentPydantic.model_validate(enrollment)
 
 
 if __name__ == "__main__":

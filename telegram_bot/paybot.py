@@ -3,6 +3,7 @@ import asyncio
 from aiogram.types import FSInputFile
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
+from db.update_methods_dao import update_enrollment_data
 from handlers import (greetings, get_subscribe, check_payment_auto, check_payment_manual,
                       get_creds, github_check_subscribe,
                       choosing_direction, choosing_product,
@@ -31,48 +32,76 @@ bot = Bot(token=BOT_TOKEN)
 # await bot.unban_chat_member(chat_id, user_id)
 
 async def check_and_ban():
-    logging.debug("Запуск Запланированной Задачи")
+    logging.debug("Запуск Проверки Подписок")
     list_id_user = []
     list_id_stream = []
-    now = datetime.now()
+    date_to_check_subscribe = datetime.now() - timedelta(days=1)
 
-
-    users_enrollments_to_ban = await get_users_enrollments_to_ban(now_date=now)
+    users_enrollments_to_ban = await get_users_enrollments_to_ban(now_date=date_to_check_subscribe.date())
     # TODO сделать нормальное отключение подписки.
+
+
+
     for enrollment in users_enrollments_to_ban:
         list_id_user.append(enrollment.user_id)
         list_id_stream.append(enrollment.stream_id)
+        try:
+            new_enrollment = await update_enrollment_data(enrollment_id=enrollment.id, new_active_status=False)
+            logging.info(f"Пользователю {new_enrollment.user_id} изменен статус подписки на False")
+            logging.info(f"expire_date = {new_enrollment.expire_date}")
+        except Exception as e:
+            logging.error(e)
 
-    users_to_ban = await get_userinfo_to_ban(user_ids=list_id_user)
-    stream_list_to_ban = await get_streaminfo_to_ban(stream_ids=list_id_stream)
+        users_to_ban = await get_userinfo_to_ban(user_ids=list_id_user)
 
-    count_user = len(users_to_ban)
+        # stream_list_to_ban = await get_streaminfo_to_ban(stream_ids=list_id_stream)
 
-    logging.info("У %s пользователей закончилась подписка:\n%s", count_user, users_to_ban)
+        count_user = len(users_to_ban)
+        logging.info("У %s пользователей закончилась подписка:\n%s", count_user, users_to_ban)
+
+
 
 async def check_and_posting():
+
+    logging.info("Запуск Запланированной Задачи")
+
     users_to_posting_rek = await select_all_users()
-    rek_photo = FSInputFile('source/pictures/rek_photo.jpg')
+
+    rek_photo = FSInputFile('source/pictures/rek_photo_happ.jpg')
     caption = (
-        f"🚨 **СКИДКА до конца месяца!** ⏰\n\n"
-        f"🔥 Любой тариф всего **150₽**!\n"
-        f"🌍 Зарубежный IP для доступа к заблокированным сайтам из России\n"
-        f"⚡ Подключайся к нашему VPN прямо сейчас!\n\n"
-        f"💥 Работай, смотри, качай без ограничений!\n\n"
-        f"🔗 Нажми Главное меню."
+        f"🚀 Happ — самый удобный способ юзать наши <a href='https://quantumturbovpn.ddns.net/'>VPN-ключи</a>\n\n"
+        f"⁉️ Хватит копаться в куче настроек и искать инфу по разным местам 😎\n\n"
+        f"Happ - Proxy Utility — это приложение, где всё собрано в одном окне:\n"
+        f"⚡️ подписка\n"
+        f"⚡️ трафик\n"
+        f"⚡️ дата окончания\n"
+        f"⚡️ подключение в один клик\n"
+        f"⚡️ прямые ссылки на наш бот и сайт\n\n"
+        f"⚙️📱💻 Android / iPhone / ПК / TV\n\n"
+        f"⚠️ Работает на всех устройствах, даже на TV 📺\n\n"
+        f"Если у тебя есть наши ключи — ставь Happ и забудь про лишний геморрой.\n\n"
+        f"🛒 Купить подписку можно через Telegram Бот и на сайте — для тех, кто не может зайти в Telegram.\n\n"
+        f"🌐 Сайт, где можно купить ключ VPN:\nhttps://quantumturbovpn.ddns.net\n\n"
+        f"⚠️ Сайт работает даже когда невозможно зайти в телеграм.\n\n"
+        f"📲 Приложение Happ-Proxy Utility:\n"
+        f"https://www.happ.su/main\n\n"
+        f"Бот: @QuantumTurboVPNBot"
     )
+
+    await check_and_ban()
+
     for user_info in users_to_posting_rek:
         if not user_info.enrollments:
-            pass
-            # try:
-            #     await bot.send_photo(chat_id=user_info.telegram_id,
-            #                          photo=rek_photo,
-            #                          caption=caption,
-            #                          reply_markup=get_start_button(),
-            #                          parse_mode="HTML")
-            #     logging.info(f"✅ Отправлено рекламное сообщение пользователю user_name = {user_info.username}")
-            # except Exception as e:
-            #     logging.debug(f"⚠️ Ошибка при отпрвке сообщения:\n{e}")
+            try:
+                await bot.send_photo(chat_id=user_info.telegram_id,
+                                     photo=rek_photo,
+                                     caption=caption,
+                                     reply_markup=get_start_button(),
+                                     parse_mode="HTML")
+                logging.info(f"✅ Отправлено рекламное сообщение пользователю user_name = {user_info.username}")
+                await asyncio.sleep(3)
+            except Exception as e:
+                logging.debug(f"⚠️ Ошибка при отпрвке сообщения:\n{e}")
 
 
     photo = FSInputFile('source/pictures/vpn_main_menu.jpg')
@@ -124,6 +153,7 @@ async def check_and_posting():
 
 
 
+
 async def main():
     logging.info("Старт Bot Loging")
 
@@ -133,7 +163,7 @@ async def main():
 
     # Запуск кода в определенные часы:
 
-    scheduler.add_job(func=check_and_posting, trigger="cron", hour=21, minute=10)
+    scheduler.add_job(func=check_and_posting, trigger="cron", hour=14, minute=10)
 
     # Запуск кода через определенный интервал
     # now_time = DT.datetime.now() + DT.timedelta(seconds=15)

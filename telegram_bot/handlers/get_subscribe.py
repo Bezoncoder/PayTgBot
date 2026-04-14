@@ -12,6 +12,8 @@ from db.select_methods import (
 )
 from keyboards.get_menu import get_subscribe_menu
 from utils.timezone import get_moscow_today
+from datetime import datetime
+
 
 router = Router()
 
@@ -30,13 +32,12 @@ async def get_creds_subscribe(callback: CallbackQuery, state: FSMContext):
     await callback.answer("Список Ваших подписок")
     list_data_buttons = callback.data.split(":")
 
-    ############################## ПОЛУЧАЕМ ПОТОКИ ##################################
-    today_date = get_moscow_today()
-    enrolments_list = await get_enrollmets_from_user_id(
-        id_user=list_data_buttons[1],
-        today_date=today_date
-
-    )
+    ############################## ПОЛУЧАЕМ ПОДПИСКИ ##################################
+    # today_date = get_moscow_today()
+    date_to_check_subscribe = datetime.now()
+    enrolments_list = await get_enrollmets_from_user_id(id_user=list_data_buttons[1],
+                                                        today_date=date_to_check_subscribe.date()
+                                                        )
 
     #################################################################################
 
