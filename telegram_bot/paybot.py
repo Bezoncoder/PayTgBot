@@ -8,7 +8,7 @@ from handlers import (greetings, get_subscribe, check_payment_auto, check_paymen
                       get_creds, github_check_subscribe,
                       choosing_direction, choosing_product,
                       get_payment, choosing_stream, check_fio, how_to_pay, check_email,
-                      choosing_payment_method)
+                      choosing_payment_method, edit_adt_posts)
 from datetime import datetime, timedelta
 from logging.handlers import RotatingFileHandler
 import logging
@@ -195,7 +195,8 @@ async def main():
                        choosing_stream.router,
                        how_to_pay.router,
                        check_email.router,
-                       choosing_payment_method.router)
+                       choosing_payment_method.router,
+                       edit_adt_posts.router)
 
     # Запускаем бота и пропускаем все накопленные входящие
     await bot.delete_webhook(drop_pending_updates=True)
