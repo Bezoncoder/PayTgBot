@@ -35,7 +35,7 @@ async def set_start(callback: CallbackQuery, state: FSMContext):
 
     key = StorageKey(
         bot_id=callback.bot.id,
-        chat_id=callback.from_user.id,  # личный чат пользователя
+        chat_id=callback.message.chat.id,  # личный чат пользователя
         user_id=callback.from_user.id  # сам пользователь
 
     )
@@ -88,15 +88,16 @@ async def send_email_verification(message: Message, state: FSMContext):
         f"forward_message_id: {message.forward_from_message_id}"
     )
 
+    logging.debug(text)
 
-    # Вариант с изменением сообщения без удаления.
+
 
     await message.bot.delete_message(chat_id=message.from_user.id, message_id=message.message_id)
 
 
     key = StorageKey(
         bot_id=message.bot.id,
-        chat_id=message.from_user.id,  # личный чат пользователя
+        chat_id=message.chat.id,  # личный чат пользователя
         user_id=message.from_user.id  # сам пользователь
 
     )
