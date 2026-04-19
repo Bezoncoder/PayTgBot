@@ -24,7 +24,6 @@ from utils.timezone import get_moscow_today
 
 router = Router()
 
-ID = str
 
 @router.callback_query(F.data == "edit_adt_posts")
 async def set_start(callback: CallbackQuery, state: FSMContext):
@@ -41,6 +40,13 @@ async def set_start(callback: CallbackQuery, state: FSMContext):
 
     )
 
+    admin_user_data = dict(
+        message_id=callback.message.message_id
+    )
+
+    await state.storage.update_data(key=key, data=admin_user_data)
+
+
     await storage.set_state(key, OrderPay.check_id_message)
     state_from_user = await storage.get_state(key)
 
@@ -49,7 +55,7 @@ async def set_start(callback: CallbackQuery, state: FSMContext):
     #####################################################################################################
 
     buttons = get_start_button()
-    ID = callback.message.message_id
+
     # Вариант с изменением сообщения без удаления.
     media = InputMediaPhoto(
         media=photo,
@@ -73,6 +79,16 @@ async def send_email_verification(message: Message, state: FSMContext):
 
     await message.bot.delete_message(chat_id=message.from_user.id, message_id=message.message_id)
 
+
+    key = StorageKey(
+        bot_id=message.bot.id,
+        chat_id=message.from_user.id,  # личный чат пользователя
+        user_id=message.from_user.id  # сам пользователь
+
+    )
+
+    admin_user_data = await state.storage.get_data(key=key)
+
     buttons = get_start_button()
 
     # Вариант с изменением сообщения без удаления.
@@ -83,9 +99,11 @@ async def send_email_verification(message: Message, state: FSMContext):
         caption=text,
         parse_mode="HTML")
 
+
+
     await message.bot.edit_message_media(media=media,
                                           chat_id=message.from_user.id,
-                                          message_id=ID,
+                                          message_id=admin_user_data.get("message_id", 000),
                                           reply_markup=buttons)
 
 
