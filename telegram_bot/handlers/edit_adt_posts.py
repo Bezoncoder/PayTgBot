@@ -84,12 +84,8 @@ async def send_email_verification(message: Message, state: FSMContext):
     # '''
 
     text = (
-        f"forward_origin: {message.forward_origin}\n"
-        f"forward_date: {message.forward_date}\n"
-        f"forward_from_chat_id: {message.forward_from_chat.id if message.forward_from_chat else None}\n"
-        f"forward_from_chat_title: {message.forward_from_chat.title if message.forward_from_chat else None}\n"
-        f"forward_from_chat_type: {message.forward_from_chat.type if message.forward_from_chat else None}\n"
-        f"forward_from_message_id: {message.forward_from_message_id}"
+        f"forward_chat_id: {message.forward_from_chat.id if message.forward_from_chat else None}\n"
+        f"forward_message_id: {message.forward_from_message_id}"
     )
 
 
