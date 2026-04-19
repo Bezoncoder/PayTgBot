@@ -15,7 +15,7 @@ from logging.handlers import RotatingFileHandler
 import logging
 import colorlog
 
-from keyboards.get_menu import get_start_button
+from keyboards.get_menu import get_start_button, get_del_button
 from settings.config import BOT_TOKEN, TECH_CHANNEL
 from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
@@ -109,7 +109,8 @@ async def check_and_posting():
                 await bot.copy_message(
                     chat_id=user_info.telegram_id,
                     from_chat_id=-1003976745616,
-                    message_id=message_id
+                    message_id=message_id,
+                    reply_markup=get_start_button()
                 )
                 logging.info(f"✅ Отправлено рекламное сообщение пользователю user_name = {user_info.username}")
                 count_success_send+=1
@@ -159,7 +160,7 @@ async def check_and_posting():
                                      photo=photo,
                                      caption=notification,
                                      reply_markup=get_start_button(),
-                                     parse_mode="HTML")
+                                     parse_mode="HTML",)
                 logging.info(f"✅ Отправлено сообщение о продлении подписки пользователю user_name = {user_info.username}")
                 if i == 1:
                     count_reminder+=1
@@ -169,14 +170,15 @@ async def check_and_posting():
     text = (
         f"🚀 <b>Рассылка выполнена</b>\n\n"
         f"⏰ Отправлено напоминаний о продлении: {count_reminder}\n\n"
-        f"Реклама:"
+        f"Реклама:\n"
         f"✅ Доставлено: <b>{count_success_send}</b>\n"
         f"⚠️ Не отправилось: <b>{count_fail_send}</b>"
     )
 
     await bot.send_message(chat_id=TECH_CHANNEL,
                            text=text,
-                           parse_mode="HTML")
+                           parse_mode="HTML",
+                           reply_markup=get_del_button())
 
 
 
@@ -194,7 +196,7 @@ async def main():
 
     # Запуск кода в определенные часы:
 
-    scheduler.add_job(func=check_and_posting, trigger="cron", hour=19, minute=18)
+    scheduler.add_job(func=check_and_posting, trigger="cron", hour=14, minute=10)
 
     # Запуск кода через определенный интервал
     # now_time = DT.datetime.now() + DT.timedelta(seconds=15)

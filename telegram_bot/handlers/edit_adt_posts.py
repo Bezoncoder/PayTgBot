@@ -47,6 +47,7 @@ router = Router()
 
 # [3,5,6,7,8,9,10]
 
+# del_info_message
 
 @router.callback_query(F.data == "edit_adt_posts")
 async def set_start(callback: CallbackQuery, state: FSMContext):
@@ -154,5 +155,10 @@ async def send_email_verification(message: Message, state: FSMContext):
 
 
 
+@router.callback_query(F.data == "del_info_message")
+async def del_info_message(callback: CallbackQuery, state: FSMContext):
+    await callback.answer("Удаляем информационное сообщение")
+    await callback.bot.delete_message(chat_id=callback.message.chat.id,
+                                      message_id=callback.message.message_id)
 
 

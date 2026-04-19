@@ -257,6 +257,17 @@ def get_errors_button() -> InlineKeyboardMarkup:
 
     return builder.as_markup(resize_keyboard=True)
 
+def get_del_button() -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+
+    builder.button(text="Удалить сообщение",
+                   callback_data=f"del_info_message")
+
+    builder.adjust(1)
+
+    return builder.as_markup(resize_keyboard=True)
+
+
 if __name__ == "__main__":
     date_string = "2025-07-10"
 # format_string = "%Y-%m-%d"
