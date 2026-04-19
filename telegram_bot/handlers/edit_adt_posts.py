@@ -71,13 +71,14 @@ async def set_start(callback: CallbackQuery, state: FSMContext):
 async def send_email_verification(message: Message, state: FSMContext):
     data = message.model_dump(exclude_none=True)
     for k, v in data.items():
-        logging.debug(f"{k} = {v}\n")
+        logging.debug(f"{k} = {----}\n")
 
     text = (f"forward_from_message_id {message.forward_from_message_id}\n"
             f"message_id {message.message_id}\n"
             f"message.chat.id {message.chat.id}\n"
             # f"message.forward_from {message.forward_from}\n"
-            f"forward_from_chat {message.forward_from_chat}")
+            # f"forward_from_chat {message.forward_from_chat}"
+            )
 
 
     # Вариант с изменением сообщения без удаления.
