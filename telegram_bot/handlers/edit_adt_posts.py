@@ -69,16 +69,28 @@ async def set_start(callback: CallbackQuery, state: FSMContext):
 
 @router.message(OrderPay.check_id_message)
 async def send_email_verification(message: Message, state: FSMContext):
-    data = message.model_dump(exclude_none=True)
-    for k, v in data.items():
-        logging.debug(f"{k} = ---- \n")
+    # data = message.model_dump(exclude_none=True)
+    # for k, v in data.items():
+    #     logging.debug(f"{k} = ---- \n")
 
-    text = (f"forward_from_message_id {message.forward_from_message_id}\n"
-            f"message_id {message.message_id}\n"
-            f"message.chat.id {message.chat.id}\n"
-            # f"message.forward_from {message.forward_from}\n"
-            # f"forward_from_chat {message.forward_from_chat}"
-            )
+    '''
+    forward_from_chat — чат, из которого переслали сообщение.
+
+    forward_from_message_id — ID исходного сообщения в этом чате.
+
+    forward_date — дата пересылки.
+
+    forward_origin — более новый универсальный объект с информацией об источнике пересылки.
+    '''
+
+    text = (
+        f"forward_origin: {message.forward_origin}\n"
+        f"forward_date: {message.forward_date}\n"
+        f"forward_from_chat_id: {message.forward_from_chat.id if message.forward_from_chat else None}\n"
+        f"forward_from_chat_title: {message.forward_from_chat.title if message.forward_from_chat else None}\n"
+        f"forward_from_chat_type: {message.forward_from_chat.type if message.forward_from_chat else None}\n"
+        f"forward_from_message_id: {message.forward_from_message_id}"
+    )
 
 
     # Вариант с изменением сообщения без удаления.
