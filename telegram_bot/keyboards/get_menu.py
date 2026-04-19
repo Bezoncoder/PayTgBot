@@ -30,7 +30,7 @@ async def get_start_menu(list_for_menu, one_user_info: dict) -> InlineKeyboardMa
     )
     builder.button(text="👩‍💻 Тех поддержка", url="https://t.me/QuantumTurboVPN")
     # builder.button(text="👩‍💻 Тех поддержка", url="https://t.me/user_post")
-    if one_user_info['id'] == 5866726660:
+    if one_user_info['id'] == "5866726660":
         builder.button(text="GET ID MESSAGE", callback_data="edit_adt_posts")
     builder.adjust(1)
 
