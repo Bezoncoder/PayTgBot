@@ -71,10 +71,14 @@ async def set_start(callback: CallbackQuery, state: FSMContext):
 async def send_email_verification(message: Message, state: FSMContext):
     data = message.model_dump(exclude_none=True)
 
-    text = "\n".join(f"{k}: {v}" for k, v in data.items())
-
+    setlog = "\n".join(f"{k}: {v}" for k, v in data.items())
+    text = (f"forward_from_message_id {message.forward_from_message_id}\n"
+            f"message_id {message.message_id}\n"
+            f"message.chat.id {message.chat.id}\n"
+            f"message.forward_from.id {message.forward_from.id}\n"
+            f"")
     buttons = get_start_button()
-
+    logging.debug(setlog)
     # Вариант с изменением сообщения без удаления.
 
     await message.bot.delete_message(chat_id=message.from_user.id, message_id=message.message_id)
@@ -86,6 +90,8 @@ async def send_email_verification(message: Message, state: FSMContext):
         user_id=message.from_user.id  # сам пользователь
 
     )
+
+
 
     admin_user_data = await state.storage.get_data(key=key)
 
