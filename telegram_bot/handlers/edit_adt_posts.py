@@ -75,8 +75,8 @@ async def send_email_verification(message: Message, state: FSMContext):
     text = (f"forward_from_message_id {message.forward_from_message_id}\n"
             f"message_id {message.message_id}\n"
             f"message.chat.id {message.chat.id}\n"
-            f"message.forward_from.id {message.forward_from}\n"
-            f"")
+            f"message.forward_from {message.forward_from}\n"
+            f"forward_from_chat {message.forward_from_chat}")
     buttons = get_start_button()
     logging.debug(setlog)
     # Вариант с изменением сообщения без удаления.
