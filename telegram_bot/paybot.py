@@ -194,7 +194,7 @@ async def main():
 
     # Запуск кода в определенные часы:
 
-    scheduler.add_job(func=check_and_posting, trigger="cron", hour=20, minute=10)
+    scheduler.add_job(func=check_and_posting, trigger="cron", hour=19, minute=18)
 
     # Запуск кода через определенный интервал
     # now_time = DT.datetime.now() + DT.timedelta(seconds=15)
