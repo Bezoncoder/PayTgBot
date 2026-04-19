@@ -3,6 +3,7 @@ from pprint import pprint
 
 from aiogram import Router, F
 from aiogram.filters import Command, CommandStart, CommandObject
+from aiogram.fsm.storage.base import StorageKey
 from aiogram.types import Message, InputMediaPhoto
 
 from keyboards.get_menu import get_start_menu, get_stream_products_menu
@@ -18,6 +19,7 @@ from aiogram.types import CallbackQuery
 # from settings.config import START_DATE
 # from settings.config import START_DATE
 from utils.get_links import get_subscribe_link
+from utils.states import OrderPay
 from utils.timezone import get_moscow_today
 
 router = Router()
@@ -86,8 +88,6 @@ async def start_with_param(message: Message, command: CommandObject, state: FSMC
 async def cmd_start(message: Message, state: FSMContext):
     logging.debug("cmd_start")
 
-    await state.clear()
-
     one_user = {"telegram_id": int(message.from_user.id),
                 "username": str(message.from_user.username),
                 "password": ""}
@@ -98,7 +98,26 @@ async def cmd_start(message: Message, state: FSMContext):
     diirections_list = await get_list_directions()
     start_menu = await get_start_menu(list_for_menu=diirections_list, one_user_info=user_info)
 
-    #############################################################################
+    ######################### Устанавливаем State для Пользователя ######################################
+
+    # TODO FUNC FOR STATE
+
+    storage = state.storage
+
+    key = StorageKey(
+        bot_id=message.bot.id,
+        chat_id=message.from_user.id,  # личный чат пользователя
+        user_id=message.from_user.id  # сам пользователь
+
+    )
+
+    await storage.set_state(key, OrderPay.set_order)
+
+    state_from_user = await storage.get_state(key)
+
+    logging.debug(f"Состояние для пользователя user_id = {message.from_user.id} установлено: {state_from_user}")
+
+    #####################################################################################################
 
     photo = FSInputFile('source/pictures/vpn_main_menu.jpg')
     await message.answer_photo(photo=photo,
@@ -125,8 +144,25 @@ async def set_start(callback: CallbackQuery, state: FSMContext):
     diirections_list = await get_list_directions()
     start_menu = await get_start_menu(list_for_menu=diirections_list, one_user_info=user_info)
 
-    #############################################################################
-    await state.clear()
+    ######################### Устанавливаем State для Пользователя ######################################
+
+    # TODO FUNC FOR STATE
+
+    storage = state.storage
+
+    key = StorageKey(
+        bot_id=callback.bot.id,
+        chat_id=callback.from_user.id,  # личный чат пользователя
+        user_id=callback.from_user.id  # сам пользователь
+
+    )
+
+    await storage.set_state(key, OrderPay.set_order)
+    state_from_user = await storage.get_state(key)
+
+    logging.debug(f"Состояние для пользователя user_id = {callback.from_user.id} установлено: {state_from_user}")
+
+    #####################################################################################################
 
     # Вариант с изменением сообщения без удаления.
     media = InputMediaPhoto(

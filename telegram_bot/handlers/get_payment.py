@@ -12,6 +12,7 @@ from db.add_methods_dao import add_payments_operation
 # from db.update_methods_dao import update_user_email
 from keyboards.get_menu import get_payment_notification_button, get_fake_menu_button, get_errors_button
 from db.select_methods import get_user_info_by_tg_id, get_stream_info
+from settings.config import TECH_CHANNEL
 # from utils.banking_operations import get_card_creds
 
 # from utils.jira_functional.jira_functions import onboard_user_with_tasks
@@ -118,12 +119,20 @@ async def get_pay(callback: CallbackQuery, state: FSMContext):
         # < code > текст < / code >
         buttons = get_errors_button()
         await callback.message.edit_caption(caption=f"❌ <b>Что-то пошло не так</b>… Повторите попытку позже\n\n"
-                                                    f"📢 <b>Сообщите в поддержку</b> и прикрепите текст ошибки\n\n"
-                                                    f"💡 <i>Чтобы скопировать — просто нажмите на текст</i>\n\n"
-                                                    f"🔴 <b>Ошибка:</b>\n"
-                                                    f"<code>{exception_text}</code>",
+                                                    f"📢 <b>Сообщите в поддержку</b>\n\n"
+                                                    f"💡 <i>Вы можете нажать главное меню, чтобы выбрать тариф и другой способ оплаты</i>\n\n",
                                             parse_mode="HTML",
                                             reply_markup=buttons)
+
+        await callback.bot.send_message(chat_id=TECH_CHANNEL,
+                                        text=(f"❌ <b>Ошибка создания ссылки на оплату</b>\n\n"
+                                                    f"📢 user_tg_id = {callback.from_user.id} user_name = {callback.from_user.username}\n"
+                                                    f"   pay_method = {pay_method}"
+                                                    f""
+                                                    f"🔴 <b>Ошибка:</b>\n"
+                                                    f"<code>{exception_text}</code>"),
+                                        parse_mode="HTML",
+                                        reply_markup=None)
         return
 
 

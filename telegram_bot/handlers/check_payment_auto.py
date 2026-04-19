@@ -24,8 +24,7 @@ from utils.get_links import get_subscribe_link
 from utils.payments import tochka_bank
 from utils.payments_operations import check_payment_status
 
-from settings.config import USER, PASSWORD
-
+from settings.config import USER, PASSWORD, TECH_CHANNEL
 
 from db.add_methods_dao import set_pay, add_new_enrollments
 from utils.user_veles_manager import UserVelesManagerAPI
@@ -235,6 +234,13 @@ async def check_pay(callback: CallbackQuery, state: FSMContext):
                                                         f"<code>{exception_text}</code>",
                                                 parse_mode="HTML",
                                                 reply_markup=buttons)
+            await callback.bot.send_message(chat_id=TECH_CHANNEL,
+                                            text=(f"❌ <b>Ошибка создания VLess ссылки</b>\n\n"
+                                                  f"📢 user_tg_id = {callback.from_user.id} user_name = {callback.from_user.username}\n"
+                                                  f"🔴 <b>Ошибка:</b>\n"
+                                                  f"<code>{exception_text}</code>"),
+                                            parse_mode="HTML",
+                                            reply_markup=None)
             return
 
         ############### Запись в БД Enrollments ################
@@ -316,7 +322,7 @@ async def check_pay(callback: CallbackQuery, state: FSMContext):
             f"✅ Требования к чеку:\n"
             f"• Четкая дата и время\n"
             f"• Точная сумма платежа\n\n"
-            f"📞 Поддержка: @user_post\n\n"
+            # f"📞 Поддержка: @user_post\n\n"
             f"⚠️ Спам = блокировка"
         )
 

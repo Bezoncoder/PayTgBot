@@ -272,15 +272,15 @@ class PlategaAPI:
         return response_data
 
     def get_payment_method_rate(self, payment_method: PaymentMethod,
-                                currency_from: str, currency_to: str) -> Dict[str, Any]:
+                                currency_from: str = None, currency_to: str = None) -> Dict[str, Any]:
         if not isinstance(payment_method, PaymentMethod):
             raise ValidationError(f"❌ payment_method должен быть PaymentMethod, получено: {payment_method}")
 
-        allowed_currencies = ['RUB', 'USDT', 'USD', 'EUR']
-        if currency_from not in allowed_currencies:
-            raise ValidationError(f"❌ currency_from должен быть из: {allowed_currencies}")
-        if currency_to not in allowed_currencies:
-            raise ValidationError(f"❌ currency_to должен быть из: {allowed_currencies}")
+        # allowed_currencies = ['RUB', 'USDT', 'USD', 'EUR']
+        # if currency_from not in allowed_currencies:
+        #     raise ValidationError(f"❌ currency_from должен быть из: {allowed_currencies}")
+        # if currency_to not in allowed_currencies:
+        #     raise ValidationError(f"❌ currency_to должен быть из: {allowed_currencies}")
 
         params = {
             'merchantId': self._merchant_id,
@@ -332,9 +332,14 @@ if __name__ == "__main__":
     # CARD_ACQUIRING = 11
     #
     # CRYPTOCURRENCY = 13
+    MERCHANT_ID_test = "a8e1a6ed-c586-478b-ac3d-81ac1eb70cf5"
+    PLATEGA_SECRET_KEY_test = "9kx7SgS9BYfP07Pq0ExsVqExYZHXGLvGKVEhMLXx5kzgVmTGLFqC53NkgOaB3UdNhturqAwumz3D1kjPWpOMJYuS1TDBDhwOVStk"
+    gd = PaymentMethod
+
     try:
-        a=PlategaAPI(MERCHANT_ID, PLATEGA_SECRET_KEY)
-        link = a.create_payment(payment_method=12, amount=10, description='test')
-        print(f"link = {link.get('redirect')}")
+        a=PlategaAPI(MERCHANT_ID_test, PLATEGA_SECRET_KEY_test)
+        link = a.create_payment(payment_method=gd.CARD_ACQUIRING.value, amount=10, description='test')
+        # link = a.get_payment_method_rate( payment_method=gd.SBP_QR)
+        print(f"link = {link}")
     except Exception as e:
         print(e)
