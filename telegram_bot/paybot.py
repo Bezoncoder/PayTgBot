@@ -163,6 +163,7 @@ async def check_and_posting():
                                      parse_mode="HTML",)
                 logging.info(f"✅ Отправлено сообщение о продлении подписки пользователю user_name = {user_info.username}")
                 count_reminder+=1
+
             except Exception as e:
                 logging.debug(f"⚠️ Ошибка при отпрвке сообщения:\n{e}")
 
