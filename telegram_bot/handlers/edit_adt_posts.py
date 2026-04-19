@@ -45,6 +45,9 @@ router = Router()
 # forward_chat_id: -1003976745616
 # forward_message_id: 10
 
+# [3,5,6,7,8,9,10]
+
+
 @router.callback_query(F.data == "edit_adt_posts")
 async def set_start(callback: CallbackQuery, state: FSMContext):
     await callback.answer("Вы выбрали Главное Меню")

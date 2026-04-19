@@ -1,4 +1,5 @@
 import asyncio
+import random
 
 from aiogram.types import FSInputFile
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -15,7 +16,7 @@ import logging
 import colorlog
 
 from keyboards.get_menu import get_start_button
-from settings.config import BOT_TOKEN
+from settings.config import BOT_TOKEN, TECH_CHANNEL
 from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
 from db.select_methods import (get_userinfo_to_ban,
@@ -25,6 +26,7 @@ from db.select_methods import (get_userinfo_to_ban,
 
 bot = Bot(token=BOT_TOKEN)
 
+ADT_MESSAGE_LIST=[3,5,6,7,8,9,10]
 
 # user subscription control @getidsbot - Бот, который выдает ID чата
 #  -1002917599861 Bootcamp Supergroup_ID
@@ -67,30 +69,34 @@ async def check_and_posting():
 
     users_to_posting_rek = await select_all_users()
 
-    rek_photo = FSInputFile('source/pictures/rek_photo_happ.jpg')
-    caption = (
-        f"🚀 Happ — самый удобный способ юзать наши <a href='https://quantumturbovpn.ddns.net/'>VPN-ключи</a>\n\n"
-        f"⁉️ Хватит копаться в куче настроек и искать инфу по разным местам 😎\n\n"
-        f"Happ - Proxy Utility — это приложение, где всё собрано в одном окне:\n"
-        f"⚡️ подписка\n"
-        f"⚡️ трафик\n"
-        f"⚡️ дата окончания\n"
-        f"⚡️ подключение в один клик\n"
-        f"⚡️ прямые ссылки на наш бот и сайт\n\n"
-        f"⚙️📱💻 Android / iPhone / ПК / TV\n\n"
-        f"⚠️ Работает на всех устройствах, даже на TV 📺\n\n"
-        f"Если у тебя есть наши ключи — ставь Happ и забудь про лишний геморрой.\n\n"
-        f"🛒 Купить подписку можно через Telegram Бот и на сайте — для тех, кто не может зайти в Telegram.\n\n"
-        f"🌐 Сайт, где можно купить ключ VPN:\nhttps://quantumturbovpn.ddns.net\n\n"
-        f"⚠️ Сайт работает даже когда невозможно зайти в телеграм.\n\n"
-        f"📲 Приложение Happ-Proxy Utility:\n"
-        f"https://www.happ.su/main\n\n"
-        f"Бот: @QuantumTurboVPNBot"
-    )
+    # rek_photo = FSInputFile('source/pictures/rek_photo_happ.jpg')
+    # caption = (
+    #     f"🚀 Happ — самый удобный способ юзать наши <a href='https://quantumturbovpn.ddns.net/'>VPN-ключи</a>\n\n"
+    #     f"⁉️ Хватит копаться в куче настроек и искать инфу по разным местам 😎\n\n"
+    #     f"Happ - Proxy Utility — это приложение, где всё собрано в одном окне:\n"
+    #     f"⚡️ подписка\n"
+    #     f"⚡️ трафик\n"
+    #     f"⚡️ дата окончания\n"
+    #     f"⚡️ подключение в один клик\n"
+    #     f"⚡️ прямые ссылки на наш бот и сайт\n\n"
+    #     f"⚙️📱💻 Android / iPhone / ПК / TV\n\n"
+    #     f"⚠️ Работает на всех устройствах, даже на TV 📺\n\n"
+    #     f"Если у тебя есть наши ключи — ставь Happ и забудь про лишний геморрой.\n\n"
+    #     f"🛒 Купить подписку можно через Telegram Бот и на сайте — для тех, кто не может зайти в Telegram.\n\n"
+    #     f"🌐 Сайт, где можно купить ключ VPN:\nhttps://quantumturbovpn.ddns.net\n\n"
+    #     f"⚠️ Сайт работает даже когда невозможно зайти в телеграм.\n\n"
+    #     f"📲 Приложение Happ-Proxy Utility:\n"
+    #     f"https://www.happ.su/main\n\n"
+    #     f"Бот: @QuantumTurboVPNBot"
+    # )
 
     await check_and_ban()
 
+    count_success_send = 0
+    count_fail_send = 0
+
     for user_info in users_to_posting_rek:
+
         if not user_info.enrollments:
             try:
                 # await bot.send_photo(chat_id=user_info.telegram_id,
@@ -98,13 +104,21 @@ async def check_and_posting():
                 #                      caption=caption,
                 #                      reply_markup=get_start_button(),
                 #                      parse_mode="HTML")
-                await bot.copy_message()
+
+                message_id = random.choice(ADT_MESSAGE_LIST)
+                await bot.copy_message(
+                    chat_id=user_info.telegram_id,
+                    from_chat_id=-1003976745616,
+                    message_id=message_id
+                )
                 logging.info(f"✅ Отправлено рекламное сообщение пользователю user_name = {user_info.username}")
+                count_success_send+=1
                 await asyncio.sleep(3)
             except Exception as e:
                 logging.debug(f"⚠️ Ошибка при отпрвке сообщения:\n{e}")
+                count_fail_send+=1
 
-
+    count_reminder = 0
     photo = FSInputFile('source/pictures/vpn_main_menu.jpg')
     for i in range(3, 0, -1):
         user_ids = []
@@ -147,8 +161,24 @@ async def check_and_posting():
                                      reply_markup=get_start_button(),
                                      parse_mode="HTML")
                 logging.info(f"✅ Отправлено сообщение о продлении подписки пользователю user_name = {user_info.username}")
+                if i == 1:
+                    count_reminder+=1
             except Exception as e:
                 logging.debug(f"⚠️ Ошибка при отпрвке сообщения:\n{e}")
+
+    text = (
+        f"🚀 <b>Рассылка выполнена</b>\n\n"
+        f"⏰ Отправлено напоминаний о продлении: {count_reminder}\n\n"
+        f"Реклама:"
+        f"✅ Доставлено: <b>{count_success_send}</b>\n"
+        f"⚠️ Не отправилось: <b>{count_fail_send}</b>"
+    )
+
+    await bot.send_message(chat_id=TECH_CHANNEL,
+                           text=text,
+                           parse_mode="HTML")
+
+
 
 
 
@@ -164,7 +194,7 @@ async def main():
 
     # Запуск кода в определенные часы:
 
-    scheduler.add_job(func=check_and_posting, trigger="cron", hour=14, minute=10)
+    scheduler.add_job(func=check_and_posting, trigger="cron", hour=20, minute=10)
 
     # Запуск кода через определенный интервал
     # now_time = DT.datetime.now() + DT.timedelta(seconds=15)
