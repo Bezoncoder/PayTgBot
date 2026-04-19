@@ -73,15 +73,15 @@ async def send_email_verification(message: Message, state: FSMContext):
     # for k, v in data.items():
     #     logging.debug(f"{k} = ---- \n")
 
-    '''
-    forward_from_chat — чат, из которого переслали сообщение.
-
-    forward_from_message_id — ID исходного сообщения в этом чате.
-
-    forward_date — дата пересылки.
-
-    forward_origin — более новый универсальный объект с информацией об источнике пересылки.
-    '''
+    # '''
+    # forward_from_chat — чат, из которого переслали сообщение.
+    #
+    # forward_from_message_id — ID исходного сообщения в этом чате.
+    #
+    # forward_date — дата пересылки.
+    #
+    # forward_origin — более новый универсальный объект с информацией об источнике пересылки.
+    # '''
 
     text = (
         f"forward_origin: {message.forward_origin}\n"
