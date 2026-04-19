@@ -93,11 +93,12 @@ async def check_and_posting():
     for user_info in users_to_posting_rek:
         if not user_info.enrollments:
             try:
-                await bot.send_photo(chat_id=user_info.telegram_id,
-                                     photo=rek_photo,
-                                     caption=caption,
-                                     reply_markup=get_start_button(),
-                                     parse_mode="HTML")
+                # await bot.send_photo(chat_id=user_info.telegram_id,
+                #                      photo=rek_photo,
+                #                      caption=caption,
+                #                      reply_markup=get_start_button(),
+                #                      parse_mode="HTML")
+                await bot.copy_message()
                 logging.info(f"✅ Отправлено рекламное сообщение пользователю user_name = {user_info.username}")
                 await asyncio.sleep(3)
             except Exception as e:

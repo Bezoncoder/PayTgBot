@@ -24,6 +24,26 @@ from utils.timezone import get_moscow_today
 
 router = Router()
 
+# forward_chat_id: -1003976745616
+# forward_message_id: 3
+
+# forward_chat_id: -1003976745616
+# forward_message_id: 5
+
+# forward_chat_id: -1003976745616
+# forward_message_id: 6
+
+# forward_chat_id: -1003976745616
+# forward_message_id: 7
+
+# forward_chat_id: -1003976745616
+# forward_message_id: 8
+
+# forward_chat_id: -1003976745616
+# forward_message_id: 9
+
+# forward_chat_id: -1003976745616
+# forward_message_id: 10
 
 @router.callback_query(F.data == "edit_adt_posts")
 async def set_start(callback: CallbackQuery, state: FSMContext):
@@ -122,6 +142,13 @@ async def send_email_verification(message: Message, state: FSMContext):
                                           chat_id=message.from_user.id,
                                           message_id=admin_user_data.get("message_id", 000),
                                           reply_markup=buttons)
+
+    await message.bot.copy_message(
+        chat_id=message.from_user.id,
+        from_chat_id=-1003976745616,
+        message_id=message.forward_from_message_id
+    )
+
 
 
 
