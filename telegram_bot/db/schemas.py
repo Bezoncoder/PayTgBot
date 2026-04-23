@@ -62,8 +62,20 @@ class UserPydantic(BaseModel):
     telegram_id: int | str | None
     username: str | None
     password: str | None
+    reward_type: str | None  # (percent, vpn_month)
     enrollments: list[EnrollmentPydantic] = []
+    # referred_by_user_id: int | None
     model_config = ConfigDict(from_attributes=True, use_enum_values=True)
+
+class ReferralRewardsPydantic(BaseModel):
+    id: int
+    user_id: int | None
+    referred_user_id: int | None
+    payment_id: int | None
+    reward_type: str | None # (percent, vpn_month)
+    reward_value: str | None # (20% или 1 month)
+    active_status: bool | None # (pending, available, paid, cancelled)
+
 
 
 class UsernameIdPydantic(BaseModel):

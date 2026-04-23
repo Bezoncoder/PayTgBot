@@ -12,6 +12,8 @@ class SubscriptionPeriod(PyEnum):
 
 class User(Base):  # Пользователи
     telegram_id: Mapped[int] = mapped_column(BigInteger)
+    # referred_by_user_id: Mapped[int | None] = mapped_column(BigInteger)
+    reward_type: Mapped[str | None]  # (percent, vpn_month)
     username: Mapped[str | None]
     password: Mapped[str | None]
 
@@ -30,6 +32,15 @@ class User(Base):  # Пользователи
         lazy="joined",
         cascade="all, delete-orphan"  # При удалении User удаляются и связанные Enrollment
     )
+
+class ReferralRewards(Base):
+    user_id: Mapped[int | None]
+    referred_user_id: Mapped[int | None]
+    payment_id: Mapped[int | None]
+    reward_type: Mapped[str | None] # (percent, vpn_month)
+    reward_value: Mapped[str | None] # (20% или 1 month)
+    active_status: Mapped[bool | None] # (pending, available, paid, cancelled)
+
 
 
 class Payment(Base):  # Покупки Пользователей

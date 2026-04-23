@@ -2,7 +2,7 @@ import datetime
 import logging
 import random
 
-from db.dao import UserDAO, EnrollmentDAO, PaymentDAO
+from db.dao import UserDAO, EnrollmentDAO, PaymentDAO, ReferralRewardsDAO
 from db.database import connection
 from asyncio import run
 
@@ -109,6 +109,22 @@ async def add_new_enrollments(enrollment_data: dict, session: AsyncSession):
     logging.info("Добавлен enrollment с ID: %s", new_enrollment.id)
     enrollment = EnrollmentPydantic.model_validate(new_enrollment)
     return enrollment
+
+
+@connection
+async def add_new_referral_rewards(referral_rewards_data: dict, session: AsyncSession):
+    # telegram_id = int(referral_rewards_data[])
+    rez = await ReferralRewardsDAO.get_refer_info(session=session,
+                                                  referred_user_id=int(referral_rewards_data["referred_user_id"]))
+
+    if rez:
+        logging.info("Пользователь referred_user_id = %s уже существует", referral_rewards_data["referred_user_id"])
+        return rez.to_dict()
+    else:
+        new_refer = await ReferralRewardsDAO.add(session=session, **referral_rewards_data)
+        logging.info("Добавлен новый Referral_Rewards с ID: %s ", new_user.id)
+        return new_refer.to_dict()
+
 
 if __name__ == "__main__":
     one_user = {"telegram_id": '222277777',

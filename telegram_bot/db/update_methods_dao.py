@@ -1,9 +1,9 @@
 import asyncio
 from pydantic import create_model
 from sqlalchemy.ext.asyncio import AsyncSession
-from db.dao import PaymentDAO, UserDAO, EnrollmentDAO
+from db.dao import PaymentDAO, UserDAO, EnrollmentDAO, ReferralRewardsDAO
 from db.database import connection
-from db.schemas import PaymentPydantic, UserPydantic, EnrollmentPydantic
+from db.schemas import PaymentPydantic, UserPydantic, EnrollmentPydantic, ReferralRewardsPydantic
 
 
 @connection
@@ -31,7 +31,26 @@ async def update_enrollment_data(session: AsyncSession, enrollment_id, new_activ
     enrollment = await EnrollmentDAO.update_one_by_id(session=session,
                                                 data_id=int(enrollment_id),
                                                 values=ValueModel(active=new_active_status))
-    return EnrollmentPydantic.model_validate(enrollment)
+    if enrollment:
+        result = EnrollmentPydantic.model_validate(enrollment)
+    else:
+        result = None
+
+    return result
+
+@connection
+async def update_referral_rewards(session: AsyncSession, user_id:int, values_dict: dict):
+    referral_reward = await ReferralRewardsDAO.update_by_user_id(session=session, user_id=user_id, values=values_dict)
+    if referral_reward:
+        rez = ReferralRewardsPydantic.model_validate(referral_reward)
+    else:
+        rez = None
+    return rez
+
+
+
+
+
 
 
 if __name__ == "__main__":

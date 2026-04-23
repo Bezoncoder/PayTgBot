@@ -9,20 +9,21 @@ from handlers import (greetings, get_subscribe, check_payment_auto, check_paymen
                       get_creds, github_check_subscribe,
                       choosing_direction, choosing_product,
                       get_payment, choosing_stream, check_fio, how_to_pay, check_email,
-                      choosing_payment_method, edit_adt_posts)
+                      choosing_payment_method, edit_adt_posts, get_referral_link)
 from datetime import datetime, timedelta
 from logging.handlers import RotatingFileHandler
 import logging
 import colorlog
 
 from keyboards.get_menu import get_start_button, get_del_button
-from settings.config import BOT_TOKEN, TECH_CHANNEL
+from settings.config import BOT_TOKEN, TECH_CHANNEL, USER, PASSWORD
 from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
 from db.select_methods import (get_userinfo_to_ban,
                                get_users_enrollments_to_ban,
                                get_streaminfo_to_ban, select_all_users,
                                get_product_info)
+from utils.vlessuiapi import XUIClient
 
 bot = Bot(token=BOT_TOKEN)
 
@@ -34,32 +35,48 @@ ADT_MESSAGE_LIST=[3,5,6,7,8,9,10]
 # await bot.unban_chat_member(chat_id, user_id)
 
 async def check_and_ban():
-    logging.debug("Запуск Проверки Подписок")
+    logging.info("Запуск Проверки Подписок")
+
     list_id_user = []
     list_id_stream = []
+    vless_info = {}
+
     date_to_check_subscribe = datetime.now() - timedelta(days=1)
 
     users_enrollments_to_ban = await get_users_enrollments_to_ban(now_date=date_to_check_subscribe.date())
-    # TODO сделать нормальное отключение подписки.
-
-
 
     for enrollment in users_enrollments_to_ban:
         list_id_user.append(enrollment.user_id)
         list_id_stream.append(enrollment.stream_id)
+
         try:
             new_enrollment = await update_enrollment_data(enrollment_id=enrollment.id, new_active_status=False)
             logging.info(f"Пользователю {new_enrollment.user_id} изменен статус подписки на False")
             logging.info(f"expire_date = {new_enrollment.expire_date}")
         except Exception as e:
             logging.error(e)
+            new_enrollment = None
 
-        users_to_ban = await get_userinfo_to_ban(user_ids=list_id_user)
+        if  new_enrollment is not None:
 
-        # stream_list_to_ban = await get_streaminfo_to_ban(stream_ids=list_id_stream)
+            product_info = await get_product_info(id_product=enrollment.id)
 
-        count_user = len(users_to_ban)
-        logging.info("У %s пользователей закончилась подписка:\n%s", count_user, users_to_ban)
+            vless_client = XUIClient(base_url_from_panel=product_info.base_url,
+                                     username=USER,
+                                     password=PASSWORD,
+                                     verify_ssl=True,
+                                     public_inbound_key=product_info.public_key,
+                                     sid=product_info.short_id)
+
+            status = vless_client.remove_client(client_id=new_enrollment.vless_user_name)
+            vless_info.setdefault(enrollment.user_id, []).append(status)
+
+
+    info_users_banned = dict(list_id_users=list_id_user,
+                          vless_info=vless_info
+                          )
+
+    return info_users_banned
 
 
 
@@ -69,28 +86,9 @@ async def check_and_posting():
 
     users_to_posting_rek = await select_all_users()
 
-    # rek_photo = FSInputFile('source/pictures/rek_photo_happ.jpg')
-    # caption = (
-    #     f"🚀 Happ — самый удобный способ юзать наши <a href='https://quantumturbovpn.ddns.net/'>VPN-ключи</a>\n\n"
-    #     f"⁉️ Хватит копаться в куче настроек и искать инфу по разным местам 😎\n\n"
-    #     f"Happ - Proxy Utility — это приложение, где всё собрано в одном окне:\n"
-    #     f"⚡️ подписка\n"
-    #     f"⚡️ трафик\n"
-    #     f"⚡️ дата окончания\n"
-    #     f"⚡️ подключение в один клик\n"
-    #     f"⚡️ прямые ссылки на наш бот и сайт\n\n"
-    #     f"⚙️📱💻 Android / iPhone / ПК / TV\n\n"
-    #     f"⚠️ Работает на всех устройствах, даже на TV 📺\n\n"
-    #     f"Если у тебя есть наши ключи — ставь Happ и забудь про лишний геморрой.\n\n"
-    #     f"🛒 Купить подписку можно через Telegram Бот и на сайте — для тех, кто не может зайти в Telegram.\n\n"
-    #     f"🌐 Сайт, где можно купить ключ VPN:\nhttps://quantumturbovpn.ddns.net\n\n"
-    #     f"⚠️ Сайт работает даже когда невозможно зайти в телеграм.\n\n"
-    #     f"📲 Приложение Happ-Proxy Utility:\n"
-    #     f"https://www.happ.su/main\n\n"
-    #     f"Бот: @QuantumTurboVPNBot"
-    # )
+    loging_info = await check_and_ban()
 
-    await check_and_ban()
+    logging.info(f"Подписки Vless удалены:\n{loging_info}")
 
     count_success_send = 0
     count_fail_send = 0
@@ -99,11 +97,6 @@ async def check_and_posting():
 
         if not user_info.enrollments:
             try:
-                # await bot.send_photo(chat_id=user_info.telegram_id,
-                #                      photo=rek_photo,
-                #                      caption=caption,
-                #                      reply_markup=get_start_button(),
-                #                      parse_mode="HTML")
 
                 message_id = random.choice(ADT_MESSAGE_LIST)
                 await bot.copy_message(
@@ -114,10 +107,12 @@ async def check_and_posting():
                 )
                 logging.info(f"✅ Отправлено рекламное сообщение пользователю user_name = {user_info.username}")
                 count_success_send+=1
-                await asyncio.sleep(3)
+
             except Exception as e:
                 logging.debug(f"⚠️ Ошибка при отпрвке сообщения:\n{e}")
                 count_fail_send+=1
+
+            await asyncio.sleep(3)
 
     count_reminder = 0
     photo = FSInputFile('source/pictures/vpn_main_menu.jpg')
@@ -185,8 +180,6 @@ async def check_and_posting():
 
 
 
-
-
 async def main():
     logging.info("Старт Bot Loging")
 
@@ -229,7 +222,8 @@ async def main():
                        how_to_pay.router,
                        check_email.router,
                        choosing_payment_method.router,
-                       edit_adt_posts.router)
+                       edit_adt_posts.router,
+                       get_referral_link.router)
 
     # Запускаем бота и пропускаем все накопленные входящие
     await bot.delete_webhook(drop_pending_updates=True)

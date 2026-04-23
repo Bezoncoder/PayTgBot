@@ -265,7 +265,15 @@ class XUIClient:
         settings = json.dumps({"clients": [{"id": client_id}]})
         data = {'id': inbound_id, 'settings': settings}
         # http: // localhost: 2053 / randompath / panel / api / inbounds / {inboundId} / delClient / {uuid}
-        return self._make_request(f"inbounds/{inbound_id}/delClient/{client_id}", data=data)
+        rez = self._make_request(f"inbounds/{inbound_id}/delClient/{client_id}", data=data)
+
+        if rez:
+            status=dict(client_id=client_id,
+                        status=rez)
+        else:
+            status = {}
+
+        return status
 
     def update_client(self, inbound_id: str, client_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """Обновить клиента"""
@@ -337,6 +345,8 @@ if __name__ == "__main__":
     # SEERVER PARAMS
     PUBLIC_KEY = "QZ63wahdkxh_n8HoY6M10zcGuT6Ig6-PDZh-sFBhAWo"
 
+    vless_user_name = "8edc1e1a-5673-4fad-a5b3-43f13966d66f"
+
     SID = "482faa37e9"
 
     # "vless_link': 'vless://a400fbb6-fa9b-447c-8575-a4a1828425cf@illiriaakva.ru:443?type=tcp&encryption=none&security=tls&fp=chrome&alpn=http%2F1.1&flow=xtls-rprx-vision#aaaaff111fkkkk"
@@ -349,7 +359,10 @@ if __name__ == "__main__":
     # pprint(client_mew.add_client(email="NEW_TEST0999007TestT").get("subscription_link"))
     # pprint(client_mew.get_list_inbounds())
     # pprint(client_mew.get_inbound(inbound_id=1))
-    uuid = '63130ad0-c089-4b5a-a7e4-33bb1e671c24'
+    uuid = '8edc1e1a-5673-4fad-a5b3-43f13966d66f'
+
+    print(client_mew.get_client_ips(inbound_id="1", email="8edc1e1a-5673-4fad-a5b3-43f13966d66f"))
+    pprint(client_mew.remove_client(client_id="8edc1e1a-5673-4fad-a5b3-43f13966d66f"))
 
     # # {'msg': '', 'obj': [], 'success': True}
     # obj = client_mew.get_client_traffic_by_id(client_uuid=uuid).get("obj")

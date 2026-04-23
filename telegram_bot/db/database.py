@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 
 from pydantic import BaseModel
-from sqlalchemy import Integer, func, BigInteger
+from sqlalchemy import Integer, func, BigInteger, select
 from sqlalchemy.orm import DeclarativeBase, declared_attr, Mapped, mapped_column, class_mapper
 from sqlalchemy.ext.asyncio import AsyncAttrs, async_sessionmaker, create_async_engine
 from typing import Annotated, List, Any, Dict
@@ -106,6 +106,32 @@ class BaseDAO:
             logging.error(e)
             raise e
         return record
+
+    @classmethod
+    async def update_one_by_field(cls, session: AsyncSession, field_name: str, field_value, values: BaseModel):
+        values_dict = values.model_dump(exclude_unset=True)
+        try:
+            field = getattr(cls.model, field_name, None)
+            if field is None:
+                raise ValueError(f"Field {field_name} not found in model")
+
+            stmt = select(cls.model).where(field == field_value)
+            result = await session.execute(stmt)
+            record = result.scalars().first()
+
+            if record is None:
+                return None
+
+            for key, value in values_dict.items():
+                setattr(record, key, value)
+
+            await session.commit()
+            return record
+
+        except SQLAlchemyError as e:
+            await session.rollback()
+            logging.error(e)
+            raise e
 
 
 

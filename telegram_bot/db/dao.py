@@ -1,10 +1,14 @@
+from typing import Any
+
 from sqlalchemy.ext.asyncio import AsyncSession
 from db.database import BaseDAO
-from db.models import User, Enrollment, Direction, Product, Stream, Payment
+from db.models import User, Enrollment, Direction, Product, Stream, Payment, ReferralRewards
 from sqlalchemy import select, update, func
 from datetime import date
 import asyncio
 import logging
+
+from db.schemas import ReferralRewardsPydantic
 
 
 class UserDAO(BaseDAO):
@@ -62,6 +66,31 @@ class UserDAO(BaseDAO):
         result = await session.execute(query)
         password = result.scalar_one_or_none()
         return password
+
+class ReferralRewardsDAO(BaseDAO):
+    model = ReferralRewards
+
+    @classmethod
+    async def update_by_user_id(cls, session: AsyncSession, user_id: int, values: dict) -> Any | None:
+        model = ReferralRewardsPydantic.model_validate(values)
+        return await cls.update_one_by_field(session=session,
+                                             field_name="user_id",
+                                             field_value=user_id,
+                                             values=model)
+
+    @classmethod
+    async def get_refer_info(cls, session: AsyncSession, referred_user_id: int):
+        # query = select(cls.model).filter_by(telegram_id=user_id)
+        query = select(cls.model).filter(cls.model.referred_user_id == referred_user_id)
+        logging.debug("Делаем запрос данных referred_user_id в БД")
+        result = await session.execute(query)
+        logging.debug("Получен Ответ из БД")
+        refer_info = result.unique().scalar_one_or_none()
+        # user_info = result.scalars().unique().scalar_one_or_none()
+        logging.debug("user_info %s", refer_info)
+        return refer_info
+
+
 
 
 class EnrollmentDAO(BaseDAO):
