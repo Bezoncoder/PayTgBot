@@ -92,22 +92,24 @@ async def send_check(message: Message, state: FSMContext):
     try:
         if user_data.get("message_id"):
 
-            await message.bot.edit_message_caption(chat_id=message.chat.id,
-                                                   message_id=int(user_data.get("message_id")),
-                                                   caption=f"Вы отправили чек!\n\n"
-                                                        f"📢 Он отправится на проверку.\n"
-                                                           f"После проверки Вам придет сообщение!\n\n"
-                                                        f"💡 Сейчас Это сообщение будет удалено.\n "
-                                                           f"Ваш чек останется до конца проверки в этом чате\n\n"
-                                                        f"🔴 Ничего не делайте, дождитесь окончания проверки!\n "
-                                                           f"Если проверка не пройдет в течении суток, "
-                                                           f"повторите отправку.\n",
-
-                                                parse_mode="HTML",
-                                                reply_markup=None)
-            await asyncio.sleep(15)
             await message.bot.delete_messages(chat_id=message.from_user.id,
                                               message_ids=[user_data.get("message_id")])
+
+            message_to_user = await message.bot.send_message(chat_id=message.from_user.id,
+                                           text=(f"Вы отправили чек!\n\n"
+                                                f"📢 Он отправится на проверку.\n"
+                                                   f"После проверки Вам придет сообщение!\n\n"
+                                                f"💡 Сейчас Это сообщение будет удалено.\n "
+                                                   f"Ваш чек останется до конца проверки в этом чате\n\n"
+                                                f"🔴 Ничего не делайте, дождитесь окончания проверки!\n\n"
+                                                   f"Если проверка не пройдет в течении суток, перезапустите бота и "
+                                                   f"повторите отправку. Или сообщите в чат техподдержки\n"),
+                                           reply_markup=None)
+
+
+            await asyncio.sleep(15)
+            await message.bot.delete_messages(chat_id=message_to_user.chat.id,
+                                              message_ids=[message_to_user.message_id])
     except TelegramBadRequest:
         logging.debug("Не удалось удалить старое сообщение:")
 
@@ -307,7 +309,7 @@ async def approve_check(callback: CallbackQuery, state: FSMContext):
         f"💰 Вы оплатили!\n"
         f"📦 Название Продукта: {stream_info.title}\n"
         f"💳 Стоимость: {payment_data.amount} ₽\n\n"
-        f"🔓 Чтобы получить доступы\nперейдите в Главное меню,\nнажмите кнопку Мои доступы\n\n"
+        f"🔓 Чтобы получить доступы\nперейдите в Главное меню,\nнажмите кнопку Мои покупки\n\n"
         f"📱 < Главное меню -> Мои покупки >\n\n"
         f"🚀 Мы рады видеть тебя в нашей команде! 🎊"
     )
