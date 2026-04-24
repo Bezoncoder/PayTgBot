@@ -87,11 +87,11 @@ async def choosing_pay_method(callback: CallbackQuery, state: FSMContext):
                    f"₿ Криптовалюта")
 
     directions_id = user_pay_data.get("directions_id")
-
+    #     0       1           2             3               4              5
+    # get_pay:{stream_id}:{price}:{product_id}:{directions_id}:{method_value} NEW
     buttons = get_choosing_pay_method_buttons(price=f"{price}",
                                               stream_id_int=stream_id_int,
-                                              directions_id=directions_id,
-                                              pay_method=None)
+                                              directions_id=directions_id)
     photo = FSInputFile('source/pictures/choosing_payment_method.jpg')
     media = InputMediaPhoto(
         media=photo,

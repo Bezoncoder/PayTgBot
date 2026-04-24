@@ -109,7 +109,8 @@ class BaseDAO:
 
     @classmethod
     async def update_one_by_field(cls, session: AsyncSession, field_name: str, field_value, values: BaseModel):
-        values_dict = values.model_dump(exclude_unset=True)
+        # values_dict = values.model_dump(exclude_unset=True)
+        values_dict = values
         try:
             field = getattr(cls.model, field_name, None)
             if field is None:

@@ -75,6 +75,7 @@ class ReferralRewardsPydantic(BaseModel):
     reward_type: str | None # (percent, vpn_month)
     reward_value: str | None # (20% или 1 month)
     active_status: bool | None # (pending, available, paid, cancelled)
+    model_config = ConfigDict(from_attributes=True, use_enum_values=True)
 
 
 

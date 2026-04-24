@@ -72,16 +72,16 @@ class ReferralRewardsDAO(BaseDAO):
 
     @classmethod
     async def update_by_user_id(cls, session: AsyncSession, user_id: int, values: dict) -> Any | None:
-        model = ReferralRewardsPydantic.model_validate(values)
+        # model = ReferralRewardsPydantic.model_validate(values)
         return await cls.update_one_by_field(session=session,
                                              field_name="user_id",
                                              field_value=user_id,
-                                             values=model)
+                                             values=values)
 
     @classmethod
-    async def get_refer_info(cls, session: AsyncSession, referred_user_id: int):
+    async def get_refer_info(cls, session: AsyncSession, refer_user_id: int):
         # query = select(cls.model).filter_by(telegram_id=user_id)
-        query = select(cls.model).filter(cls.model.referred_user_id == referred_user_id)
+        query = select(cls.model).filter(cls.model.user_id == refer_user_id)
         logging.debug("Делаем запрос данных referred_user_id в БД")
         result = await session.execute(query)
         logging.debug("Получен Ответ из БД")

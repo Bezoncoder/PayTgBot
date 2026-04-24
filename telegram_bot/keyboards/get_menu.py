@@ -113,9 +113,11 @@ def get_payment_notification_button(
 
     return builder.as_markup(resize_keyboard=True)
 
-def get_choosing_pay_method_buttons(price: str, stream_id_int: int, directions_id: int = None,
+def get_choosing_pay_method_buttons(price: str, stream_id_int: int, product_id: int = None, directions_id: int = None,
                                     pay_method: PaymentMethod = None) -> InlineKeyboardMarkup:
-    # get_pay:{stream_id_int}:{price_menu}:{directions_id}:{pay_method}
+
+    #     0       1           2             3               4              5
+    # get_pay:{stream_id}:{price}:{product_id}:{directions_id}:{method_value} NEW
 
     builder = InlineKeyboardBuilder()
     for method in PaymentMethod:
@@ -128,7 +130,7 @@ def get_choosing_pay_method_buttons(price: str, stream_id_int: int, directions_i
             text_button = "💰 Криптовалюта"
 
         builder.button(text=f"{text_button}",
-                       callback_data=f"get_pay:{stream_id_int}:{price}:{directions_id}:{method.value}")
+                       callback_data=f"get_pay:{stream_id_int}:{price}:{product_id}:{directions_id}:{method.value}")
 
     if directions_id is None:
         builder.button(text="Назад", callback_data=f"set_stream:{stream_id_int}:{price}")
@@ -175,14 +177,15 @@ def get_stream_payment_buttons(price_menu: str = None,
     return builder.as_markup(resize_keyboard=True)
 
 
-def get_back_button(stream_id: int, price: int, product_id: int, directions_id: str) -> InlineKeyboardMarkup:
+def get_back_button(stream_id: int=None, price: int=None, product_id: int=None,
+                    directions_id: str=None, method_value: str = None) -> InlineKeyboardMarkup:
 
     builder = InlineKeyboardBuilder()
 
-    # get_pay:{stream_id}:{price_menu}:{product_id}:{directions_id} -> get_payment
+    # get_pay:{stream_id}:{price}:{product_id}:{directions_id}:{method_value} -> get_payment
 
     builder.button(
-        text="Назад", callback_data=f"get_pay:{stream_id}:{price}:{product_id}:{directions_id}"
+        text="Назад", callback_data=f"get_pay:{stream_id}:{price}:{product_id}:{directions_id}:{method_value}"
     )
     builder.button(
         text="Главное меню", callback_data=f"set: start"

@@ -115,14 +115,14 @@ async def add_new_enrollments(enrollment_data: dict, session: AsyncSession):
 async def add_new_referral_rewards(referral_rewards_data: dict, session: AsyncSession):
     # telegram_id = int(referral_rewards_data[])
     rez = await ReferralRewardsDAO.get_refer_info(session=session,
-                                                  referred_user_id=int(referral_rewards_data["referred_user_id"]))
+                                                  refer_user_id=int(referral_rewards_data["user_id"]))
 
     if rez:
-        logging.info("Пользователь referred_user_id = %s уже существует", referral_rewards_data["referred_user_id"])
+        logging.info("Пользователь user_id = %s уже существует", referral_rewards_data["user_id"])
         return rez.to_dict()
     else:
         new_refer = await ReferralRewardsDAO.add(session=session, **referral_rewards_data)
-        logging.info("Добавлен новый Referral_Rewards с ID: %s ", new_user.id)
+        logging.info("Добавлен новый Referral_Rewards с ID: %s ", new_refer.id)
         return new_refer.to_dict()
 
 

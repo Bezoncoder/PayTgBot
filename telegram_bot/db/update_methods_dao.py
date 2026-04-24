@@ -39,7 +39,7 @@ async def update_enrollment_data(session: AsyncSession, enrollment_id, new_activ
     return result
 
 @connection
-async def update_referral_rewards(session: AsyncSession, user_id:int, values_dict: dict):
+async def update_referral_rewards(session: AsyncSession, user_id: int, values_dict: dict):
     referral_reward = await ReferralRewardsDAO.update_by_user_id(session=session, user_id=user_id, values=values_dict)
     if referral_reward:
         rez = ReferralRewardsPydantic.model_validate(referral_reward)
@@ -54,5 +54,13 @@ async def update_referral_rewards(session: AsyncSession, user_id:int, values_dic
 
 
 if __name__ == "__main__":
-    test = asyncio.run(update_payment_data(payment_id=5, new_operation_id='QWERTY', new_status="APROVE"))
+    # test = asyncio.run(update_payment_data(payment_id=5, new_operation_id='QWERTY', new_status="APROVE"))
+    referral_rewards = dict(referred_user_id=100,
+                            payment_id=None,
+                            reward_type=None,
+                            reward_value=None,
+                            active_status=None)
+
+    test = asyncio.run(update_referral_rewards(user_id=5,values_dict=referral_rewards))
+
     print(test)

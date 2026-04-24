@@ -37,7 +37,8 @@ router = Router()
 
 # set_stream:{stream_id}:{price}  <- get_payment check_pay:{stream_id}:{price}:{directions_id} -> check_pay
 # get_pay:{stream_id_int}:{price_menu}:{directions_id} or '' get_payment
-# get_pay:{stream_id_int}:{price_menu}:{directions_id}:{method.value} NEW
+
+# get_pay:{stream_id}:{price}:{product_id}:{directions_id}:{method_value} NEW
 
 
 
@@ -64,10 +65,14 @@ async def get_pay(callback: CallbackQuery, state: FSMContext):
 
     logging.debug("Callback = %s:", callback.data)
 
+    #     0       1           2             3               4              5
+    # get_pay:{stream_id}:{price}:{product_id}:{directions_id}:{method_value} NEW
+
+
     list_data_buttons = callback.data.split(':')
     stream_id_int = int(list_data_buttons[1])
     price = int(list_data_buttons[2])
-    pay_method = list_data_buttons[4]  # "PaymentMethod.CARD_ACQUIRING:"
+    pay_method = list_data_buttons[5]  # "PaymentMethod.CARD_ACQUIRING.value"
 
 
     ######################## ФОРМИРУЕМ USER_KEY ########################
@@ -101,11 +106,11 @@ async def get_pay(callback: CallbackQuery, state: FSMContext):
 
     ######################## Получаем Информаци о пользователе #################
     logging.debug(f"Получаем Информаци о пользователе")
-    user_info_dict = await get_user_info_by_tg_id(tg_user_id=callback.from_user.id)
-    logging.debug(f"user_info_dict={user_info_dict}")
+    user_info_paidantic = await get_user_info_by_tg_id(tg_user_id=callback.from_user.id)
+    logging.debug(f"user_info_paidantic={user_info_paidantic}")
     ############################ Обновляем Email ###############################
 
-    # await update_user_email(user_id_from_db=user_info_dict['id'], new_email=email)
+    # await update_user_email(user_id_from_db=user_info_paidantic['id'], new_email=email)
 
     ########################### Получаем Данные о платеже от Провайдера Эквайринга #############################
 
@@ -145,7 +150,7 @@ async def get_pay(callback: CallbackQuery, state: FSMContext):
                           "amount": price,
                           "operation_id": operation_id_from_provider,
                           "status": "CREATE",
-                          "user_id": user_info_dict["id"],
+                          "user_id": user_info_paidantic.id,
                           "stream_id": stream_info.id}
 
     #################### Добавляем в БД запись об оплате и получаем ссылку на оплату ###########################
@@ -157,7 +162,8 @@ async def get_pay(callback: CallbackQuery, state: FSMContext):
     user_data = dict(stream_id_int=stream_id_int,
                      price=price,
                      operation_id=operation_id_from_provider,
-                     payment_id=payment_data_from_db.id)
+                     payment_id=payment_data_from_db.id,
+                     pay_method=pay_method)
 
     await state.storage.update_data(user_key, data=user_data)  # <— сохраняем для ЭТОГО пользователя
 
@@ -167,7 +173,7 @@ async def get_pay(callback: CallbackQuery, state: FSMContext):
     payment_details = (
         f"Способ оплаты: {pay_method}\n\n"
         f"К оплате: {price} 🇷🇺RUB\n"
-        f"Ваш ID: {user_info_dict['telegram_id']}\n\n"
+        f"Ваш ID: {user_info_paidantic.telegram_id}\n\n"
         "Реквизиты для оплаты:\n\n"
         f"Ссылка на оплату:\n{url_pay_from_provider}\n\n"
         f"После оплаты вам будут доступны ключи доступа.\n"

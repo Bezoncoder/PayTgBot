@@ -78,7 +78,7 @@ async def get_refer_program(callback: CallbackQuery, state: FSMContext):
     user_info = await get_user_info_by_tg_id(tg_user_id=int(callback.from_user.id))
 
     link = await create_start_link(bot=callback.bot,
-                                   payload=f"{reward_type}_{user_info.get("id")}",
+                                   payload=f"{reward_type}_{user_info.id}",
                                    encode=True)
     if reward_type == "percent":
         caption = (
@@ -86,7 +86,7 @@ async def get_refer_program(callback: CallbackQuery, state: FSMContext):
                    "✨ Делитесь ею с друзьями и зарабатывайте вместе с QuantumTurbo VPN.\n\n"
                    "Каждая покупка по вашей ссылке приносит вам 20% прибыли — просто, удобно и выгодно.\n\n"
                    "🔥 Чем больше вы делитесь, тем больше ваш доход.\n\n"
-                   f"👉 Ваша ссылка: "
+                   f"👉 Ваша ссылка:\n"
                    f"<code>{link}</code>"
         )
     else:

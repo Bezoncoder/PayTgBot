@@ -80,8 +80,8 @@ async def start_with_param(message: Message, command: CommandObject, state: FSMC
 
     ############################ Делаем запись в ReferralRewards ##################################
 
-    referral_rewards = dict(user_id=referred_by_user_id,
-                            referred_user_id=int(user_info.get("id")),
+    referral_rewards = dict(user_id=int(user_info.get("id")),
+                            referred_user_id=referred_by_user_id,
                             payment_id=None,
                             reward_type=reward_type,
                             reward_value=None,

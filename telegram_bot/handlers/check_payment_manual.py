@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from pprint import pprint
 
@@ -17,8 +18,8 @@ from aiogram.fsm.context import FSMContext
 
 from aiogram.filters import StateFilter
 
-from db.update_methods_dao import update_payment_data
-from keyboards.get_menu import get_payment_verification_button, get_back_button, get_errors_button
+from db.update_methods_dao import update_payment_data, update_referral_rewards
+from keyboards.get_menu import get_payment_verification_button, get_back_button, get_errors_button, get_start_button
 from utils.calculate_expire_date import get_expire_time_sec
 from utils.get_links import get_subscribe_link
 from utils.payments import tochka_bank
@@ -33,7 +34,7 @@ from utils.creds import get_creds
 
 from utils.states import OrderPay
 
-from db.select_methods import get_product_info, get_stream_info, get_userinfo_by_id
+from db.select_methods import get_product_info, get_stream_info, get_userinfo_by_id, get_user_info_by_tg_id
 from utils.access_control import restore_chat_access
 
 from utils.gen_ssl_key import get_signed_cert
@@ -90,6 +91,21 @@ async def send_check(message: Message, state: FSMContext):
 
     try:
         if user_data.get("message_id"):
+
+            await message.bot.edit_message_caption(chat_id=message.chat.id,
+                                                   message_id=int(user_data.get("message_id")),
+                                                   caption=f"Вы отправили чек!\n\n"
+                                                        f"📢 Он отправится на проверку.\n"
+                                                           f"После проверки Вам придет сообщение!\n\n"
+                                                        f"💡 Сейчас Это сообщение будет удалено.\n "
+                                                           f"Ваш чек останется до конца проверки в этом чате\n\n"
+                                                        f"🔴 Ничего не делайте, дождитесь окончания проверки!\n "
+                                                           f"Если проверка не пройдет в течении суток, "
+                                                           f"повторите отправку.\n",
+
+                                                parse_mode="HTML",
+                                                reply_markup=None)
+            await asyncio.sleep(15)
             await message.bot.delete_messages(chat_id=message.from_user.id,
                                               message_ids=[user_data.get("message_id")])
     except TelegramBadRequest:
@@ -173,8 +189,33 @@ async def approve_check(callback: CallbackQuery, state: FSMContext):
         logging.error(f"⚠️ ОШИБКА await update_payment_data\n"
                       f"user_data = {user_data}\n"
                       f"{e}\n")
+        payment_data = None
 
     logging.info("Получена оплата:\n%s", payment_data)
+
+    # Обновляем запись в БД ReferralRewards
+
+    # referral_rewards = dict(user_id=int(user_info.get("id")),
+    #                         referred_user_id=referred_by_user_id,
+    #                         payment_id=None,
+    #                         reward_type=reward_type,
+    #                         reward_value=None,
+    #                         active_status=None)
+
+    # TODO сделать проверку наличия реферальной записи
+    # SELECT referral_rewards WHERE active_status==None
+    if payment_data.amount != 30:
+        print("⚠️ — предупреждение, требует внимания")
+        user_info = await get_user_info_by_tg_id(tg_user_id=user_telegram_id)
+
+        reward_value = payment_data.amount * 0.2
+        referral_rewards = dict(payment_id=payment_data.id,
+                                reward_value=str(reward_value),
+                                active_status=True)
+
+        referral_data = await update_referral_rewards(user_id=user_info.id, values_dict=referral_rewards)
+
+        logging.debug(referral_data)
 
     #################### EXPIRE_DATE ############################
 
@@ -283,12 +324,7 @@ async def approve_check(callback: CallbackQuery, state: FSMContext):
         chat_id=user_telegram_id,
         photo=animation,
         caption=caption,
-        reply_markup=get_back_button(
-            stream_id=stream_info.id,
-            price=stream_info.price,
-            product_id=stream_info.product_id,
-            directions_id=str(product_info.direction_id),
-        ),
+        reply_markup=get_start_button()
     )
 
 
