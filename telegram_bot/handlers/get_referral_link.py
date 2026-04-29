@@ -36,6 +36,7 @@ async def get_referral_link(callback: CallbackQuery, state: FSMContext):
 
     await callback.answer(text=f"Реферальная программа")
 
+    user_info = await get_user_info_by_tg_id(tg_user_id=int(callback.from_user.id))
 
     #####################################################################################################
 
@@ -50,7 +51,7 @@ async def get_referral_link(callback: CallbackQuery, state: FSMContext):
                         "Выбирай свой вариант 👇")
 
 
-    photo = FSInputFile('source/pictures/vpn_main_menu.jpg')
+    photo = FSInputFile('source/pictures/referral_rewards.jpg')
 
     media = InputMediaPhoto(
         media=photo,
@@ -60,7 +61,7 @@ async def get_referral_link(callback: CallbackQuery, state: FSMContext):
     await callback.bot.edit_message_media(media=media,
                                           chat_id=callback.from_user.id,
                                           message_id=callback.message.message_id,
-                                          reply_markup=get_choice_refer_button())
+                                          reply_markup=get_choice_refer_button(user_id=user_info.id))
 
 @router.callback_query(F.data.startswith("refer:"))
 async def get_refer_program(callback: CallbackQuery, state: FSMContext):
@@ -82,33 +83,36 @@ async def get_refer_program(callback: CallbackQuery, state: FSMContext):
                                    encode=True)
     if reward_type == "percent":
         caption = (
-                   "🚀 Ваша реферальная ссылка уже готова!\n\n"
-                   "✨ Делитесь ею с друзьями и зарабатывайте вместе с QuantumTurbo VPN.\n\n"
-                   "Каждая покупка по вашей ссылке приносит вам 20% прибыли — просто, удобно и выгодно.\n\n"
-                   "🔥 Чем больше вы делитесь, тем больше ваш доход.\n\n"
-                   f"👉 Ваша ссылка:\n"
-                   f"<code>{link}</code>"
+                   f"🚀 Ваша реферальная ссылка уже готова!\n\n"
+                   f"✨ Делитесь ею с друзьями и зарабатывайте вместе с QuantumTurbo VPN.\n\n"
+                   f"Каждая покупка по вашей ссылке приносит вам 20% прибыли — просто, удобно и выгодно.\n\n"
+                   f"🔥 Чем больше вы делитесь, тем больше ваш доход.\n\n"
+                   f"🔗 Ваша ссылка (нажми, чтобы скопировать):\n"
+                   f"👉 <code>{link}</code>"
         )
     else:
         caption = (
-                    "👥 Пригласите друга и получите 1 месяц бесплатно!\n\n"
-                    "✨ Каждый новый переход по вашей ссылке — это ещё +1 месяц к вашему доступу.\n\n"
-                    "🚀 Делитесь ссылкой, приглашайте друзей и продлевайте свой VPN бесплатно.\n\n"
-                    "🔥 Чем больше друзей перейдёт по ссылке, тем дольше ваш бонусный срок!\n\n"
-                    f"👉 Ваша ссылка: "
-                    f"<code>{link}</code>"
+                    f"👥 Пригласите друга и получите 1 месяц бесплатно!\n\n"
+                    f"✨ Каждый новый переход по вашей ссылке — это ещё +1 месяц к вашему доступу.\n\n"
+                    f"🚀 Делитесь ссылкой, приглашайте друзей и продлевайте свой VPN бесплатно.\n\n"
+                    f"🔥 Чем больше друзей перейдёт по ссылке, тем дольше ваш бонусный срок!\n\n"
+                    f"🔗 Ваша ссылка (нажми, чтобы скопировать):\n"
+                    f"👉 <code>{link}</code>"
         )
 
 
 
 
-
+# 📊 Мои бонусы
+# 👥 Пришло: {ref_count}
+# 🎁 Бонусные месяцы: {bonus_months} мес.
+# 💸 Выплаты по ссылкам: {affiliate_payout} ₽
     #####################################################################################################
 
     # Вариант с изменением сообщения без удаления.
 
 
-    photo = FSInputFile('source/pictures/vpn_main_menu.jpg')
+    photo = FSInputFile('source/pictures/referral_rewards.jpg')
 
     media = InputMediaPhoto(
         media=photo,

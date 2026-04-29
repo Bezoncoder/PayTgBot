@@ -124,18 +124,23 @@ def get_choosing_pay_method_buttons(price: str, stream_id_int: int, product_id: 
 
         if method == PaymentMethod.SBP_QR:
             text_button = "🏦 СБП"
-        elif method == PaymentMethod.CARD_ACQUIRING:
-            text_button = "💳 Оплата картой"
+        # elif method == PaymentMethod.CARD_ACQUIRING:
+        #     text_button = "💳 Оплата картой"
         else:
             text_button = "💰 Криптовалюта"
 
         builder.button(text=f"{text_button}",
                        callback_data=f"get_pay:{stream_id_int}:{price}:{product_id}:{directions_id}:{method.value}")
 
+    # get_free_month:{stream_id}:{price}:{directions_id}
+
+    builder.button(text="🎁 Бесплатно", callback_data=f"get_free_month:{stream_id_int}:{price}:{directions_id}")
+
     if directions_id is None:
         builder.button(text="Назад", callback_data=f"set_stream:{stream_id_int}:{price}")
     else:
         builder.button(text="Назад", callback_data=f"set_group:{directions_id}")
+
     builder.adjust(1)
     builder.button(text="Главное меню", callback_data=f"set: start")
 
@@ -271,11 +276,12 @@ def get_del_button() -> InlineKeyboardMarkup:
     return builder.as_markup(resize_keyboard=True)
 
 
-def get_choice_refer_button() -> InlineKeyboardMarkup:
+def get_choice_refer_button(user_id: int) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
     builder.button(text="Месяц бесплатно", callback_data="refer:month")
     builder.button(text="Получать 20%", callback_data="refer:percent")
+    builder.button(text="🧾 Ваш отчет", callback_data=f"get_referral_program:{user_id}")
     builder.button(text="Назад", callback_data=f"set: start")
     builder.adjust(1)
 

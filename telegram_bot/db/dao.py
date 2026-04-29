@@ -1,5 +1,6 @@
 from typing import Any
 
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 from db.database import BaseDAO
 from db.models import User, Enrollment, Direction, Product, Stream, Payment, ReferralRewards
@@ -78,6 +79,7 @@ class ReferralRewardsDAO(BaseDAO):
                                              field_value=user_id,
                                              values=values)
 
+
     @classmethod
     async def get_refer_info(cls, session: AsyncSession, refer_user_id: int):
         # query = select(cls.model).filter_by(telegram_id=user_id)
@@ -89,6 +91,56 @@ class ReferralRewardsDAO(BaseDAO):
         # user_info = result.scalars().unique().scalar_one_or_none()
         logging.debug("user_info %s", refer_info)
         return refer_info
+
+    @classmethod
+    async def get_referralrewards_user_id(cls, session: AsyncSession, referred_user_id: int):
+        query = select(cls.model).where(cls.model.referred_user_id == int(referred_user_id))
+
+        logging.debug("get_referralrewards_user_id %s", query)
+        result = await session.execute(query)
+        enrolments = result.scalars().all()
+        return enrolments
+
+
+    @classmethod
+    async def get_referralrewards_to_month_user_d(cls, session: AsyncSession, id_user: int):
+        query = select(cls.model).where(cls.model.referred_user_id == int(id_user)).where(cls.model.reward_type == "month").where(cls.model.active_status == True)
+
+        logging.debug("get_referralrewards_to_month_user_d %s", query)
+        result = await session.execute(query)
+        if result is not None:
+            referralrewards = result.scalars().all()
+        else:
+            referralrewards = []
+        return referralrewards
+
+
+    @classmethod
+    async def update_one_by_month(cls, session: AsyncSession, field_name: str, field_value, values: dict):
+        # values_dict = values.model_dump(exclude_unset=True)
+        values_dict = values
+        try:
+            field = getattr(cls.model, field_name, None)
+            if field is None:
+                raise ValueError(f"Field {field_name} not found in model")
+
+            stmt = select(cls.model).where(field == field_value).where(cls.model.reward_type == "month").where(cls.model.active_status == True)
+            result = await session.execute(stmt)
+            record = result.scalars().first()
+
+            if record is None:
+                return None
+
+            for key, value in values_dict.items():
+                setattr(record, key, value)
+
+            await session.commit()
+            return record
+
+        except SQLAlchemyError as e:
+            await session.rollback()
+            logging.error(e)
+            raise e
 
 
 

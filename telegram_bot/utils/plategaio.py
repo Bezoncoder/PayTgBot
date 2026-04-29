@@ -71,7 +71,7 @@ class PaymentStatus(Enum):
 
 class PaymentMethod(Enum):
     SBP_QR = 2
-    CARD_ACQUIRING = 11
+    # CARD_ACQUIRING = 11
     CRYPTOCURRENCY = 13
 
 
@@ -259,6 +259,103 @@ class PlategaAPI:
         response_data = self._request('POST', 'transaction/process', data=payload_data)
         return response_data
 
+    def create_payment_v2(self, amount: float, description: str,
+                                currency: str = 'RUB', success_url: str = '',
+                                fail_url: str = '', payload: str = '') -> Dict[str, Any]:
+        """
+        Создает транзакцию с правильной структурой для Platega API
+        post v2/transaction/process
+
+        paymentDetails
+        object
+        required
+        amount
+        number <float>
+        required
+        Сумма платежа
+        currency
+        string
+        required
+        Валюта платежа (например, RUB)
+        description
+        string
+        required
+
+        Назначение (описание) платежа, указывайте по возможности всегда
+
+        Обязательное правило
+        Если создаётся платеж, который относится к продаже Stars, поле description обязательно должно содержать
+        Telegram ID получателя в следующем формате:
+
+        TgId:<telegram_id>
+        UserId:<user_id>
+
+        Пример
+        TgId:123123
+        UserId:123123
+
+        Формат и валидация:
+
+            Ключ фиксированный: TgId/UserId
+            Разделитель: двоеточие :
+            Значение: целое число (Telegram ID/ID пользователя), без пробелов
+            Допускается только цифры: 0-9
+
+        Рекомендуемый шаблон:
+        TgId:{telegram_id}
+        UserId:{user_id}
+        return
+        string <uri>
+        optional
+        Редирект при успешном платеже
+        failedUrl
+        string <uri>
+        optional
+        Редирект при неуспешном платеже
+        payload
+        string
+        optional
+        Дополнительная информация для инициализации в вашей системе.
+
+        """
+
+        if not isinstance(amount, (int, float)) or amount <= 0:
+            raise ValidationError(f"❌ Сумма должна быть положительным числом, получено: {amount}")
+        if amount < 0.01:
+            raise ValidationError("❌ Минимальная сумма платежа: 0.01")
+
+        if not isinstance(description, str):
+            raise ValidationError("❌ description должен быть строкой")
+        if len(description.strip()) > 255:
+            raise ValidationError("❌ description не должен превышать 255 символов")
+
+        allowed_currencies = ['RUB', 'USDT']
+        if currency not in allowed_currencies:
+            raise ValidationError(f"❌ Валюта должна быть одной из: {allowed_currencies}")
+
+        if not self._validate_url(success_url):
+            raise ValidationError("❌ success_url должен быть пустым или валидным URL")
+        if not self._validate_url(fail_url):
+            raise ValidationError("❌ fail_url должен быть пустым или валидным URL")
+
+        if payload and len(payload) > 1000:
+            raise ValidationError("❌ payload не должен превышать 1000 символов")
+
+        payload_data = {
+            "paymentDetails": {
+                "amount": round(amount, 2),
+                "currency": currency
+            },
+            "description": description.strip(),
+            "return": success_url or None,
+            "failedUrl": fail_url or None,
+            "payload": payload or None
+        }
+
+        logger.info(f"💳 Создание платежной ссылки: amount={amount}")
+        response_data = self._request('POST', 'v2/transaction/process', data=payload_data)
+        return response_data
+
     def get_payment_status(self, transaction_id: str) -> Dict[str, Any]:
         if not isinstance(transaction_id, str):
             raise ValidationError("❌ transaction_id должен быть строкой")
@@ -332,14 +429,30 @@ if __name__ == "__main__":
     # CARD_ACQUIRING = 11
     #
     # CRYPTOCURRENCY = 13
-    MERCHANT_ID_test = "a8e1a6ed-c586-478b-ac3d-81ac1eb70cf5"
-    PLATEGA_SECRET_KEY_test = "9kx7SgS9BYfP07Pq0ExsVqExYZHXGLvGKVEhMLXx5kzgVmTGLFqC53NkgOaB3UdNhturqAwumz3D1kjPWpOMJYuS1TDBDhwOVStk"
-    gd = PaymentMethod
+    MERCHANT_ID_test = ""
+    PLATEGA_SECRET_KEY_test = ""
+    pm = PaymentMethod
 
     try:
         a=PlategaAPI(MERCHANT_ID_test, PLATEGA_SECRET_KEY_test)
-        link = a.create_payment(payment_method=gd.CARD_ACQUIRING.value, amount=10, description='test')
+        link = a.create_payment(payment_method=13, amount=10, description='test')
+        # link = a.create_payment_v2(amount=40, description="TEST", )
         # link = a.get_payment_method_rate( payment_method=gd.SBP_QR)
         print(f"link = {link}")
     except Exception as e:
         print(e)
+
+    # V1
+
+    # link = {'paymentMethod': 'SBPQR', 'transactionId': 'c4af516a-d0ff-4d45-9800-a4cfa7b8e5e9',
+    #         'redirect': 'https://pay.platega.io?id=c4af516a-d0ff-4d45-9800-a4cfa7b8e5e9&mh=a8e1a6ed-c586-478b-ac3d-81ac1eb70cf5',
+    #         'return': None, 'paymentDetails': '10 RUB', 'status': 'PENDING', 'expiresIn': None,
+    #         'merchantId': 'a8e1a6ed-c586-478b-ac3d-81ac1eb70cf5', 'usdtRate': 79.3764, 'cryptoAmount': 0.12598203}
+
+    # V2
+
+    # link = {'transactionId': '6782ef9e-f6a2-4f95-a870-922b9b3cc566', 'status': 'PENDING',
+    #         'url': 'https://pay.platega.io?id=6782ef9e-f6a2-4f95-a870-922b9b3cc566&mh=a8e1a6ed-c586-478b-ac3d-81ac1eb70cf5',
+    #         'expiresIn': '00:30:00', 'rate': 0}
+
+

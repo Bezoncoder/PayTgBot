@@ -108,7 +108,7 @@ class BaseDAO:
         return record
 
     @classmethod
-    async def update_one_by_field(cls, session: AsyncSession, field_name: str, field_value, values: BaseModel):
+    async def update_one_by_field(cls, session: AsyncSession, field_name: str, field_value, values: dict):
         # values_dict = values.model_dump(exclude_unset=True)
         values_dict = values
         try:

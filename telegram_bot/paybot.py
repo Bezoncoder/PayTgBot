@@ -9,7 +9,7 @@ from handlers import (greetings, get_subscribe, check_payment_auto, check_paymen
                       get_creds, github_check_subscribe,
                       choosing_direction, choosing_product,
                       get_payment, choosing_stream, check_fio, how_to_pay, check_email,
-                      choosing_payment_method, edit_adt_posts, get_referral_link)
+                      choosing_payment_method, edit_adt_posts, get_referral_link, get_referal_program)
 from datetime import datetime, timedelta
 from logging.handlers import RotatingFileHandler
 import logging
@@ -27,7 +27,7 @@ from utils.vlessuiapi import XUIClient
 
 bot = Bot(token=BOT_TOKEN)
 
-ADT_MESSAGE_LIST=[3,5,6,7,8,9,10]
+ADT_MESSAGE_LIST=[3,5,6,7,8,10,11]
 
 # user subscription control @getidsbot - Бот, который выдает ID чата
 #  -1002917599861 Bootcamp Supergroup_ID
@@ -72,11 +72,11 @@ async def check_and_ban():
             vless_info.setdefault(enrollment.user_id, []).append(status)
 
 
-    info_users_banned = dict(list_id_users=list_id_user,
+    info_banned_users = dict(list_id_users=list_id_user,
                           vless_info=vless_info
                           )
 
-    return info_users_banned
+    return info_banned_users
 
 
 
@@ -93,16 +93,15 @@ async def check_and_posting():
     count_success_send = 0
     count_fail_send = 0
 
+    message_to_post_id = random.choice(ADT_MESSAGE_LIST)
     for user_info in users_to_posting_rek:
 
         if not user_info.enrollments:
             try:
-
-                message_id = random.choice(ADT_MESSAGE_LIST)
                 await bot.copy_message(
                     chat_id=user_info.telegram_id,
                     from_chat_id=-1003976745616,
-                    message_id=message_id,
+                    message_id=message_to_post_id,
                     reply_markup=get_start_button()
                 )
                 logging.info(f"✅ Отправлено рекламное сообщение пользователю user_name = {user_info.username}")
@@ -115,12 +114,13 @@ async def check_and_posting():
             await asyncio.sleep(3)
 
     count_reminder = 0
+
     photo = FSInputFile('source/pictures/vpn_main_menu.jpg')
     for i in range(3, 0, -1):
         user_ids = []
         date_to_check = datetime.now() + timedelta(days=i)
         logging.info(f"Начинаем рассылку о продлении ключа VPN.")
-        logging.info(f"date_to_check = {date_to_check}")
+        logging.info(f"date_to_check = {date_to_check.date()}")
 
         if i>1:
             days_str = f"{i} дня"
@@ -223,7 +223,8 @@ async def main():
                        check_email.router,
                        choosing_payment_method.router,
                        edit_adt_posts.router,
-                       get_referral_link.router)
+                       get_referral_link.router,
+                       get_referal_program.router)
 
     # Запускаем бота и пропускаем все накопленные входящие
     await bot.delete_webhook(drop_pending_updates=True)

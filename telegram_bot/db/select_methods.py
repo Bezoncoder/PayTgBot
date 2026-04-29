@@ -6,12 +6,12 @@ from typing import List
 import colorlog
 
 
-from db.dao import UserDAO, DirectionDAO, EnrollmentDAO, ProductDAO, StreamDAO
+from db.dao import UserDAO, DirectionDAO, EnrollmentDAO, ProductDAO, StreamDAO, ReferralRewardsDAO
 from db.database import connection
 
 from datetime import date, datetime, timedelta
 from asyncio import run
-from db.schemas import ProductPydantic, StreamPydantic, EnrollmentPydantic, UserPydantic
+from db.schemas import ProductPydantic, StreamPydantic, EnrollmentPydantic, UserPydantic, ReferralRewardsPydantic
 from utils.timezone import get_moscow_today
 
 
@@ -194,6 +194,36 @@ async def get_enrollments_count_stream_id(session, product_id: int) -> int:
     # for enrollment in enrollments:
     #     enrollments_list.append(EnrollmentPydantic.model_validate(enrollment))
     return enrollments_count[0]
+
+########## ReferralRewards ############
+@connection
+async def get_referralrewards_from_user_id(session, referred_user_id: int) -> list[ReferralRewardsPydantic]:
+    logging.debug("Запрос get_referralrewards_from_user_id id = %s", referred_user_id)
+
+    referralrewards_raw = await ReferralRewardsDAO.get_referralrewards_user_id(session=session,
+                                                                               referred_user_id=referred_user_id)
+
+    logging.debug("Ответ на get_referralrewards_from_user_id получен:\n%s", referralrewards_raw)
+    refrewards_list = []
+    for referralreward_raw in referralrewards_raw:
+        refrewards_list.append(ReferralRewardsPydantic.model_validate(referralreward_raw))
+    return refrewards_list
+
+@connection
+async def get_referralrewards_to_month_user_d(session, id_user: int) -> list[ReferralRewardsPydantic]:
+    logging.debug("Запрос get_referralrewards_from_user_id id = %s", id_user)
+
+    referralrewards_raw = await ReferralRewardsDAO.get_referralrewards_to_month_user_d(session=session,
+                                                                               id_user=id_user)
+
+    logging.debug("Ответ на get_referralrewards_from_user_id получен:\n%s", referralrewards_raw)
+    if referralrewards_raw:
+        refrewards_list = []
+        for referralreward_raw in referralrewards_raw:
+            refrewards_list.append(ReferralRewardsPydantic.model_validate(referralreward_raw))
+    else:
+        refrewards_list = []
+    return refrewards_list
 
 
 
