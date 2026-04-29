@@ -27,7 +27,7 @@ from utils.vlessuiapi import XUIClient
 
 bot = Bot(token=BOT_TOKEN)
 
-ADT_MESSAGE_LIST=[3,5,6,7,8,10,11]
+ADT_MESSAGE_LIST=[3,5,6,7,8,10,11,12]
 
 # user subscription control @getidsbot - Бот, который выдает ID чата
 #  -1002917599861 Bootcamp Supergroup_ID
