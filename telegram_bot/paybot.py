@@ -59,7 +59,7 @@ async def check_and_ban():
 
         if  new_enrollment is not None:
 
-            product_info = await get_product_info(id_product=enrollment.id)
+            product_info = await get_product_info(id_product=enrollment.product_id)
 
             vless_client = XUIClient(base_url_from_panel=product_info.base_url,
                                      username=USER,
@@ -189,7 +189,7 @@ async def main():
 
     # Запуск кода в определенные часы:
 
-    scheduler.add_job(func=check_and_posting, trigger="cron", hour=14, minute=10)
+    scheduler.add_job(func=check_and_posting, trigger="cron", hour=16, minute=10)
 
     # Запуск кода через определенный интервал
     # now_time = DT.datetime.now() + DT.timedelta(seconds=15)
