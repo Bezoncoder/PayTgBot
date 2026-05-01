@@ -141,7 +141,8 @@ async def set_start(callback: CallbackQuery, state: FSMContext):
     platega_client = PlategaWebClient(login=LOGIN_WEB_PLATEGA,
                                       password=PASSWORD_WEB_PLATEGA)
 
-    balance = platega_client.get_balance()
+    balance_rub = platega_client.get_balance()
+    balance_usdt = platega_client.get_balance(currencycode="USDT")
     today__date_iso = datetime.datetime.now().date().isoformat()
     statistics_today = platega_client.get_statistics_by_currency(date_start=str(today__date_iso), date_end=str(today__date_iso))
 
@@ -179,7 +180,8 @@ async def set_start(callback: CallbackQuery, state: FSMContext):
         f"<a href='https://my.platega.io'>Перейти в кабинет</a>\n"
         f"━━━━━━━━━━━━━━\n"
         f"💰 <b>Баланс</b>\n"
-        f"  • {balance.amount:.2f} {balance.currency}\n"
+        f"  • {balance_rub.amount:} {balance_rub.currency}\n"
+        f"  • {balance_usdt.amount:} {balance_usdt.currency}\n"
         f"━━━━━━━━━━━━━━\n"
         f"📈 <b>Оборот</b>\n"
         f"• Прошлый месяц ({start_prev_month_date}-{end_prev_month_date}): "
