@@ -28,10 +28,9 @@ async def get_start_menu(list_for_menu, one_user_info: dict) -> InlineKeyboardMa
     builder.button(text="📦 Мои покупки", callback_data=f"get_my_subscribe:{one_user_info['id']}")
     builder.button(text="👩‍💻 Тех поддержка", url="https://t.me/QuantumTurboVPN")
     # builder.button(text="👩‍💻 Тех поддержка", url="https://t.me/user_post")
-    if one_user_info['telegram_id'] == "5866726660" or one_user_info['telegram_id'] == 5866726660:
-        builder.button(text="GET ID MESSAGE", callback_data="edit_adt_posts")
-
     builder.button(text="🎁 Получить VPN бесплатно", callback_data=f"get_referral_link:{one_user_info['id']}")
+    if one_user_info['telegram_id'] == "5866726660" or one_user_info['telegram_id'] == 5866726660 or one_user_info['telegram_id'] == 1773955529:
+        builder.button(text="🛠 Инструменты", callback_data="get_utils")
     builder.adjust(1)
 
     return builder.as_markup(resize_keyboard=True)
@@ -292,9 +291,19 @@ def get_refer_back_button() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
     builder.button(text="Назад", callback_data=f"get_referral_link:")
-    builder.button(
-        text="Главное меню", callback_data=f"set: start"
-    )
+    builder.button(text="Главное меню", callback_data=f"set: start")
+
+    builder.adjust(1)
+
+    return builder.as_markup(resize_keyboard=True)
+
+def get_admin_button() -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+
+    builder.button(text="Баланс", callback_data=f"get_balance")
+    # builder.button(text="За сегодня", callback_data=f"get_statistics")
+    builder.button(text="Узнать ID", callback_data=f"get_id_message")
+    builder.button(text="Главное меню", callback_data=f"set: start")
 
     builder.adjust(1)
 

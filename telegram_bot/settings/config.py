@@ -8,9 +8,8 @@ BOT_TOKEN = os.getenv("BOT_TOKEN")
 URL = os.getenv("URL")
 USER = os.getenv("USER")
 PASSWORD = os.getenv("PASSWORD")
-
-
-
+LOGIN_WEB_PLATEGA = os.getenv("LOGIN_WEB_PLATEGA")
+PASSWORD_WEB_PLATEGA = os.getenv("PASSWORD_WEB_PLATEGA")
 
 
 # DB LOCAL

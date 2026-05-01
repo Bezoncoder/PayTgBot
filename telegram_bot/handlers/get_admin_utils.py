@@ -1,0 +1,379 @@
+import datetime
+import logging
+from calendar import month
+from pprint import pprint
+
+from dateutil.relativedelta import relativedelta
+from aiogram import Router, F
+from aiogram.filters import Command, CommandStart, CommandObject
+from aiogram.fsm.storage.base import StorageKey
+from aiogram.types import Message, InputMediaPhoto
+
+from keyboards.get_menu import get_start_menu, get_stream_products_menu, get_start_button, get_admin_button
+from aiogram.types import FSInputFile
+
+from db.select_methods import get_list_directions, get_product_info, get_user_info_by_tg_id, get_enrollmets_from_user_id
+from db.add_methods_dao import check_user_and_add
+
+from aiogram.fsm.context import FSMContext
+
+from aiogram.types import CallbackQuery
+
+from settings.config import LOGIN_WEB_PLATEGA, PASSWORD_WEB_PLATEGA
+# from settings.config import START_DATE
+# from settings.config import START_DATE
+from utils.get_links import get_subscribe_link
+from utils.platega_api_web_panel import PlategaWebClient
+from utils.states import OrderPay
+from utils.timezone import get_moscow_today
+
+router = Router()
+
+# forward_chat_id: -1003976745616
+# forward_message_id: 3
+
+# forward_chat_id: -1003976745616
+# forward_message_id: 5
+
+# forward_chat_id: -1003976745616
+# forward_message_id: 6
+
+# forward_chat_id: -1003976745616
+# forward_message_id: 7
+
+# forward_chat_id: -1003976745616
+# forward_message_id: 8
+
+# forward_chat_id: -1003976745616
+# forward_message_id: 9
+
+# forward_chat_id: -1003976745616
+# forward_message_id: 10
+
+# [3,5,6,7,8,9,10]
+
+# del_info_message
+# builder.button(text="Баланс", callback_data=f"get_balance")
+# builder.button(text="За сегодня", callback_data=f"get_statistics")
+
+
+@router.callback_query(F.data == "get_utils")
+async def set_start(callback: CallbackQuery, state: FSMContext):
+    await callback.answer("Вы выбрали Админ Меню")
+
+    photo = FSInputFile('source/pictures/admin_utils.jpg')
+
+    storage = state.storage
+
+    key = StorageKey(
+        bot_id=callback.bot.id,
+        chat_id=callback.message.chat.id,  # личный чат пользователя
+        user_id=callback.from_user.id  # сам пользователь
+
+    )
+
+    admin_user_data = dict(
+        message_id=callback.message.message_id
+    )
+
+    await state.storage.update_data(key=key, data=admin_user_data)
+
+
+    # await storage.set_state(key, OrderPay.check_id_message)
+    state_from_user = await storage.get_state(key)
+
+    logging.debug(f"Состояние для пользователя user_id = {callback.from_user.id} установлено: {state_from_user}")
+
+    #####################################################################################################
+
+    buttons = get_admin_button()
+
+    caption = (
+        f"⚙️ Админ-панель\n\n"
+        f"Выберите нужное действие:\n\n"
+        f"💰 Посмотреть баланс\n"
+        f"🆔 Узнать ID\n"
+        f"🏠 Вернуться в главное меню"
+    )
+
+    # Вариант с изменением сообщения без удаления.
+    media = InputMediaPhoto(
+        media=photo,
+        caption=caption,
+        parse_mode="HTML")
+
+    await callback.bot.edit_message_media(media=media,
+                                          chat_id=callback.from_user.id,
+                                          message_id=callback.message.message_id,
+                                          reply_markup=buttons)
+
+
+
+@router.callback_query(F.data == "get_balance")
+async def set_start(callback: CallbackQuery, state: FSMContext):
+    await callback.answer("Вы выбрали Меню статистики")
+
+    photo = FSInputFile('source/pictures/get_balance.jpg')
+
+    storage = state.storage
+
+    key = StorageKey(
+        bot_id=callback.bot.id,
+        chat_id=callback.message.chat.id,  # личный чат пользователя
+        user_id=callback.from_user.id  # сам пользователь
+
+    )
+
+    admin_user_data = dict(
+        message_id=callback.message.message_id
+    )
+
+    await state.storage.update_data(key=key, data=admin_user_data)
+
+
+    await storage.set_state(key, OrderPay.set_order)
+    state_from_user = await storage.get_state(key)
+
+    logging.debug(f"Состояние для пользователя user_id = {callback.from_user.id} установлено: {state_from_user}")
+
+    #####################################################################################################
+
+    platega_client = PlategaWebClient(login=LOGIN_WEB_PLATEGA,
+                                      password=PASSWORD_WEB_PLATEGA)
+
+    balance = platega_client.get_balance()
+    today__date_iso = datetime.datetime.now().date().isoformat()
+    statistics_today = platega_client.get_statistics_by_currency(date_start=str(today__date_iso), date_end=str(today__date_iso))
+
+    if not statistics_today.statsByCurrency:
+        today_sale = 0
+    else:
+        today_sale = statistics_today.statsByCurrency[0].turnover
+
+    date_start_stat = datetime.datetime.now().replace(day=1).date().isoformat()
+
+    month_to_date_stat = platega_client.get_statistics_by_currency(date_start=date_start_stat,
+                                                                   date_end=today__date_iso)
+
+    if not month_to_date_stat.statsByCurrency:
+        month_to_date = 0
+    else:
+        month_to_date = statistics_today.statsByCurrency[0].turnover
+
+
+    start_prev_month_date = (datetime.datetime.now().replace(day=1) - relativedelta(months=1)).date().isoformat()
+    end_prev_month_date = (datetime.datetime.now().replace(day=1) - relativedelta(days=1)).date().isoformat()
+
+
+    previous_month = platega_client.get_statistics_by_currency(date_start=str(start_prev_month_date),
+                                                               date_end=str(end_prev_month_date))
+
+    # "Month-to-Date"
+    # previous_month
+    # "🧊 Заморожено: "
+
+    buttons = get_admin_button()
+
+    caption = (
+        f"🌐 <b>My.Platega</b>\n"
+        f"<a href='https://my.platega.io'>Перейти в кабинет</a>\n"
+        f"━━━━━━━━━━━━━━\n"
+        f"💰 <b>Баланс</b>\n"
+        f"  • {balance.amount:.2f} {balance.currency}\n"
+        f"━━━━━━━━━━━━━━\n"
+        f"📈 <b>Оборот</b>\n"
+        f"• Прошлый месяц ({start_prev_month_date}-{end_prev_month_date}): "
+        f"  {previous_month.statsByCurrency[0].netProfit} RUB\n"
+        f"• С начала месяца ({date_start_stat}-{today__date_iso}): "
+        f"  {month_to_date} RUB\n"
+        f"• Сегодня: {today_sale} RUB"
+    )
+    # Вариант с изменением сообщения без удаления.
+    media = InputMediaPhoto(
+        media=photo,
+        caption=caption,
+        parse_mode="HTML")
+
+    await callback.bot.edit_message_media(media=media,
+                                          chat_id=callback.from_user.id,
+                                          message_id=callback.message.message_id,
+                                          reply_markup=buttons)
+
+
+# @router.callback_query(F.data == "get_statistics")
+# async def set_start(callback: CallbackQuery, state: FSMContext):
+#     await callback.answer("Вы выбрали Админ Меню")
+#
+#     photo = FSInputFile('source/pictures/vpn_main_menu.jpg')
+#
+#     storage = state.storage
+#
+#     key = StorageKey(
+#         bot_id=callback.bot.id,
+#         chat_id=callback.message.chat.id,  # личный чат пользователя
+#         user_id=callback.from_user.id  # сам пользователь
+#
+#     )
+#
+#     admin_user_data = dict(
+#         message_id=callback.message.message_id
+#     )
+#
+#     await state.storage.update_data(key=key, data=admin_user_data)
+#
+#
+#     # await storage.set_state(key, OrderPay.check_id_message)
+#     state_from_user = await storage.get_state(key)
+#
+#     logging.debug(f"Состояние для пользователя user_id = {callback.from_user.id} установлено: {state_from_user}")
+#
+#     #####################################################################################################
+#
+#     buttons = get_admin_button()
+#
+#
+#     # Вариант с изменением сообщения без удаления.
+#     media = InputMediaPhoto(
+#         media=photo,
+#         caption="Перешли любое сообщение, чтобы узнать его ID",
+#         parse_mode="HTML")
+#
+#     await callback.bot.edit_message_media(media=media,
+#                                           chat_id=callback.from_user.id,
+#                                           message_id=callback.message.message_id,
+#                                           reply_markup=buttons)
+
+
+@router.callback_query(F.data == "get_id_message")
+async def set_start(callback: CallbackQuery, state: FSMContext):
+    await callback.answer("Вы выбрали Узнать ID сообщения")
+
+    photo = FSInputFile('source/pictures/get_id_message.jpg')
+
+    storage = state.storage
+
+    key = StorageKey(
+        bot_id=callback.bot.id,
+        chat_id=callback.message.chat.id,  # личный чат пользователя
+        user_id=callback.from_user.id  # сам пользователь
+
+    )
+
+    admin_user_data = dict(
+        message_id=callback.message.message_id
+    )
+
+    await state.storage.update_data(key=key, data=admin_user_data)
+
+
+    await storage.set_state(key, OrderPay.check_id_message)
+    state_from_user = await storage.get_state(key)
+
+    logging.debug(f"Состояние для пользователя user_id = {callback.from_user.id} установлено: {state_from_user}")
+
+    #####################################################################################################
+
+    buttons = get_admin_button()
+    caption = (
+        f"🆔 Узнать ID\n\n"
+        f"Чтобы узнать ID, просто перешлите сообщение для анализа в этот чат."
+    )
+
+    # Вариант с изменением сообщения без удаления.
+    media = InputMediaPhoto(
+        media=photo,
+        caption=caption,
+        parse_mode="HTML")
+
+    await callback.bot.edit_message_media(media=media,
+                                          chat_id=callback.from_user.id,
+                                          message_id=callback.message.message_id,
+                                          reply_markup=buttons)
+
+
+@router.message(OrderPay.check_id_message)
+async def check_id_from_message(message: Message, state: FSMContext):
+    # data = message.model_dump(exclude_none=True)
+    # for k, v in data.items():
+    #     logging.debug(f"{k} = ---- \n")
+
+    # '''
+    # forward_from_chat — чат, из которого переслали сообщение.
+    #
+    # forward_from_message_id — ID исходного сообщения в этом чате.
+    #
+    # forward_date — дата пересылки.
+    #
+    # forward_origin — более новый универсальный объект с информацией об источнике пересылки.
+    # '''
+
+    caption = (
+        f"📩 Пересланное сообщение:\n\n"
+        f"🆔 Chat ID: {message.forward_from_chat.id if message.forward_from_chat else '—'}\n"
+        f"💬 Message ID: {message.forward_from_message_id if message.forward_from_message_id else '—'}"
+    )
+
+    logging.debug(caption)
+
+
+
+    await message.bot.delete_message(chat_id=message.from_user.id, message_id=message.message_id)
+
+
+    key = StorageKey(
+        bot_id=message.bot.id,
+        chat_id=message.chat.id,  # личный чат пользователя
+        user_id=message.from_user.id  # сам пользователь
+
+    )
+
+
+
+    admin_user_data = await state.storage.get_data(key=key)
+
+    buttons = get_start_button()
+
+    # Вариант с изменением сообщения без удаления.
+    photo = FSInputFile('source/pictures/get_id_message.jpg')
+
+    media = InputMediaPhoto(
+        media=photo,
+        caption=caption,
+        parse_mode="HTML")
+
+
+
+    await message.bot.edit_message_media(media=media,
+                                          chat_id=message.from_user.id,
+                                          message_id=admin_user_data.get("message_id", 000),
+                                          reply_markup=buttons)
+
+    # await message.bot.copy_message(
+    #     chat_id=message.from_user.id,
+    #     from_chat_id=-1003976745616,
+    #     message_id=message.forward_from_message_id
+    # )
+
+
+
+@router.callback_query(F.data == "del_info_message")
+async def del_info_message(callback: CallbackQuery, state: FSMContext):
+    await callback.answer("Удаляем информационное сообщение")
+    await callback.bot.delete_message(chat_id=callback.message.chat.id,
+                                      message_id=callback.message.message_id)
+
+
+if __name__ == "__main__":
+
+
+    platega_client = PlategaWebClient(login=LOGIN_WEB_PLATEGA,
+                                      password=PASSWORD_WEB_PLATEGA)
+
+
+
+    start_prev_month = (datetime.datetime.now().replace(day=1) - relativedelta(months=1)).date().isoformat()
+    end_prev_month = (datetime.datetime.now().replace(day=1) - relativedelta(days=1)).date().isoformat()
+
+
+    month_to_date = platega_client.get_statistics_by_currency(date_start=str(start_prev_month), date_end=str(end_prev_month))
+    print(month_to_date)

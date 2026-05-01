@@ -50,7 +50,7 @@ async def get_list_of_tg_ids(session, active: bool):  # TODO Check Bag
 @connection
 async def get_users_enrollments_to_ban(session, now_date: date) -> list[EnrollmentPydantic]:
     users_enrollments_to_ban = []
-    enrollments_to_ban = await EnrollmentDAO.get_user_info_to_ban(session=session, now_date=now_date)
+    enrollments_to_ban = await EnrollmentDAO.get_enrollments_to_ban(session=session, now_date=now_date)
     logging.debug("get_users_enrollments_to_ban\n %s", enrollments_to_ban)
     for enrollment_info in enrollments_to_ban:
         users_enrollments_to_ban.append(EnrollmentPydantic.model_validate(enrollment_info))

@@ -9,7 +9,7 @@ from handlers import (greetings, get_subscribe, check_payment_auto, check_paymen
                       get_creds, github_check_subscribe,
                       choosing_direction, choosing_product,
                       get_payment, choosing_stream, check_fio, how_to_pay, check_email,
-                      choosing_payment_method, edit_adt_posts, get_referral_link, get_referal_program)
+                      choosing_payment_method, get_admin_utils, get_referral_link, get_referal_program)
 from datetime import datetime, timedelta
 from logging.handlers import RotatingFileHandler
 import logging
@@ -222,7 +222,7 @@ async def main():
                        how_to_pay.router,
                        check_email.router,
                        choosing_payment_method.router,
-                       edit_adt_posts.router,
+                       get_admin_utils.router,
                        get_referral_link.router,
                        get_referal_program.router)
 
