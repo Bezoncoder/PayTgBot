@@ -138,13 +138,13 @@ async def set_start(callback: CallbackQuery, state: FSMContext):
 
     #####################################################################################################
 
-    platega_client = PlategaWebClient(login=LOGIN_WEB_PLATEGA,
-                                      password=PASSWORD_WEB_PLATEGA)
+    platega_web_client = PlategaWebClient(login=LOGIN_WEB_PLATEGA,
+                                          password=PASSWORD_WEB_PLATEGA)
 
-    balance_rub = platega_client.get_balance()
-    balance_usdt = platega_client.get_balance(currencycode="USDT")
+    balance_rub = platega_web_client.get_balance()
+    balance_usdt = platega_web_client.get_balance(currencycode="USDT")
     today__date_iso = datetime.datetime.now().date().isoformat()
-    statistics_today = platega_client.get_statistics_by_currency(date_start=str(today__date_iso), date_end=str(today__date_iso))
+    statistics_today = platega_web_client.get_statistics_by_currency(date_start=str(today__date_iso), date_end=str(today__date_iso))
 
     if not statistics_today.statsByCurrency:
         today_sale = 0
@@ -153,21 +153,21 @@ async def set_start(callback: CallbackQuery, state: FSMContext):
 
     date_start_stat = datetime.datetime.now().replace(day=1).date().isoformat()
 
-    month_to_date_stat = platega_client.get_statistics_by_currency(date_start=date_start_stat,
-                                                                   date_end=today__date_iso)
+    month_to_date_stat = platega_web_client.get_statistics_by_currency(date_start=date_start_stat,
+                                                                       date_end=today__date_iso)
 
     if not month_to_date_stat.statsByCurrency:
-        month_to_date = 0
+        month_to_now_date = 0
     else:
-        month_to_date = statistics_today.statsByCurrency[0].turnover
+        month_to_now_date = month_to_date_stat.statsByCurrency[0].turnover
 
 
     start_prev_month_date = (datetime.datetime.now().replace(day=1) - relativedelta(months=1)).date().isoformat()
     end_prev_month_date = (datetime.datetime.now().replace(day=1) - relativedelta(days=1)).date().isoformat()
 
 
-    previous_month = platega_client.get_statistics_by_currency(date_start=str(start_prev_month_date),
-                                                               date_end=str(end_prev_month_date))
+    previous_month = platega_web_client.get_statistics_by_currency(date_start=str(start_prev_month_date),
+                                                                   date_end=str(end_prev_month_date))
 
     # "Month-to-Date"
     # previous_month
@@ -187,7 +187,7 @@ async def set_start(callback: CallbackQuery, state: FSMContext):
         f"• Прошлый месяц ({start_prev_month_date}-{end_prev_month_date}): "
         f"  {previous_month.statsByCurrency[0].netProfit} RUB\n"
         f"• С начала месяца ({date_start_stat}-{today__date_iso}): "
-        f"  {month_to_date} RUB\n"
+        f"  {month_to_now_date} RUB\n"
         f"• Сегодня: {today_sale} RUB"
     )
     # Вариант с изменением сообщения без удаления.
