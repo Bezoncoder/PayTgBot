@@ -250,3 +250,17 @@ if __name__ == "__main__":
     Balance = platega_client.get_balance()
     print(Balance)
 
+    # Litva1 - beget - ssh root@155.212.228.65     %rx%ko%h8H&h
+
+    date_start_stat = datetime.now().replace(day=1).date().isoformat()
+
+    # month_to_date_stat = platega_client.get_statistics_by_currency(date_start=date_start_stat,
+    #                                                                    date_end=today__date_iso)
+
+    # if not month_to_date_stat.statsByCurrency:
+    #     month_to_now_date = 0
+    # else:
+    #     month_to_now_date = statistics_today.statsByCurrency[0].turnover
+    #
+    # print()
+

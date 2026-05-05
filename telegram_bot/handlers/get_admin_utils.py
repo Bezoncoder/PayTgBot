@@ -110,7 +110,7 @@ async def set_start(callback: CallbackQuery, state: FSMContext):
 
 
 @router.callback_query(F.data == "get_balance")
-async def set_start(callback: CallbackQuery, state: FSMContext):
+async def get_balance(callback: CallbackQuery, state: FSMContext):
     await callback.answer("Вы выбрали Меню статистики")
 
     photo = FSInputFile('source/pictures/get_balance.jpg')
@@ -191,15 +191,27 @@ async def set_start(callback: CallbackQuery, state: FSMContext):
         f"• Сегодня: {today_sale} RUB"
     )
     # Вариант с изменением сообщения без удаления.
-    media = InputMediaPhoto(
-        media=photo,
-        caption=caption,
-        parse_mode="HTML")
+    # media = InputMediaPhoto(
+    #     media=photo,
+    #     caption=caption,
+    #     parse_mode="HTML")
 
-    await callback.bot.edit_message_media(media=media,
-                                          chat_id=callback.from_user.id,
-                                          message_id=callback.message.message_id,
-                                          reply_markup=buttons)
+    await callback.bot.delete_message(chat_id=callback.message.chat.id,
+                                      message_id=callback.message.message_id)
+    logging.debug("Сообщение 'get_balance' удалено.")
+
+    # await callback.bot.edit_message_media(media=media,
+    #                                       chat_id=callback.from_user.id,
+    #                                       message_id=callback.message.message_id,
+    #                                       reply_markup=buttons)
+
+    await callback.bot.send_photo(chat_id=callback.message.chat.id,
+                                  photo=photo,
+                                  caption=caption,
+                                  parse_mode="HTML",
+                                  reply_markup=buttons)
+
+    logging.debug("Сообщение 'get_balance' отправлено.")
 
 
 # @router.callback_query(F.data == "get_statistics")
@@ -247,7 +259,7 @@ async def set_start(callback: CallbackQuery, state: FSMContext):
 
 
 @router.callback_query(F.data == "get_id_message")
-async def set_start(callback: CallbackQuery, state: FSMContext):
+async def get_id_message(callback: CallbackQuery, state: FSMContext):
     await callback.answer("Вы выбрали Узнать ID сообщения")
 
     photo = FSInputFile('source/pictures/get_id_message.jpg')
