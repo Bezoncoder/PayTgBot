@@ -67,16 +67,31 @@ async def get_referral_program(callback: CallbackQuery, state: FSMContext):
 
     # Вариант с изменением сообщения без удаления.
 
-    referral_caption = (f"Здесь вы можете посмотреть, что доступно именно вам: "
-                        f"текущий бонусный срок, приглашённых друзей и активные награды.\n\n"
-                        f"🧾 Ваш отчет:\n\n"
-                        f"👥 Пришло: {ref_count}\n"
-                        f"🎁 Бонусные месяцы: {bonus_months} мес.\n"
-                        f"💸 Выплаты по ссылкам: {affiliate_payout} ₽\n\n"
-                        f"✨ За каждого нового друга по вашей ссылке начисляется "
-                        f"1 месяц доступа или проценты от стоимости его покупки\n\n"
-                        f"👥 Количество приглашений влияет на общий бонусный срок и выплаты\n\n"
-                        f"🚀 Делитесь ссылкой и продлевайте VPN бесплатно.")
+    # referral_caption = (f"Здесь вы можете посмотреть, что доступно именно вам: "
+    #                     f"текущий бонусный срок, приглашённых друзей и активные награды.\n\n"
+    #                     f"🧾 Ваш отчет:\n\n"
+    #                     f"👥 Пришло: {ref_count}\n"
+    #                     f"🎁 Бонусные месяцы: {bonus_months} мес.\n"
+    #                     f"💸 Выплаты по ссылкам: {affiliate_payout} ₽\n\n"
+    #                     f"✨ За каждого нового друга по вашей ссылке начисляется "
+    #                     f"1 месяц доступа или проценты от стоимости его покупки\n\n"
+    #                     f"👥 Количество приглашений влияет на общий бонусный срок и выплаты\n\n"
+    #                     f"🚀 Делитесь ссылкой и продлевайте VPN бесплатно.")
+
+    referral_caption = (
+        f"🔥 <b>РЕФЕРАЛКА</b>\n"
+        f"Здесь вы можете посмотреть, что доступно именно вам: "
+        f"текущий бонусный срок, приглашённых друзей и активные награды.\n"
+        f"━━━━━━━━━━━━━━━\n"
+        f"📊 <b>СТАТИСТИКА</b>\n"
+        f"  • 👥 Приглашено: <b>{ref_count}</b>\n"
+        f"  • 🎁 Бонусные месяцы: {bonus_months} мес.\n"
+        f"  • 💸 Выплаты по ссылкам: {affiliate_payout} ₽\n\n"
+        f"━━━━━━━━━━━━━━━\n\n"
+        f"💎 <b>1 друг = 1 месяц доступа или проценты от стоимости его покупки</b>\n\n"
+        f"👥 Количество приглашений влияет на общий бонусный срок и выплаты\n\n"
+        f"🚀 Делитесь ссылкой и продлевайте VPN бесплатно."
+    )
 
     photo = FSInputFile('source/pictures/referral_rewards.jpg')
 
@@ -89,6 +104,9 @@ async def get_referral_program(callback: CallbackQuery, state: FSMContext):
                                           chat_id=callback.from_user.id,
                                           message_id=callback.message.message_id,
                                           reply_markup=get_refer_back_button())
+
+
+
 
 @router.callback_query(F.data.startswith("get_free_month:"))
 async def get_free_month(callback: CallbackQuery, state: FSMContext):
