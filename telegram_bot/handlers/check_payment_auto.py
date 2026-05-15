@@ -87,7 +87,7 @@ router = Router()
 async def check_pay(callback: CallbackQuery, state: FSMContext):
     # check_pay:{stream_id}:{price}:{directions_id}
     await callback.answer(text=f"Проверка Оплаты")
-
+    logging.info(f"Запущена Автоматическая Проверка Оплаты")
     list_data_buttons = callback.data.split(":")
     stream_id = int(list_data_buttons[1])
     price = int(list_data_buttons[2])
@@ -120,6 +120,8 @@ async def check_pay(callback: CallbackQuery, state: FSMContext):
         try:
 
             payment_status = check_payment_status(operation_id_from_provider=user_data.get("operation_id", 000))
+            logging.info(f"Получен статус оплаты для user_tg_id = {callback.from_user.id}: "
+                         f"operation_id = {user_data.get("operation_id")} status = {payment_status}")
 
         except Exception as exception_text:
             # < code > текст < / code >

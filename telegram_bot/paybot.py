@@ -1,5 +1,6 @@
 import asyncio
 import random
+from typing import Any
 
 from aiogram.types import FSInputFile
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -94,16 +95,13 @@ async def check_and_posting():
     count_fail_send = 0
 
     message_to_post_id = random.choice(ADT_MESSAGE_LIST)
+
     for user_info in users_to_posting_rek:
 
         if not user_info.enrollments:
             try:
-                await bot.copy_message(
-                    chat_id=user_info.telegram_id,
-                    from_chat_id=-1003976745616,
-                    message_id=message_to_post_id,
-                    reply_markup=get_start_button()
-                )
+                await bot.copy_message(chat_id=int(user_info.telegram_id), from_chat_id=-1003976745616,
+                                       message_id=message_to_post_id, reply_markup=get_start_button())
                 logging.info(f"✅ Отправлено рекламное сообщение пользователю user_name = {user_info.username}")
                 count_success_send+=1
 

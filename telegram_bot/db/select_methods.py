@@ -1,7 +1,7 @@
 import asyncio
 import logging
 from logging.handlers import RotatingFileHandler
-from typing import List
+from typing import List, Any
 
 import colorlog
 
@@ -21,16 +21,16 @@ async def select_username_id(session):
 
 
 @connection
-async def select_all_users(session) -> list[UserPydantic]:
+async def select_all_users(session) -> list[Any] | None:
     raw_users = await UserDAO.get_all_users(session)
     users =[]
     if not raw_users:
-        return users
+        return None
 
     for raw_user in raw_users:
-        product = UserPydantic.model_validate(raw_user)
+        user = UserPydantic.model_validate(raw_user)
 
-        users.append(product)
+        users.append(user)
     return users
 
 

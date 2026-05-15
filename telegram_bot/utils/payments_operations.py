@@ -28,6 +28,7 @@ def check_payment_status(operation_id_from_provider: str):
     # 'APPROVED'
     operation_status = ''
     check_pay = platega.get_payment_status(transaction_id=operation_id_from_provider)
+    logging.debug(check_pay)
     if check_pay:
         if check_pay.get('status') == 'CONFIRMED':
             operation_status = 'APPROVED'
