@@ -70,8 +70,8 @@ async def set_stream(callback: CallbackQuery, state: FSMContext):
     #                f"Нажимая кнопку «Оплатить», вы соглашаетесь с условиями оферты {link_part}.\n\n"
     #                f'\n⚠️ Оплата производится исключительно с карты физического лица!\n\n')
 
-    politika_url = "https://telegra.ph/Politika-konfidencialnosti-08-15-17"
-    polzovatelskoe_url = "https://telegra.ph/Politika-konfidencialnosti-08-15-17"
+    politika_url = "https://quantumturbovpn.ddns.net/policy"
+    polzovatelskoe_url = "https://quantumturbovpn.ddns.net/soglashenie"
 
     new_caption = (f"🧾 Вы выбрали: {stream_info.title} за {stream_info.price} ₽.\n\n"
                    f"✅ Нажмите «Продолжить» для перехода к оплате!\n\n"
