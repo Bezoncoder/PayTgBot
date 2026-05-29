@@ -12,6 +12,9 @@ from typing import Dict, Any, Optional
 import pandas as pd
 import json
 
+import re
+
+
 # Настройка логирования
 # logging.basicConfig(
 #     level=logging.INFO,
@@ -28,6 +31,7 @@ class XUIClient:
     def __init__(self, base_url_from_panel: str = None,
                  public_inbound_key: str = None, sid: str = None, sni: str = "ya.ru",
                  username: str = None, password: str = None, two_factor: str = None,
+                 token: str = None,
                  sub_path: str = ":2096/1AWEJRPGmKLSZojNjB",
                  verify_ssl: bool = False, auto_login: bool = True):
 
@@ -49,6 +53,7 @@ class XUIClient:
         self.use_https = parsed.scheme == 'https'
         self.username = username
         self.password = password
+        self.token = token
         self.two_factor = two_factor
         self.verify_ssl = verify_ssl
         self.sub_path = sub_path
@@ -56,6 +61,8 @@ class XUIClient:
         self.session.headers.update({
             'Accept': 'application/json',
             'Content-Type': 'application/x-www-form-urlencoded'
+            # 'Authorization': f'Bearer {token}'
+
         })
         # Отключение SSL проверки для самоподписанных сертификатов
         self.session.verify = verify_ssl
@@ -182,28 +189,88 @@ class XUIClient:
 
         return f"vless://{client_uuid}@{host}:{vless_port}?{params_str}#{profile_name}"
 
-    def login(self, username: str = None, password: str = None, two_factor: str = "") -> bool:
+    def login(self, username: str = None, password: str = None, two_factor: str = None, token: str = None) -> bool:
         """Авторизация в 3X-UI"""
         username = username or self.username
         password = password or self.password
-
+        token  = token or self.token
         if not username or not password:
             logger.error("❌ Username/password не указаны!")
             return False
 
-        url = f"{self.base_url}/login/"
+        url = f"{self.base_url}/login"
+        # url = "https://quantumturbovpn.ddns.net:49699/login/"
+        print(url)
         data = {
             'username': username,
             'password': password
         }
+
+        payload_new = json.dumps({
+            "username": username,
+            "password": password
+
+        })
+        # headers = {
+        #     'Content-Type': 'application/json',
+        #     'Accept': 'application/json',
+        #     'Authorization': f'Bearer {token}'
+        # }
+        print(payload_new)
+        # print(headers)
+        # response = requests.request("POST", url, headers=headers, data=payload)
+
+
         if two_factor:
             data['twoFactorCode'] = two_factor
 
         try:
             logger.info(f"Попытка авторизации для пользователя: {username}")
-            response = self.session.post(url, data=data, timeout=30)
-            result = response.json()
+            print("LOGIN")
+            # response = self.session.post(url, data=payload, timeout=30)
+            # print(response)
+            # result = response.json()
+            # print(result)
 
+            # base_url = "https://quantumturbovpn.ddns.net:49699/9RWEJRPGmKLSZojNjB/panel/"
+
+            # Шаг 1: GET на /login — получаем страницу И cookie
+            login_page_test = self.session.get(f"{base_url}/panel/", verify=True, allow_redirects=True)
+            # "CSRF token: BiZMKckz4oSuUzYlWunL1W2VBaErZqyNAaqGlOge1F4"
+            # 9_Vrh_FPCHTkv_ZIMUaHoTaSWOYC_l0DV7SmjqWLZAo
+            print(f"Status GET: {login_page_test.status_code}")
+            print(f"Content-Type: {login_page_test.headers.get('Content-Type')}")
+            print(f"Cookies: {self.session.cookies.get_dict()}")
+
+            # Шаг 2: Ищем CSRF-токен в разных местах
+            csrf_token_find = None
+
+            # Вариант А: meta-тег
+            match_crf = re.search(r'meta name="csrf-token" content="([^"]+)"', login_page_test.text)
+            if match_crf:
+                csrf_token_find = match_crf.group(1)
+                print(f"Found in meta tag: {csrf_token_find}")
+                print("Вариант А: meta-тег")
+
+            url_login = f"https://quantumturbovpn.ddns.net:49699/9RWEJRPGmKLSZojNjB/login"
+
+            payload_new = json.dumps({
+                "username": username,
+                "password": password
+            })
+
+            headers = {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'x-csrf-token': csrf_token_find
+            }
+
+
+            response_login = self.session.post(url_login, headers=headers, data=payload_new, verify=True, allow_redirects=True)
+            print(f"\nStatus POST: {response_login.status_code}")
+            print(f"Response: {response_login.text}")
+            print(f"Cookies после логина: {self.session.cookies.get_dict()}")
+            result = response_login.json()
             if result.get('success'):
                 self.is_authenticated = True
                 self.username = username
@@ -337,6 +404,130 @@ class XUIClient:
 
 
 if __name__ == "__main__":
+
+    # url = "https://quantumturbovpn.ddns.net:49699/9RWEJRPGmKLSZojNjB"
+    # # url = "https://quantumturbovpn.ddns.net:49699/9RWEJRPGmKLSZojNjB/panel/login"
+    #945960
+
+    # payload = json.dumps({
+    #     "username": "sBcdl7KQt9",
+    #     "password": "8Dgwr0u6Cw",
+    #     "twoFactorCode": "274817"
+    # })
+    # headers = {
+    #     'Content-Type': 'application/json',
+    #     'Accept': 'application/json'
+    #     # 'Authorization': 'Bearer 2FC9ZcLPIJiRpHNeMDzCvwQiTKwcw5JZt6trDSd21kpuG1iG'
+    # }
+    #
+    #
+    #
+    # response = requests.request("POST", url, headers=headers, data=payload)
+    # print(response.status_code)
+    # print(response.text)
+    #
+    # import requests
+    # import json
+    # import re
+    #
+    # session = requests.Session()
+    #
+    # base_url = "https://quantumturbovpn.ddns.net:49699/9RWEJRPGmKLSZojNjB/panel/"
+    #
+    # # Шаг 1: GET на /login — получаем страницу И cookie
+    # login_page = session.get(f"{base_url}", verify=True, allow_redirects=True)
+    # # "CSRF token: BiZMKckz4oSuUzYlWunL1W2VBaErZqyNAaqGlOge1F4"
+    # # 9_Vrh_FPCHTkv_ZIMUaHoTaSWOYC_l0DV7SmjqWLZAo
+    # print(f"Status GET: {login_page.status_code}")
+    # print(f"Content-Type: {login_page.headers.get('Content-Type')}")
+    # print(f"Cookies: {session.cookies.get_dict()}")
+    #
+    # # Шаг 2: Ищем CSRF-токен в разных местах
+    # csrf_token = None
+    #
+    # # Вариант А: meta-тег
+    # match = re.search(r'meta name="csrf-token" content="([^"]+)"', login_page.text)
+    # if match:
+    #     csrf_token = match.group(1)
+    #     print(f"Found in meta tag: {csrf_token}")
+    #     print( "Вариант А: meta-тег")
+    #
+    # url = f"https://quantumturbovpn.ddns.net:49699/9RWEJRPGmKLSZojNjB/login"
+    #
+    # payload = json.dumps({
+    #     "username": "sBcdl7KQt9",
+    #     "password": "8Dgwr0u6Cw"
+    # })
+    #
+    # response = session.post(url, headers=headers, data=payload, verify=True, allow_redirects=True)
+    # print(f"\nStatus POST: {response.status_code}")
+    # print(f"Response: {response.text}")
+    # print(f"Cookies после логина: {session.cookies.get_dict()}")
+
+
+    # # Вариант Б: hidden input с name="csrf-token" или name="_csrf"
+    # if not csrf_token:
+    #     match = re.search(r'name=["\']csrf-token["\']\s+value=["\']([^"\']+)["\']', login_page.text)
+    #     if match:
+    #         csrf_token = match.group(1)
+    #         print(f"Found in input (csrf-token): {csrf_token}")
+    #
+    # if not csrf_token:
+    #     match = re.search(r'name=["\']_csrf["\']\s+value=["\']([^"\']+)["\']', login_page.text)
+    #     if match:
+    #         csrf_token = match.group(1)
+    #         print(f"Found in input (_csrf): {csrf_token}")
+    #
+    # # Вариант В: CSRF из cookie (csrftoken, XSRF-TOKEN, csrf)
+    # if not csrf_token:
+    #     csrf_token = session.cookies.get('csrftoken') or session.cookies.get('csrf') or session.cookies.get(
+    #         'XSRF-TOKEN')
+    #     if csrf_token:
+    #         print(f"Found in cookie: {csrf_token}")
+    #
+    # # Если токен всё равно не найден — пробуем без CSRF
+    # if not csrf_token:
+    #     print("CSRF token не найден, пробуем без него!")
+    #     headers = {
+    #         'Content-Type': 'application/json',
+    #         'Accept': 'application/json'
+    #     }
+    # else:
+    #     print(f"CSRF token: {csrf_token}")
+    #     headers = {
+    #         'Content-Type': 'application/json',
+    #         'Accept': 'application/json',
+    #         'x-csrf-token': csrf_token
+    #     }
+    # headers = {
+    #     'Content-Type': 'application/json',
+    #     'Accept': 'application/json',
+    #     'x-csrf-token': csrf_token
+    # }
+    # # Шаг 3: POST на /login
+    # url = f"https://quantumturbovpn.ddns.net:49699/9RWEJRPGmKLSZojNjB/login"
+    #
+    # payload = json.dumps({
+    #     "username": "sBcdl7KQt9",
+    #     "password": "8Dgwr0u6Cw"
+    # })
+    #
+    # response = session.post(url, headers=headers, data=payload, verify=True, allow_redirects=True)
+    # print(f"\nStatus POST: {response.status_code}")
+    # print(f"Response: {response.text}")
+    # print(f"Cookies после логина: {session.cookies.get_dict()}")
+
+    # Если ответ 200 — проверяем, вошли ли мы
+    # if response.status_code == 200:
+    #     try:
+    #         data = response.json()
+    #         print(f"JSON: {data}")
+    #     except:
+    #         print("Ответ не JSON, текст:", response.text)
+
+
+
+
     base_url = "https://quantumturbovpn.ddns.net:49699/9RWEJRPGmKLSZojNjB"
 
     expire_time = 86400
@@ -345,9 +536,9 @@ if __name__ == "__main__":
     # SEERVER PARAMS
     PUBLIC_KEY = "QZ63wahdkxh_n8HoY6M10zcGuT6Ig6-PDZh-sFBhAWo"
 
-    vless_user_name = "8edc1e1a-5673-4fad-a5b3-43f13966d66f"
-
-    SID = "482faa37e9"
+    # vless_user_name = "8edc1e1a-5673-4fad-a5b3-43f13966d66f"
+    # TOKEN_NEW = "2FC9ZcLPIJiRpHNeMDzCvwQiTKwcw5JZt6trDSd21kpuG1iG"
+    # SID = "482faa37e9"
 
     # "vless_link': 'vless://a400fbb6-fa9b-447c-8575-a4a1828425cf@illiriaakva.ru:443?type=tcp&encryption=none&security=tls&fp=chrome&alpn=http%2F1.1&flow=xtls-rprx-vision#aaaaff111fkkkk"
     # "https://illiriaakva.ru:49699/9RWEJRPGmKLSZojNjB"
@@ -355,14 +546,16 @@ if __name__ == "__main__":
 
 
 
-    client_mew = XUIClient(base_url_from_panel=base_url, username=USER, password=PASSWORD)
+    client_mew = XUIClient(base_url_from_panel=base_url,
+                           username=USER,
+                           password=PASSWORD)
     # pprint(client_mew.add_client(email="NEW_TEST0999007TestT").get("subscription_link"))
     # pprint(client_mew.get_list_inbounds())
-    # pprint(client_mew.get_inbound(inbound_id=1))
-    uuid = '8edc1e1a-5673-4fad-a5b3-43f13966d66f'
-
-    print(client_mew.get_client_ips(inbound_id="1", email="8edc1e1a-5673-4fad-a5b3-43f13966d66f"))
-    pprint(client_mew.remove_client(client_id="8edc1e1a-5673-4fad-a5b3-43f13966d66f"))
+    pprint(client_mew.get_inbound(inbound_id=1))
+    # uuid = '8edc1e1a-5673-4fad-a5b3-43f13966d66f'
+    # print(client_mew.get_list_inbounds())
+    # print(client_mew.get_client_ips(inbound_id="1", email="8edc1e1a-5673-4fad-a5b3-43f13966d66f"))
+    # pprint(client_mew.remove_client(client_id="8edc1e1a-5673-4fad-a5b3-43f13966d66f"))
 
     # # {'msg': '', 'obj': [], 'success': True}
     # obj = client_mew.get_client_traffic_by_id(client_uuid=uuid).get("obj")
