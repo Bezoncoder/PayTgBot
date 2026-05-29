@@ -235,7 +235,7 @@ class XUIClient:
             # base_url = "https://quantumturbovpn.ddns.net:49699/9RWEJRPGmKLSZojNjB/panel/"
 
             # Шаг 1: GET на /login — получаем страницу И cookie
-            login_page_test = self.session.get(f"{base_url}/panel/", verify=True, allow_redirects=True)
+            login_page_test = self.session.get(f"{self.base_url}/panel/", verify=True, allow_redirects=True)
             # "CSRF token: BiZMKckz4oSuUzYlWunL1W2VBaErZqyNAaqGlOge1F4"
             # 9_Vrh_FPCHTkv_ZIMUaHoTaSWOYC_l0DV7SmjqWLZAo
             print(f"Status GET: {login_page_test.status_code}")
@@ -252,7 +252,7 @@ class XUIClient:
                 print(f"Found in meta tag: {csrf_token_find}")
                 print("Вариант А: meta-тег")
 
-            url_login = f"https://quantumturbovpn.ddns.net:49699/9RWEJRPGmKLSZojNjB/login"
+            url_login = f"{self.base_url}/login"
 
             payload_new = json.dumps({
                 "username": username,
