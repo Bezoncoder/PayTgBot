@@ -222,12 +222,12 @@ class XUIClient:
         return self._make_request("backuptotgbot", method="POST")
 
 if __name__=="__main__":
-    APITOKEN = "EqMX2CMUtd2xbZlD7fUITtzMDCgWbLw2kC2m2JgBT47olQbR"
+    API_VLESS_TOKEN = ""
     BASE_URL = "https://origin.illiriaakva.online:49699/9RWEJRPGmKLSZojNjB"
     # "https://quantumturbovpn.ddns.net:49699/9RWEJRPGmKLSZojNjB"
     client = XUIClient(
         base_url_from_panel="https://origin.illiriaakva.online:49699/9RWEJRPGmKLSZojNjB",
-        api_token=APITOKEN,
+        api_token=API_VLESS_TOKEN,
         verify_ssl=True
     )
 
