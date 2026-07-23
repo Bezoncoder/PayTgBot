@@ -255,11 +255,17 @@ async def approve_check(callback: CallbackQuery, state: FSMContext):
                                  sid=product_info.short_id)
 
         client_uuid_from_payment = str(payment_data.operation_id)
+        # link = vless_client.add_client(client_uuid=client_uuid_from_payment,
+        #                                flow="xtls-rprx-vision",
+        #                                inbound_id="1",
+        #                                expiry_time=expire_time_sec,
+        #                                email=f"{user_telegram_id}_{client_uuid_from_payment}").get('subscription_link')
         link = vless_client.add_client(client_uuid=client_uuid_from_payment,
                                        flow="xtls-rprx-vision",
-                                       inbound_id="1",
+                                       total_gb=product_info.total_gb,
+                                       inbound_id=str(product_info.inbound_id),
                                        expiry_time=expire_time_sec,
-                                       email=f"{user_telegram_id}_{client_uuid_from_payment}").get('subscription_link')
+                                       email=f"{client_uuid_from_payment}").get('subscription_link')
     except Exception as exception_text:
         # < code > текст < / code >
         buttons = get_errors_button()
