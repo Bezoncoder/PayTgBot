@@ -242,7 +242,7 @@ async def check_pay(callback: CallbackQuery, state: FSMContext):
                 link = vless_client.add_client(client_uuid=client_uuid_from_payment,
                                                flow="xtls-rprx-vision",
                                                total_gb=product_info.total_gb,
-                                               inbound_id=product_info.inbound_id,
+                                               inbound_id=str(product_info.inbound_id),
                                                expiry_time=expire_time_sec,
                                                email=f"{client_uuid_from_payment}").get('subscription_link')
             else:
