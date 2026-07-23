@@ -125,7 +125,7 @@ class XUIClient:
         client_data = {
             "id": final_id,
             "email": final_email,
-            "totalGB": int(total_gb),
+            "totalGB": int(total_gb)*(1024 ** 3),
             "expiryTime": expiry_time,
             "tgId": 0,
             "limitIp": limit_ip,
