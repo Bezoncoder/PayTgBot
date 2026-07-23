@@ -223,6 +223,7 @@ class XUIClient:
 
 if __name__=="__main__":
     API_VLESS_TOKEN = ""
+
     BASE_URL = "https://origin.illiriaakva.online:49699/9RWEJRPGmKLSZojNjB"
     # "https://quantumturbovpn.ddns.net:49699/9RWEJRPGmKLSZojNjB"
     client = XUIClient(
