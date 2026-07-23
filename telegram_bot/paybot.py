@@ -65,6 +65,7 @@ async def check_and_ban():
             vless_client = XUIClient(base_url_from_panel=product_info.base_url,
                                      username=USER,
                                      password=PASSWORD,
+                                     api_token=product_info.api_vless_token,
                                      verify_ssl=True,
                                      public_inbound_key=product_info.public_key,
                                      sid=product_info.short_id)

@@ -26,6 +26,7 @@ class ProductPydantic(BaseModel):  # Продукты по направлени�
     base_url: str | None
     total_gb: int | None
     inbound_id: int | None
+    api_vless_token: str | None
     public_key: str | None
     short_id: str | None
     streams: list[StreamPydantic] | None

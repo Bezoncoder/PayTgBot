@@ -80,6 +80,7 @@ class Product(Base):  # Продукты по направлениям
     short_id: Mapped[str | None] = mapped_column(Text)
     total_gb: Mapped[int | None]
     inbound_id: Mapped[int | None]
+    api_vless_token: Mapped[str | None]
     # Связь один-ко-многим с Stream
     streams: Mapped[list["Stream"]] = relationship(
         "Stream",
