@@ -78,7 +78,8 @@ class Product(Base):  # Продукты по направлениям
     base_url: Mapped[str | None]
     public_key: Mapped[str | None] = mapped_column(Text)
     short_id: Mapped[str | None] = mapped_column(Text)
-
+    total_gb: Mapped[int | None]
+    inbound_id: Mapped[int | None]
     # Связь один-ко-многим с Stream
     streams: Mapped[list["Stream"]] = relationship(
         "Stream",

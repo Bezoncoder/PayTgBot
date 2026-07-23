@@ -241,9 +241,10 @@ async def check_pay(callback: CallbackQuery, state: FSMContext):
                 logging.info(f"📢 Создаем ссылку для клиента с UUID = {client_uuid_from_payment}")
                 link = vless_client.add_client(client_uuid=client_uuid_from_payment,
                                                flow="xtls-rprx-vision",
-                                               inbound_id="1",
+                                               total_gb=product_info.total_gb,
+                                               inbound_id=product_info.inbound_id,
                                                expiry_time=expire_time_sec,
-                                               email=f"{callback.from_user.id}_{client_uuid_from_payment}").get('subscription_link')
+                                               email=f"{client_uuid_from_payment}").get('subscription_link')
             else:
                 logging.info(f"💡 Клиент c UUID = {client_uuid_from_payment} уже есть в 3xui")
                 logging.debug(obj)

@@ -24,6 +24,8 @@ class ProductPydantic(BaseModel):  # Продукты по направлени�
     capacity: int | None
     direction_id: int
     base_url: str | None
+    total_gb: int | None
+    inbound_id: int | None
     public_key: str | None
     short_id: str | None
     streams: list[StreamPydantic] | None

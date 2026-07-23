@@ -179,11 +179,11 @@ async def approve_check(callback: CallbackQuery, state: FSMContext):
     product_info = await get_product_info(id_product=stream_info.product_id)
 
     # Обновляем запись в БД об оплате
-    # TODO payment_id
+    # TODO payment_id СДЕЛАТЬ ПРОВЕРКУ payment_data
     try:
         payment_data = await update_payment_data(
             payment_id=user_data.get("payment_id", 000),
-            new_operation_id=user_data.get("operation_id", 000),
+            new_operation_id=user_data.get("operation_id", "000"),
             new_status="APPROVED_MANUAL",
             stream_id=stream_info.id
         )
@@ -206,7 +206,7 @@ async def approve_check(callback: CallbackQuery, state: FSMContext):
 
     # TODO сделать проверку наличия реферальной записи
     # SELECT referral_rewards WHERE active_status==None
-    if payment_data.amount != 30:
+    if payment_data and payment_data.amount != 30:
         print("⚠️ — предупреждение, требует внимания")
         user_info = await get_user_info_by_tg_id(tg_user_id=user_telegram_id)
 
