@@ -24,7 +24,7 @@ from utils.get_links import get_subscribe_link
 from utils.payments import tochka_bank
 from utils.payments_operations import check_payment_status
 
-from settings.config import USER, PASSWORD, TECH_CHANNEL
+from settings.config import USER, PASSWORD, TECH_CHANNEL, API_VLESS_TOKEN
 
 from db.add_methods_dao import set_pay, add_new_enrollments
 from utils.user_veles_manager import UserVelesManagerAPI
@@ -229,6 +229,7 @@ async def check_pay(callback: CallbackQuery, state: FSMContext):
             vless_client = XUIClient(base_url_from_panel=base_url,
                                      username=USER,
                                      password=PASSWORD,
+                                     api_token=API_VLESS_TOKEN,
                                      verify_ssl=True,
                                      public_inbound_key=product_info.public_key,
                                      sid=product_info.short_id)
