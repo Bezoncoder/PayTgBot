@@ -105,8 +105,8 @@ async def check_account_summary_from_message(message: Message, state: FSMContext
 
     for enrolment in user_info.enrollments:
         if enrolment.active:
-            caption.join(f"🏷️ VelesName: <code>{enrolment.vless_user_name}</code>\n")
-            caption.join(f"🔗 Link: <code>{enrolment.vless_link}</code>\n\n")
+            caption.join(f"🏷️ VelesName: {enrolment.vless_user_name}\n")
+            caption.join(f"🔗 Link: {enrolment.vless_link}\n\n")
         else:
             caption.join(f"У данного пользователя нет активных подписок.\n")
             caption.join(f"TG_NAME: {message.forward_from.username}\n")
