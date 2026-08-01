@@ -52,7 +52,7 @@ async def set_product(callback: CallbackQuery, state: FSMContext):
     ################## Проверяем, не куплен ли продукт ранее #################
     # user_info = await get_user_info_by_tg_id(tg_user_id=callback.from_user.id)
     logging.info(
-        "Выбран продукт: %s\nИмеет Потоки: %s",
+        "Выбран продукт: %s\nИмеет Тарифы: %s",
         product_pydantic.title,
         product_pydantic.streams,
     )
