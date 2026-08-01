@@ -10,7 +10,8 @@ from handlers import (greetings, get_subscribe, check_payment_auto, check_paymen
                       get_creds, github_check_subscribe,
                       choosing_direction, choosing_product,
                       get_payment, choosing_stream, check_fio, how_to_pay, check_email,
-                      choosing_payment_method, get_admin_utils, get_referral_link, get_referal_program)
+                      choosing_payment_method, get_admin_utils, get_referral_link,
+                      get_referal_program, get_account_summary)
 from datetime import datetime, timedelta
 from logging.handlers import RotatingFileHandler
 import logging
@@ -223,7 +224,8 @@ async def main():
                        choosing_payment_method.router,
                        get_admin_utils.router,
                        get_referral_link.router,
-                       get_referal_program.router)
+                       get_referal_program.router,
+                       get_account_summary.router)
 
     # Запускаем бота и пропускаем все накопленные входящие
     await bot.delete_webhook(drop_pending_updates=True)
