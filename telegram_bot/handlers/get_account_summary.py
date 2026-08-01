@@ -92,7 +92,7 @@ async def check_account_summary_from_message(message: Message, state: FSMContext
 
     # GET USER ENROLMENTS
 
-    user_info = await get_user_info_by_tg_id(tg_user_id=message.forward_from.id)
+    user_info = await get_user_info_by_tg_id(tg_user_id=int(message.forward_from.id))
 
     # user_enrolments = [EnrollmentPydantic]
 
@@ -107,6 +107,12 @@ async def check_account_summary_from_message(message: Message, state: FSMContext
         if enrolment.active:
             caption.join(f"🏷️ VelesName: <code>{enrolment.vless_user_name}</code>\n")
             caption.join(f"🔗 Link: <code>{enrolment.vless_link}</code>\n\n")
+        else:
+            caption.join(f"У данного пользователя нет активных подписок.\n")
+            caption.join(f"TG_NAME: {message.forward_from.username}\n")
+            caption.join(f"TG_ID: {message.forward_from.id}\n")
+
+
 
     await message.bot.delete_message(chat_id=message.from_user.id, message_id=message.message_id)
 
