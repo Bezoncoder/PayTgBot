@@ -303,6 +303,22 @@ def get_admin_button() -> InlineKeyboardMarkup:
     builder.button(text="Баланс", callback_data=f"get_balance")
     # builder.button(text="За сегодня", callback_data=f"get_statistics")
     builder.button(text="Узнать ID", callback_data=f"get_id_message")
+    builder.button(text="Сводка по аккаунту", callback_data=f"get_account_summary_menu")
+    builder.button(text="Главное меню", callback_data=f"set: start")
+
+    builder.adjust(1)
+
+    return builder.as_markup(resize_keyboard=True)
+
+def get_account_summary_button(user_tg_id:int|None) -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+
+    if user_tg_id:
+        builder.button(text="Сводка по аккаунту", callback_data=f"get_user_summary:{user_tg_id}")
+    # builder.button(text="За сегодня", callback_data=f"get_statistics")
+    # builder.button(text="Узнать ID", callback_data=f"get_id_message")
+
+    builder.button(text="Назад", callback_data=f"get_utils")
     builder.button(text="Главное меню", callback_data=f"set: start")
 
     builder.adjust(1)

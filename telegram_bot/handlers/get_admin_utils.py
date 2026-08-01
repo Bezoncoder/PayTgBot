@@ -58,7 +58,7 @@ router = Router()
 
 
 @router.callback_query(F.data == "get_utils")
-async def set_start(callback: CallbackQuery, state: FSMContext):
+async def get_utils(callback: CallbackQuery, state: FSMContext):
     await callback.answer("Вы выбрали Админ Меню")
 
     photo = FSInputFile('source/pictures/admin_utils.jpg')
