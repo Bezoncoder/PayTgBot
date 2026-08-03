@@ -239,7 +239,7 @@ async def check_and_posting():
 
 
 
-def main():
+async def main():
     logging.info("Старт Bot Loging")
 
     # Настройка Шедулера
@@ -291,9 +291,7 @@ def main():
     # logging.info("Бот Запущен")
     # await dp.start_polling(bot)
 
-    # Создаем приложение и запускаем его
-    app = create_app()
-    web.run_app(app=app, host="155.212.228.65", port=8000)
+
 
 if __name__ == "__main__":
     # Настройка логирования
@@ -327,5 +325,8 @@ if __name__ == "__main__":
     )
 
     # Запуск бота
-    # asyncio.run(main())
-    main()
+    # Создаем приложение и запускаем его
+    app = create_app()
+    web.run_app(app=app, host="155.212.228.65", port=8000)
+    asyncio.run(main())
+
