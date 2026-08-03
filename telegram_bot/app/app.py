@@ -1,3 +1,5 @@
+import logging
+
 from aiohttp import web
 from aiogram.types import Update
 from settings.config import bot, dp
@@ -24,27 +26,30 @@ async def home_page(request: web.Request) -> web.Response:
     html_content = file_path.read_text(encoding="utf-8")
     return web.Response(text=html_content, content_type="text/html")
 
+async def payment_success(request: web.Request) -> web.Response:
+    try:
+        operation_id = request.query.get("operation_id")
+        successful_raw = request.query.get("successful")
 
-async def robokassa_result(request: web.Request) -> web.Response:
-    """
-    Обработчик для отображения главной страницы из файла source/templates/index.html.
-    """
-    file_path = Path("source/templates/index.html")
+        if operation_id is None or successful_raw is None:
+            return web.json_response(
+                {"success": False, "message": "operation_id and successful are required"},
+                status=400
+            )
 
-    if not file_path.exists():
-        raise web.HTTPNotFound(text="Файл source/templates/index.html не найден")
+        successful = successful_raw
 
-    html_content = file_path.read_text(encoding="utf-8")
-    return web.Response(text=html_content, content_type="text/html")
+        if not successful:
 
-async def robokassa_fail(request: web.Request) -> web.Response:
-    """
-    Обработчик для отображения главной страницы из файла source/templates/index.html.
-    """
-    file_path = Path("source/templates/index.html")
+            return web.json_response({
+                "success": False,
+                "message": "Payment not confirmed",
+                "operation_id": operation_id
+            })
 
-    if not file_path.exists():
-        raise web.HTTPNotFound(text="Файл source/templates/index.html не найден")
 
-    html_content = file_path.read_text(encoding="utf-8")
-    return web.Response(text=html_content, content_type="text/html")
+        return web.Response(status=200)
+
+    except Exception:
+        logging.exception("payment_success error")
+        return web.Response(status=500)

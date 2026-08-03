@@ -27,7 +27,7 @@ from db.select_methods import (get_userinfo_to_ban,
                                get_product_info)
 from utils.vlessuiapi import XUIClient
 
-from app.app import handle_webhook, robokassa_result, robokassa_fail, home_page
+from app.app import handle_webhook, home_page, payment_success
 from aiogram.webhook.aiohttp_server import setup_application
 from aiohttp import web
 
@@ -43,6 +43,19 @@ ADMINS = [5866726660, 1773955529]
 #  -1002917599861 Bootcamp Supergroup_ID
 # await bot.ban_chat_member(chat_id, user_id)
 # await bot.unban_chat_member(chat_id, user_id)
+
+async def start_scheduler(app):
+    scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
+    scheduler.add_job(check_and_posting, trigger="cron", hour=20, minute=10)
+    scheduler.start()
+    app["scheduler"] = scheduler
+    logging.info("Scheduler started")
+
+async def stop_scheduler(app):
+    scheduler = app.get("scheduler")
+    if scheduler:
+        scheduler.shutdown(wait=False)
+        logging.info("Scheduler stopped")
 
 async def on_startup(app):
     """
@@ -82,8 +95,7 @@ def create_app():
 
     # Регистрация обработчиков маршрутов
     app.router.add_post(f"/{BOT_TOKEN}", handle_webhook)
-    app.router.add_post("/robokassa/result/", robokassa_result)
-    app.router.add_get("/robokassa/fail/", robokassa_fail)
+    app.router.add_post("/api/payment-success", payment_success)
     app.router.add_get("/", home_page)
 
     # Настройка приложения с диспетчером и ботом
@@ -91,7 +103,10 @@ def create_app():
 
     # Регистрация функций запуска и остановки
     app.on_startup.append(on_startup)
+    app.on_startup.append(start_scheduler)
     app.on_shutdown.append(on_shutdown)
+    app.on_shutdown.append(stop_scheduler)
+
     return app
 
 
