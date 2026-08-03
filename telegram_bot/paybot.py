@@ -324,10 +324,7 @@ if __name__ == "__main__":
         format="%(asctime)s [%(levelname)s] %(message)s"
     )
 
-    # Запуск бота
-    # Создаем приложение и запускаем его
-    app = create_app()
-    web.run_app(app=app, host="0.0.0.0", port=8000)
+
     # asyncio.run(main())
     # Подключаем маршруты
     dp.include_routers(greetings.router,
@@ -348,3 +345,8 @@ if __name__ == "__main__":
                        get_referral_link.router,
                        get_referal_program.router,
                        get_account_summary.router)
+
+    # Запуск бота
+    # Создаем приложение и запускаем его
+    app = create_app()
+    web.run_app(app=app, host="0.0.0.0", port=8000)
