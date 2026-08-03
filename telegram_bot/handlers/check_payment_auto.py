@@ -305,7 +305,7 @@ async def check_pay(callback: CallbackQuery, state: FSMContext):
         )
         animation = FSInputFile("source/pictures/successful_payment.jpg")
         media = InputMediaPhoto(media=animation, caption=caption)
-        await state.clear()
+        # await state.clear()
 
     # "MANUAL"
     else:
