@@ -218,3 +218,5 @@ telegram_bot/migration/script.py.mako
 telegram_bot/texts.txt
 telegram_bot/PayTgBot_Info.md
 telegram_bot/compose.yaml
+PayTgBot_Info.md
+compose.yaml
