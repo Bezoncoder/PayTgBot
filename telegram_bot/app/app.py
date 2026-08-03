@@ -34,6 +34,8 @@ async def home_page(request: web.Request) -> web.Response:
     return web.Response(text=html_content, content_type="text/html")
 
 async def payment_success(request: web.Request) -> web.Response:
+    logging.info("⚠️ Получен payment_success request")
+
     try:
         operation_id = request.query.get("operation_id")
         successful_raw = request.query.get("successful")
@@ -74,6 +76,8 @@ async def payment_success(request: web.Request) -> web.Response:
             current_state = await user_state.get_state()
             user_data = await user_state.get_data()
 
+            logging.info(f"⚠️ {user_data}")
+
             # Получаем Данные Потока и Продукта
             stream_info = await get_stream_info(id_stream=int(user_data.get("stream_id_int")))
             product_info = await get_product_info(id_product=stream_info.product_id)
@@ -99,7 +103,7 @@ async def payment_success(request: web.Request) -> web.Response:
             )
             animation = FSInputFile("source/pictures/successful_payment.jpg")
             media = InputMediaPhoto(media=animation, caption=caption)
-            bot.edit_message_media(message_id=user_data.get("tg_message_id"),
+            await bot.edit_message_media(message_id=user_data.get("tg_message_id"),
                                    media = media,
                                    reply_markup = get_back_button(stream_id=stream_info.id,
                                                                   price=stream_info.price,
@@ -108,11 +112,7 @@ async def payment_success(request: web.Request) -> web.Response:
                                                                   method_value=user_data.get("pay_method"))
                                    )
 
-
-
-
-
-
+            # expected = {"success": True, "message": "operation_id and successful are required"}
             return web.json_response(
                 {"success": True, "message": "operation_id and successful are required"},
                 status=200
