@@ -327,4 +327,5 @@ if __name__ == "__main__":
     )
 
     # Запуск бота
-    asyncio.run(main())
+    # asyncio.run(main())
+    main()
