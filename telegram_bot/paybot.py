@@ -49,7 +49,7 @@ async def on_startup(app):
     Выполняется при запуске приложения.
     """
     # await set_default_commands()
-    await bot.set_webhook("http://litva.illiriaakva.online")
+    await bot.set_webhook("https://litva.illiriaakva.online")
     for admin_id in ADMINS:
         try:
             await bot.send_message(admin_id, 'Бот запущен 🥳.')
