@@ -1,3 +1,5 @@
+from aiogram.fsm.storage.memory import MemoryStorage
+from aiogram import Bot, Dispatcher
 import os
 
 YOOMONEY_TOKEN = os.getenv("YOOMONEY_TOKEN")
@@ -12,6 +14,8 @@ LOGIN_WEB_PLATEGA = os.getenv("LOGIN_WEB_PLATEGA")
 PASSWORD_WEB_PLATEGA = os.getenv("PASSWORD_WEB_PLATEGA")
 API_VLESS_TOKEN = os.getenv("API_VLESS_TOKEN")
 
+dp = Dispatcher(storage=MemoryStorage())
+bot = Bot(token=BOT_TOKEN)
 
 # DB LOCAL
 

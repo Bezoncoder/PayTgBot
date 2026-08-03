@@ -18,7 +18,7 @@ import logging
 import colorlog
 
 from keyboards.get_menu import get_start_button, get_del_button
-from settings.config import BOT_TOKEN, TECH_CHANNEL, USER, PASSWORD
+from settings.config import BOT_TOKEN, TECH_CHANNEL, USER, PASSWORD, bot, dp
 from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
 from db.select_methods import (get_userinfo_to_ban,
@@ -27,14 +27,73 @@ from db.select_methods import (get_userinfo_to_ban,
                                get_product_info)
 from utils.vlessuiapi import XUIClient
 
-bot = Bot(token=BOT_TOKEN)
+from app.app import handle_webhook, robokassa_result, robokassa_fail, home_page
+from aiogram.webhook.aiohttp_server import setup_application
+from aiohttp import web
+
+
+# bot = Bot(token=BOT_TOKEN)
 
 ADT_MESSAGE_LIST=[3,5,6,7,8,10,11,12,13]
+
+ADMINS = [5866726660, 1773955529]
+
 
 # user subscription control @getidsbot - Бот, который выдает ID чата
 #  -1002917599861 Bootcamp Supergroup_ID
 # await bot.ban_chat_member(chat_id, user_id)
 # await bot.unban_chat_member(chat_id, user_id)
+
+async def on_startup(app):
+    """
+    Выполняется при запуске приложения.
+    """
+    # await set_default_commands()
+    await bot.set_webhook("http://litva.illiriaakva.online")
+    for admin_id in ADMINS:
+        try:
+            await bot.send_message(admin_id, 'Бот запущен 🥳.')
+        except Exception as e:
+            print(e)
+            # logger.error(f"Не удалось отправить сообщение админу {admin_id}: {e}")
+    # logger.info("Бот успешно запущен.")
+
+async def on_shutdown(app):
+    """
+    Выполняется при остановке приложения.
+    """
+    for admin_id in ADMINS:
+        try:
+            await bot.send_message(admin_id, 'Бот остановлен. Почему? 😔')
+        except Exception as e:
+            print(e)
+            # logger.error(f"Не удалось отправить сообщение админу {admin_id}: {e}")
+    await bot.delete_webhook(drop_pending_updates=True)
+    await bot.session.close()
+    # logger.error("Бот остановлен!")
+
+
+def create_app():
+    """
+    Создает и настраивает приложение aiohttp.
+    """
+    # Создаем приложение
+    app = web.Application()
+
+    # Регистрация обработчиков маршрутов
+    app.router.add_post(f"/{BOT_TOKEN}", handle_webhook)
+    app.router.add_post("/robokassa/result/", robokassa_result)
+    app.router.add_get("/robokassa/fail/", robokassa_fail)
+    app.router.add_get("/", home_page)
+
+    # Настройка приложения с диспетчером и ботом
+    setup_application(app, dp, bot=bot)
+
+    # Регистрация функций запуска и остановки
+    app.on_startup.append(on_startup)
+    app.on_shutdown.append(on_shutdown)
+    return app
+
 
 async def check_and_ban():
     logging.info("Запуск Проверки Подписок")
@@ -202,7 +261,7 @@ async def main():
     scheduler.start()
     logging.info("Настройка Шедулера завершена.")
 
-    dp = Dispatcher(storage=MemoryStorage())
+    # dp = Dispatcher(storage=MemoryStorage())
 
     # dp.message.middleware(UserInternalIdMiddleware())
     # dp.callback_query.middleware(how_to_pay.HowToPayCleanupMiddleware())
@@ -228,10 +287,13 @@ async def main():
                        get_account_summary.router)
 
     # Запускаем бота и пропускаем все накопленные входящие
-    await bot.delete_webhook(drop_pending_updates=True)
-    logging.info("Бот Запущен")
-    await dp.start_polling(bot)
+    # await bot.delete_webhook(drop_pending_updates=True)
+    # logging.info("Бот Запущен")
+    # await dp.start_polling(bot)
 
+    # Создаем приложение и запускаем его
+    app = create_app()
+    web.run_app(app=app, host="155.212.228.65", port=8000)
 
 if __name__ == "__main__":
     # Настройка логирования

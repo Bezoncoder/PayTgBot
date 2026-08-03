@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="index, follow">
+
+    <title>СуперВПН сервис — быстрый и удобный VPN</title>
+    <meta name="description" content="СуперВПН сервис — быстрый VPN для телефона, компьютера и Telegram. Простое подключение, защита соединения и стабильная работа.">
+
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="СуперВПН сервис — быстрый и удобный VPN">
+    <meta property="og:description" content="Быстрый VPN для телефона, компьютера и Telegram.">
+    <meta property="og:site_name" content="СуперВПН сервис">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", Arial, sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(circle at 20% 30%, rgba(100, 100, 255, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 70% 70%, rgba(255, 100, 150, 0.12) 0%, transparent 40%),
+                radial-gradient(circle at 40% 80%, rgba(100, 255, 200, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 80% 20%, rgba(255, 200, 100, 0.08) 0%, transparent 40%);
+            animation: floatBg 15s ease-in-out infinite;
+            z-index: -2;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                radial-gradient(2px 2px at 20px 30px, rgba(255,255,255,0.3), transparent),
+                radial-gradient(2px 2px at 90px 70px, rgba(100,200,255,0.4), transparent),
+                radial-gradient(1px 1px at 50px 90px, rgba(255,100,100,0.5), transparent);
+            animation: particles 8s linear infinite;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @keyframes floatBg {
+            0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.6; }
+            25% { transform: scale(1.05) rotate(2deg); opacity: 0.8; }
+            50% { transform: scale(1.02) rotate(-2deg); opacity: 0.7; }
+            75% { transform: scale(1.08) rotate(1deg); opacity: 0.9; }
+        }
+
+        @keyframes particles {
+            from { transform: translateY(0); }
+            to { transform: translateY(-50px); }
+        }
+
+        .wrapper {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 70px 20px 40px;
+        }
+
+        h1 {
+            font-size: clamp(2.2rem, 5vw, 4rem);
+            font-weight: 800;
+            margin-bottom: 20px;
+            color: #ffffff;
+        }
+
+        .subtitle {
+            font-size: clamp(1rem, 2vw, 1.25rem);
+            color: #d6d6d6;
+            max-width: 760px;
+            margin: 0 auto;
+        }
+
+        .section {
+            background: rgba(26, 26, 30, 0.82);
+            backdrop-filter: blur(15px);
+            border: 1px solid #333;
+            border-radius: 18px;
+            padding: 28px;
+            margin-bottom: 22px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+        }
+
+        .section h2 {
+            font-size: 1.6rem;
+            margin-bottom: 14px;
+            color: #ffffff;
+        }
+
+        .section p {
+            color: #e7e7e7;
+            margin-bottom: 14px;
+        }
+
+        .highlight {
+            background: rgba(42, 42, 46, 0.95);
+            border: 1px solid #555;
+            border-radius: 14px;
+            padding: 18px;
+            margin-top: 18px;
+            color: #f2f2f2;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-top: 18px;
+        }
+
+        .feature {
+            background: rgba(37, 37, 41, 0.92);
+            border: 1px solid #404040;
+            border-radius: 14px;
+            padding: 18px;
+        }
+
+        .feature strong {
+            display: block;
+            margin-bottom: 8px;
+            color: #ffffff;
+            font-size: 1.05rem;
+        }
+
+        .footer-note {
+            text-align: center;
+            color: #bdbdbd;
+            font-size: 0.95rem;
+            margin-top: 10px;
+            padding-bottom: 20px;
+        }
+
+        strong {
+            color: #ffffff;
+        }
+
+        @media (max-width: 768px) {
+            .wrapper {
+                padding: 20px 14px;
+            }
+
+            .hero {
+                padding: 40px 10px 24px;
+            }
+
+            .section {
+                padding: 20px;
+            }
+
+            .features {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <section class="hero">
+            <h1>СуперВПН сервис</h1>
+            <p class="subtitle">
+                Быстрый и удобный VPN для телефона, компьютера и Telegram. Простое подключение, стабильная работа и защита соединения в один клик.
+            </p>
+        </section>
+
+        <section class="section">
+            <h2>Что это за сервис</h2>
+            <p>
+                <strong>СуперВПН сервис</strong> — это удобный VPN для повседневного использования, который помогает безопаснее подключаться к интернету, скрывать IP-адрес и защищать трафик.
+            </p>
+            <p>
+                Сервис подходит для смартфонов, компьютеров и других устройств, а подключение занимает всего несколько секунд.
+            </p>
+
+            <div class="highlight">
+                <strong>Как это работает:</strong> вы подключаетесь к VPN, и весь интернет-трафик проходит через защищённый сервер. Это помогает повысить приватность, защитить данные и пользоваться интернетом без лишних сложностей.
+            </div>
+        </section>
+
+        <section class="section">
+            <h2>Преимущества</h2>
+            <div class="features">
+                <div class="feature">
+                    <strong>Быстрое подключение</strong>
+                    Запуск VPN в один клик без сложных настроек.
+                </div>
+                <div class="feature">
+                    <strong>Для всех устройств</strong>
+                    Подходит для телефона, компьютера и других платформ.
+                </div>
+                <div class="feature">
+                    <strong>Защита соединения</strong>
+                    Шифрование трафика и повышение приватности в сети.
+                </div>
+                <div class="feature">
+                    <strong>Стабильная работа</strong>
+                    Надёжное подключение для ежедневного использования.
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2>Кому подходит</h2>
+            <p>
+                Тем, кто хочет быстро и удобно пользоваться VPN для Telegram, безопасного интернет-сёрфинга и защиты личных данных.
+            </p>
+            <p>
+                Если нужен простой сервис без лишних шагов — это как раз такой вариант.
+            </p>
+        </section>
+
+        <p class="footer-note">СуперВПН сервис — простой доступ к защищённому интернету.</p>
+    </div>
+</body>
+</html>
