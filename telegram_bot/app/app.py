@@ -5,11 +5,11 @@ from pathlib import Path
 
 async def handle_webhook(request: web.Request):
     try:
-        update = Update(**await request.json())
+        update = Update.model_validate(await request.json(), context={"bot": bot})
         await dp.feed_update(bot, update)
         return web.Response(status=200)
     except Exception as e:
-        # logger.error(f"Ошибка при обработке вебхука: {e}")
+        print(f"Webhook error: {e}")
         return web.Response(status=500)
 
 async def home_page(request: web.Request) -> web.Response:

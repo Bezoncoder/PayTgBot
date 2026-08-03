@@ -328,5 +328,23 @@ if __name__ == "__main__":
     # Создаем приложение и запускаем его
     app = create_app()
     web.run_app(app=app, host="0.0.0.0", port=8000)
-    asyncio.run(main())
-
+    # asyncio.run(main())
+    # Подключаем маршруты
+    dp.include_routers(greetings.router,
+                       get_subscribe.router,
+                       check_payment_auto.router,
+                       check_payment_manual.router,
+                       check_fio.router,
+                       github_check_subscribe.router,
+                       get_creds.router,
+                       choosing_direction.router,
+                       choosing_product.router,
+                       get_payment.router,
+                       choosing_stream.router,
+                       how_to_pay.router,
+                       check_email.router,
+                       choosing_payment_method.router,
+                       get_admin_utils.router,
+                       get_referral_link.router,
+                       get_referal_program.router,
+                       get_account_summary.router)
