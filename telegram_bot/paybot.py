@@ -239,7 +239,7 @@ async def check_and_posting():
 
 
 
-async def main():
+def main():
     logging.info("Старт Bot Loging")
 
     # Настройка Шедулера
