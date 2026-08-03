@@ -92,7 +92,7 @@ async def payment_success(request: web.Request) -> web.Response:
                 "✅ Проверка оплаты прошла успешно!\n\n"
                 f"💰 Вы оплатили!\n"
                 f"📦 Название Продукта: {stream_info.title}\n"
-                f"💳 Стоимость: {user_data.get("price")} ₽\n\n"
+                f"💳 Стоимость: {stream_info.price} ₽\n\n"
                 f"🔓 Чтобы получить доступы\nперейдите в Главное меню,\nнажмите кнопку Мои покупки\n\n"
                 f"📱 < Главное меню -> Мои покупки >\n\n"
                 f"🚀 Мы рады видеть тебя в нашей команде! 🎊"
@@ -101,8 +101,8 @@ async def payment_success(request: web.Request) -> web.Response:
             media = InputMediaPhoto(media=animation, caption=caption)
             bot.edit_message_media(message_id=user_data.get("tg_message_id"),
                                    media = media,
-                                   reply_markup = get_back_button(stream_id=user_data.get("stream_id_int"),
-                                                                  price=user_data.get("price"),
+                                   reply_markup = get_back_button(stream_id=stream_info.id,
+                                                                  price=stream_info.price,
                                                                   product_id=stream_info.product_id,
                                                                   directions_id=int(product_info.direction_id),
                                                                   method_value=user_data.get("pay_method"))
