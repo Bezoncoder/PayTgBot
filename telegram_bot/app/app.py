@@ -104,8 +104,9 @@ async def payment_success(request: web.Request) -> web.Response:
             animation = FSInputFile("source/pictures/successful_payment.jpg")
             media = InputMediaPhoto(media=animation, caption=caption)
             await bot.edit_message_media(message_id=user_data.get("tg_message_id"),
-                                   media = media,
-                                   reply_markup = get_back_button(stream_id=stream_info.id,
+                                         media = media,
+                                         chat_id=user_info.telegram_id,
+                                         reply_markup = get_back_button(stream_id=stream_info.id,
                                                                   price=stream_info.price,
                                                                   product_id=stream_info.product_id,
                                                                   directions_id=int(product_info.direction_id),
