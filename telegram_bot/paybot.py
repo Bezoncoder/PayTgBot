@@ -19,8 +19,8 @@ import colorlog
 
 from keyboards.get_menu import get_start_button, get_del_button
 from settings.config import BOT_TOKEN, TECH_CHANNEL, USER, PASSWORD, bot, dp
-from aiogram import Bot, Dispatcher
-from aiogram.fsm.storage.memory import MemoryStorage
+# from aiogram import Bot, Dispatcher
+# from aiogram.fsm.storage.memory import MemoryStorage
 from db.select_methods import (get_userinfo_to_ban,
                                get_users_enrollments_to_ban,
                                get_streaminfo_to_ban, select_all_users,
