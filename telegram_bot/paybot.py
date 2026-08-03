@@ -327,6 +327,6 @@ if __name__ == "__main__":
     # Запуск бота
     # Создаем приложение и запускаем его
     app = create_app()
-    web.run_app(app=app, host="155.212.228.65", port=8000)
+    web.run_app(app=app, host="0.0.0.0", port=8000)
     asyncio.run(main())
 
