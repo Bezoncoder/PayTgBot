@@ -40,7 +40,7 @@ async def payment_success(request: web.Request) -> web.Response:
 
         if operation_id is None or successful_raw is None:
             return web.json_response(
-                {"success": False, "message": "operation_id and successful are required"},
+                {"success": False, "message": "operation_id and successful None"},
                 status=400
             )
 
@@ -75,7 +75,7 @@ async def payment_success(request: web.Request) -> web.Response:
             user_data = await user_state.get_data()
 
             # Получаем Данные Потока и Продукта
-            stream_info = await get_stream_info(id_stream=user_data.get("stream_id"))
+            stream_info = await get_stream_info(id_stream=int(user_data.get("stream_id_int")))
             product_info = await get_product_info(id_product=stream_info.product_id)
 
             # user_data = dict(stream_id_int=stream_id_int,
