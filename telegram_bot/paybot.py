@@ -18,23 +18,97 @@ import logging
 import colorlog
 
 from keyboards.get_menu import get_start_button, get_del_button
-from settings.config import BOT_TOKEN, TECH_CHANNEL, USER, PASSWORD
-from aiogram import Bot, Dispatcher
-from aiogram.fsm.storage.memory import MemoryStorage
+from settings.config import BOT_TOKEN, TECH_CHANNEL, USER, PASSWORD, bot, dp
+# from aiogram import Bot, Dispatcher
+# from aiogram.fsm.storage.memory import MemoryStorage
 from db.select_methods import (get_userinfo_to_ban,
                                get_users_enrollments_to_ban,
                                get_streaminfo_to_ban, select_all_users,
                                get_product_info)
 from utils.vlessuiapi import XUIClient
 
-bot = Bot(token=BOT_TOKEN)
+from app.app import handle_webhook, home_page, payment_success
+from aiogram.webhook.aiohttp_server import setup_application
+from aiohttp import web
+
+
+# bot = Bot(token=BOT_TOKEN)
 
 ADT_MESSAGE_LIST=[3,5,6,7,8,10,11,12,13]
+
+ADMINS = [5866726660, 1773955529]
+
 
 # user subscription control @getidsbot - Бот, который выдает ID чата
 #  -1002917599861 Bootcamp Supergroup_ID
 # await bot.ban_chat_member(chat_id, user_id)
 # await bot.unban_chat_member(chat_id, user_id)
+
+async def start_scheduler(app):
+    scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
+    scheduler.add_job(check_and_posting, trigger="cron", hour=20, minute=10)
+    scheduler.start()
+    app["scheduler"] = scheduler
+    logging.info("Scheduler started")
+
+async def stop_scheduler(app):
+    scheduler = app.get("scheduler")
+    if scheduler:
+        scheduler.shutdown(wait=False)
+        logging.info("Scheduler stopped")
+
+async def on_startup(app):
+    """
+    Выполняется при запуске приложения.
+    """
+    # await set_default_commands()
+    await bot.set_webhook(f"https://litva.illiriaakva.online/{BOT_TOKEN}")
+    for admin_id in ADMINS:
+        try:
+            await bot.send_message(admin_id, 'Бот запущен 🥳.')
+        except Exception as e:
+            print(e)
+            # logger.error(f"Не удалось отправить сообщение админу {admin_id}: {e}")
+    # logger.info("Бот успешно запущен.")
+
+async def on_shutdown(app):
+    """
+    Выполняется при остановке приложения.
+    """
+    for admin_id in ADMINS:
+        try:
+            await bot.send_message(admin_id, 'Бот остановлен. Почему? 😔')
+        except Exception as e:
+            print(e)
+            # logger.error(f"Не удалось отправить сообщение админу {admin_id}: {e}")
+    await bot.delete_webhook(drop_pending_updates=True)
+    await bot.session.close()
+    # logger.error("Бот остановлен!")
+
+
+def create_app():
+    """
+    Создает и настраивает приложение aiohttp.
+    """
+    # Создаем приложение
+    app = web.Application()
+
+    # Регистрация обработчиков маршрутов
+    app.router.add_post(f"/{BOT_TOKEN}", handle_webhook)
+    app.router.add_post("/api/payment-success", payment_success)
+    app.router.add_get("/", home_page)
+
+    # Настройка приложения с диспетчером и ботом
+    setup_application(app, dp, bot=bot)
+
+    # Регистрация функций запуска и остановки
+    app.on_startup.append(on_startup)
+    app.on_startup.append(start_scheduler)
+    app.on_shutdown.append(on_shutdown)
+    app.on_shutdown.append(stop_scheduler)
+
+    return app
+
 
 async def check_and_ban():
     logging.info("Запуск Проверки Подписок")
@@ -202,7 +276,7 @@ async def main():
     scheduler.start()
     logging.info("Настройка Шедулера завершена.")
 
-    dp = Dispatcher(storage=MemoryStorage())
+    # dp = Dispatcher(storage=MemoryStorage())
 
     # dp.message.middleware(UserInternalIdMiddleware())
     # dp.callback_query.middleware(how_to_pay.HowToPayCleanupMiddleware())
@@ -228,9 +302,10 @@ async def main():
                        get_account_summary.router)
 
     # Запускаем бота и пропускаем все накопленные входящие
-    await bot.delete_webhook(drop_pending_updates=True)
-    logging.info("Бот Запущен")
-    await dp.start_polling(bot)
+    # await bot.delete_webhook(drop_pending_updates=True)
+    # logging.info("Бот Запущен")
+    # await dp.start_polling(bot)
+
 
 
 if __name__ == "__main__":
@@ -264,5 +339,29 @@ if __name__ == "__main__":
         format="%(asctime)s [%(levelname)s] %(message)s"
     )
 
+
+    # asyncio.run(main())
+    # Подключаем маршруты
+    dp.include_routers(greetings.router,
+                       get_subscribe.router,
+                       check_payment_auto.router,
+                       check_payment_manual.router,
+                       check_fio.router,
+                       github_check_subscribe.router,
+                       get_creds.router,
+                       choosing_direction.router,
+                       choosing_product.router,
+                       get_payment.router,
+                       choosing_stream.router,
+                       how_to_pay.router,
+                       check_email.router,
+                       choosing_payment_method.router,
+                       get_admin_utils.router,
+                       get_referral_link.router,
+                       get_referal_program.router,
+                       get_account_summary.router)
+
     # Запуск бота
-    asyncio.run(main())
+    # Создаем приложение и запускаем его
+    app = create_app()
+    web.run_app(app=app, host="0.0.0.0", port=8000)

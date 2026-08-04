@@ -61,6 +61,22 @@ class UserDAO(BaseDAO):
         return user_info_list
 
     @classmethod
+    async def get_user_info_from_operation_id(cls, session: AsyncSession, operation_id: str):
+        query = (select(cls.model).where(cls.model.id == (select(Payment.user_id)
+                                                          .where(Payment.operation_id == operation_id)
+                                                          .scalar_subquery()
+                                                          )
+                                         )
+                 )
+
+        logging.info("Делаем запрос данных пользователя по operation_id в БД")
+        result = await session.execute(query)
+        logging.info("Получен ответ из БД")
+        user_info = result.unique().scalar_one_or_none()
+        logging.debug("user_info: %s", user_info)
+        return user_info
+
+    @classmethod
     async def get_password_telegramid(cls, session: AsyncSession, telegram_id):
         query = select(cls.model.password).filter(cls.model.telegram_id == telegram_id)
         logging.debug("get_password_telegramid %s", query)

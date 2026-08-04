@@ -225,7 +225,12 @@ async def get_referralrewards_to_month_user_d(session, id_user: int) -> list[Ref
         refrewards_list = []
     return refrewards_list
 
-
+@connection
+async def get_userinfo_by_id_operation_id(session, operation_id: str) -> UserPydantic | None:
+    res = await UserDAO.get_user_info_from_operation_id(session=session, operation_id=operation_id)
+    if not res:
+        return None
+    return UserPydantic.model_validate(res)
 
 
 
@@ -289,7 +294,10 @@ if "__main__" == __name__:
             # await asyncio.sleep(3)
 
 
-    run(test())
+    run(get_userinfo_by_id_operation_id(operation_id="a6231146-de93-4a79-aeeb-0c6ed14b6108"))
+
+
+
 
     # rez = run(get_all_product_from_direction_id(group_id=1))
     # print(rez)

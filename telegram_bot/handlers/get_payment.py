@@ -163,7 +163,10 @@ async def get_pay(callback: CallbackQuery, state: FSMContext):
                      price=price,
                      operation_id=operation_id_from_provider,
                      payment_id=payment_data_from_db.id,
-                     pay_method=pay_method)
+                     pay_method=pay_method,
+                     tg_user_id=callback.from_user.id,
+                     tg_message_id=callback.message.message_id,
+                     )
 
     await state.storage.update_data(user_key, data=user_data)  # <— сохраняем для ЭТОГО пользователя
 
