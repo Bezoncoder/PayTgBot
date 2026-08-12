@@ -34,7 +34,8 @@ from utils.creds import get_creds
 
 from utils.states import OrderPay
 
-from db.select_methods import get_product_info, get_stream_info, get_userinfo_by_id, get_user_info_by_tg_id
+from db.select_methods import get_product_info, get_stream_info, get_userinfo_by_id, get_user_info_by_tg_id, \
+    get_all_product_from_direction_id, get_enrollments_count_stream_id
 from utils.access_control import restore_chat_access
 
 from utils.gen_ssl_key import get_signed_cert
@@ -267,6 +268,34 @@ async def approve_check(callback: CallbackQuery, state: FSMContext):
                                        inbound_id=str(product_info.inbound_id),
                                        expiry_time=expire_time_sec,
                                        email=f"{client_uuid_from_payment}").get('subscription_link')
+
+        # add_client_external_links
+        list_of_products = await get_all_product_from_direction_id(group_id=1)
+        external_links=[]
+        for product_bonus in list_of_products:
+            enrollments_count = await get_enrollments_count_stream_id(product_id=product_bonus.id)
+            if product_bonus.capacity > enrollments_count :
+
+                vless_client_new = XUIClient(base_url_from_panel=product_bonus.base_url,
+                                         username=USER,
+                                         password=PASSWORD,
+                                         api_token=product_bonus.api_vless_token,
+                                         verify_ssl=True,
+                                         public_inbound_key=product_bonus.public_key,
+                                         sid=product_bonus.short_id)
+
+                bonus_subscription_link = vless_client_new.add_client(client_uuid=client_uuid_from_payment,
+                                               flow="xtls-rprx-vision",
+                                               total_gb=4,
+                                               inbound_id=str(product_bonus.inbound_id),
+                                               expiry_time=expire_time_sec,
+                                               email=f"{client_uuid_from_payment}").get('subscription_link')
+                external_links.append(bonus_subscription_link)
+
+        vless_client.add_client_external_links(email=client_uuid_from_payment,subscriptions_links=external_links)
+
+
+
     except Exception as exception_text:
         # < code > текст < / code >
         buttons = get_errors_button()

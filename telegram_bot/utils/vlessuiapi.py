@@ -179,6 +179,48 @@ class XUIClient:
         }
         return self._make_request("clients/update", method="POST", json=payload)
 
+    def add_client_external_links(self, email: str, subscriptions_links: list[str]) -> Optional[Dict[str, Any]]:
+        """
+        Добавляет клиенту несколько внешних ссылок (подписок) одним запросом.
+
+        :param email: email (имя) клиента
+        :param subscriptions: список подписок, каждая — dict с полями:
+            {
+                "kind": "subscription",
+                "value": "https://домен:порт/путь",
+                "remark": ""  # опционально
+            }
+
+        :return: JSON-ответ от сервера (dict) или None при ошибке
+        """
+        subscriptions=[]
+        for subscription_link in subscriptions_links:
+            subscriptions.append(dict(kind="subscription",
+                                      value=subscription_link,
+                                      remark=""))
+        # subscription_links = [
+        #     {
+        #         "kind": "subscription",
+        #         "value": "https://origin.illiriaakva.online:2096/1AWEJRPGmKLSZojNjB/a3pk3drwrluo6q6d",
+        #         "remark": "",
+        #     },
+        #     {
+        #         "kind": "subscription",
+        #         "value": "https://другой-домен:порт/путь",
+        #         "remark": "backup",
+        #     },
+        # ]
+
+
+        logger.info(f"Добавление {len(subscriptions)} внешних ссылок для клиента {email}")
+
+        payload = {
+            "externalLinks": subscriptions
+        }
+
+        return self._make_request(endpoint=f"clients/{email}/externalLinks", method="POST", json=payload)
+
+
     def get_client_traffic_by_id(self, client_uuid: str):
         # //panel/api/clients/get/:email
         endpoint = f"clients/get/{client_uuid}"
