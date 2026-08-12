@@ -274,7 +274,7 @@ async def approve_check(callback: CallbackQuery, state: FSMContext):
         external_links=[]
         for product_bonus in list_of_products:
             enrollments_count = await get_enrollments_count_stream_id(product_id=product_bonus.id)
-            if product_bonus.capacity > enrollments_count :
+            if product_bonus.capacity > enrollments_count and product_bonus.id != product_info.id :
 
                 vless_client_new = XUIClient(base_url_from_panel=product_bonus.base_url,
                                          username=USER,
