@@ -294,13 +294,13 @@ if "__main__" == __name__:
             # await asyncio.sleep(3)
 
 
-    run(get_userinfo_by_id_operation_id(operation_id="a6231146-de93-4a79-aeeb-0c6ed14b6108"))
+    # run(get_userinfo_by_id_operation_id(operation_id="a6231146-de93-4a79-aeeb-0c6ed14b6108"))
 
 
 
 
-    # rez = run(get_all_product_from_direction_id(group_id=1))
-    # print(rez)
+    rez = run(get_all_product_from_direction_id(group_id=1))
+    print(rez)
     # rez = run(get_stream_info(id_stream=2))
     # print(rez.title)
     # zalupa = ProductPydantic.model_validate(rez)
