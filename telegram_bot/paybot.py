@@ -32,6 +32,7 @@ from aiogram.webhook.aiohttp_server import setup_application
 from aiohttp import web
 
 
+BASE_URL_BOT = "https://bot.quantumturbovpn.com"
 # bot = Bot(token=BOT_TOKEN)
 
 ADT_MESSAGE_LIST=[3,5,6,7,8,10,11,12,13]
@@ -62,7 +63,7 @@ async def on_startup(app):
     Выполняется при запуске приложения.
     """
     # await set_default_commands()
-    await bot.set_webhook(f"https://germany.illiriaakva.online/{BOT_TOKEN}")
+    await bot.set_webhook(f"{BASE_URL_BOT}/{BOT_TOKEN}")
     for admin_id in ADMINS:
         try:
             await bot.send_message(admin_id, 'Бот запущен 🥳.')
@@ -77,7 +78,7 @@ async def on_shutdown(app):
     """
     for admin_id in ADMINS:
         try:
-            await bot.send_message(admin_id, 'Бот остановлен. Почему? 😔')
+            await bot.send_message(admin_id, 'Бот остановлен.')
         except Exception as e:
             print(e)
             # logger.error(f"Не удалось отправить сообщение админу {admin_id}: {e}")
