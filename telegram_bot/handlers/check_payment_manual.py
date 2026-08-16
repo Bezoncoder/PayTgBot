@@ -284,7 +284,7 @@ async def approve_check(callback: CallbackQuery, state: FSMContext):
                                          public_inbound_key=product_bonus.public_key,
                                          sid=product_bonus.short_id)
 
-                bonus_subscription_link = vless_client_new.add_client(client_uuid=client_uuid_from_payment,
+                bonus_subscription_link = vless_client_new.add_client(client_uuid=f'PROMO_{client_uuid_from_payment}',
                                                flow="xtls-rprx-vision",
                                                total_gb=4,
                                                inbound_id=str(product_bonus.inbound_id),
