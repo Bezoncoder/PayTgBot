@@ -272,9 +272,12 @@ async def approve_check(callback: CallbackQuery, state: FSMContext):
         # add_client_external_links
         list_of_products = await get_all_product_from_direction_id(group_id=1)
         external_links=[]
+        i=0
         for product_bonus in list_of_products:
             enrollments_count = await get_enrollments_count_stream_id(product_id=product_bonus.id)
             if product_bonus.capacity > enrollments_count and product_bonus.id != product_info.id :
+
+                i+=1
 
                 vless_client_new = XUIClient(base_url_from_panel=product_bonus.base_url,
                                          username=USER,
@@ -284,12 +287,12 @@ async def approve_check(callback: CallbackQuery, state: FSMContext):
                                          public_inbound_key=product_bonus.public_key,
                                          sid=product_bonus.short_id)
 
-                bonus_subscription_link = vless_client_new.add_client(client_uuid=f'PROMO_{client_uuid_from_payment}',
+                bonus_subscription_link = vless_client_new.add_client(client_uuid=f"PROMO_{i}_{client_uuid_from_payment}",
                                                flow="xtls-rprx-vision",
                                                total_gb=4,
                                                inbound_id=str(product_bonus.inbound_id),
                                                expiry_time=expire_time_sec,
-                                               email=f"{client_uuid_from_payment}").get('subscription_link')
+                                               email=f"PROMO_{client_uuid_from_payment}").get('subscription_link')
                 external_links.append(bonus_subscription_link)
 
         logging.info("Начинаем добавлять подписки...")

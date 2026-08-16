@@ -140,7 +140,7 @@ class XUIClient:
             "inboundIds": [int(inbound_id)]
         }
 
-        logger.info(f"Добавление клиента {final_id[:8]}... в inbound {inbound_id}: {final_email}")
+        logging.info(f"Добавление клиента {final_id[:8]}... в inbound {inbound_id}: {final_email}")
 
         result = self._make_request("clients/add", method="POST", json=payload)
         success = result.get('success', False)
