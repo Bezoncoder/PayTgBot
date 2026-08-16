@@ -279,15 +279,15 @@ async def approve_check(callback: CallbackQuery, state: FSMContext):
 
                 i+=1
 
-                vless_client_new = XUIClient(base_url_from_panel=product_bonus.base_url,
-                                         username=USER,
-                                         password=PASSWORD,
-                                         api_token=product_bonus.api_vless_token,
-                                         verify_ssl=True,
-                                         public_inbound_key=product_bonus.public_key,
-                                         sid=product_bonus.short_id)
+                # vless_client_new = XUIClient(base_url_from_panel=product_bonus.base_url,
+                #                          username=USER,
+                #                          password=PASSWORD,
+                #                          api_token=product_bonus.api_vless_token,
+                #                          verify_ssl=True,
+                #                          public_inbound_key=product_bonus.public_key,
+                #                          sid=product_bonus.short_id)
 
-                bonus_subscription_link = vless_client_new.add_client(client_uuid=None,
+                bonus_subscription_link = vless_client.add_client(client_uuid=None,
                                                flow="xtls-rprx-vision",
                                                total_gb=4,
                                                inbound_id=str(product_bonus.inbound_id),
