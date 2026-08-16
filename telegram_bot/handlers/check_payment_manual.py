@@ -303,11 +303,11 @@ async def approve_check(callback: CallbackQuery, state: FSMContext):
     except Exception as exception_text:
         # < code > текст < / code >
         buttons = get_errors_button()
-        new_caption = f"❌ <b>Что-то пошло не так</b>… Повторите попытку позже\n\n"
+        new_caption = (f"❌ <b>Что-то пошло не так</b>… Повторите попытку позже\n\n"
         f"📢 <b>Сообщите в поддержку</b> и прикрепите текст ошибки\n\n"
         f"💡 <i>Чтобы скопировать — просто нажмите на текст</i>\n\n"
         f"🔴 <b>Ошибка:</b>\n"
-        f"<code>{exception_text}</code>"
+        f"<code>{exception_text}</code>")
         await callback.message.edit_caption(caption=new_caption,
                                             parse_mode="HTML",
                                             reply_markup=buttons)
