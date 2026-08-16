@@ -1,6 +1,7 @@
 import asyncio
 import logging
 from pprint import pprint
+import time
 
 from aiogram import Router, F
 from aiogram.exceptions import TelegramBadRequest
@@ -292,7 +293,8 @@ async def approve_check(callback: CallbackQuery, state: FSMContext):
                                                total_gb=4,
                                                inbound_id=str(product_bonus.inbound_id),
                                                expiry_time=expire_time_sec,
-                                               email=f"PROMO_{i}_{client_uuid_from_payment}").get('subscription_link')
+                                               email=f"PROMO_{i}_{client_uuid_from_payment}",
+                                               sub_id=f"sub-{int(time.time())}_i").get('subscription_link')
                 external_links.append(bonus_subscription_link)
 
         logging.info("Начинаем добавлять подписки...")
