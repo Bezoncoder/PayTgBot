@@ -294,7 +294,7 @@ async def approve_check(callback: CallbackQuery, state: FSMContext):
                                                inbound_id=str(product_bonus.inbound_id),
                                                expiry_time=expire_time_sec,
                                                email=f"PROMO_{i}_{client_uuid_from_payment}",
-                                               sub_id=f"sub-{int(time.time())}_i").get('subscription_link')
+                                               sub_id=f"sub-{int(time.time())}{i}").get('subscription_link')
                 external_links.append(bonus_subscription_link)
 
         logging.info("Начинаем добавлять подписки...")
