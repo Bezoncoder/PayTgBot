@@ -292,6 +292,7 @@ async def approve_check(callback: CallbackQuery, state: FSMContext):
                                                email=f"{client_uuid_from_payment}").get('subscription_link')
                 external_links.append(bonus_subscription_link)
 
+        logging.info("Начинаем добавлять подписки...")
         vless_client.add_client_external_links(email=client_uuid_from_payment,subscriptions_links=external_links)
 
 

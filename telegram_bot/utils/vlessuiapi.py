@@ -212,8 +212,8 @@ class XUIClient:
         # ]
 
 
-        logger.info(f"Добавление {len(subscriptions)} внешних ссылок для клиента {email}")
-
+        # logger.info(f"Добавление {len(subscriptions)} внешних ссылок для клиента {email}")
+        logging.info(f"Добавление {len(subscriptions)} внешних ссылок для клиента {email}")
         payload = {
             "externalLinks": subscriptions
         }
