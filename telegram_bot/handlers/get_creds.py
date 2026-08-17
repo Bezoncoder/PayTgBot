@@ -53,13 +53,15 @@ async def get_creds_message(callback: CallbackQuery, state: FSMContext):
 
     ########################################################################################
 
-    veles_link = f"Ссылка для подключения:\n\n<code>{enrollment_info.vless_link}</code>"
+    veles_link_caption = (f"{enrollment_info.title_product} "
+                          f"до {enrollment_info.expire_date}\n\n"
+                          f"Ссылка для подключения:\n\n<code>{enrollment_info.vless_link}</code>")
     qrcode_path = get_qr_code(veless_url=enrollment_info.vless_link)
 
     if os.path.exists(qrcode_path):
         new_media = InputMediaPhoto(
             media=FSInputFile(qrcode_path),
-            caption=veles_link,
+            caption=veles_link_caption,
             parse_mode="HTML")
     else:
         new_media = InputMediaPhoto(

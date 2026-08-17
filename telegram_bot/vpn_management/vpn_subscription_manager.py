@@ -196,7 +196,7 @@ def create_vpn_subscriptions(
                 "bonus_links": ["https://...", "https://..."],
                 "errors": [],
             }
-
+        Вариант вывода:
             {
                 "success": True,
                 "message": "Основная VPN-подписка создана. Бонусных подписок создано: 1. Ошибок: 1.",
