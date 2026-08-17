@@ -1,31 +1,21 @@
 import logging
 
 from aiogram import Router, F
-from aiogram.types import CallbackQuery, FSInputFile, InputMediaPhoto, Message
+from aiogram.types import CallbackQuery, FSInputFile, InputMediaPhoto
 
 from aiogram.fsm.storage.base import StorageKey
 
 from aiogram.fsm.context import FSMContext
-import asyncio
 
-from db.add_methods_dao import add_payments_operation
 # from db.update_methods_dao import update_user_email
-from keyboards.get_menu import get_payment_notification_button, get_fake_menu_button, get_errors_button, \
-    get_choosing_pay_method_buttons
-from db.select_methods import get_user_info_by_tg_id, get_stream_info
+from keyboards.get_menu import get_choosing_pay_method_buttons
+
 # from utils.banking_operations import get_card_creds
 
 # from utils.jira_functional.jira_functions import onboard_user_with_tasks
 
-from utils.gen_ssl_key import get_signed_cert
 # from utils.get_links import get_subscribe_link
 # from utils.creds import get_creds
-from utils.calculate_expire_date import get_expire_time_sec
-import datetime as DT
-import os
-from utils.plategaio import PaymentMethod
-from utils.payments_operations import get_payment_link_data
-from utils.states import OrderPay
 
 router = Router()
 

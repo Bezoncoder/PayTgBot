@@ -15,7 +15,7 @@ from aiogram.fsm.context import FSMContext
 from db.update_methods_dao import update_payment_data, update_referral_rewards
 from keyboards.get_menu import get_back_button, get_errors_button
 from utils.calculate_expire_date import get_expire_time_sec
-from utils.payments_operations import check_payment_status
+from payment_tools.payments_operations import check_payment_status
 
 from settings.config import USER, PASSWORD, TECH_CHANNEL
 

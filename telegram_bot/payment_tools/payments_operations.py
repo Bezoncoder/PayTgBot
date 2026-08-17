@@ -1,7 +1,6 @@
 import logging
-from pprint import pprint
 from typing import Any
-from utils.plategaio import PlategaAPI, PaymentMethod
+from payment_tools.plategaio import PlategaAPI
 from settings.config import MERCHANT_ID, PLATEGA_SECRET_KEY
 
 

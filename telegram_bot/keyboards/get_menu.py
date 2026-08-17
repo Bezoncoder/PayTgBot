@@ -1,13 +1,10 @@
 import logging
-from typing import List
 
-from aiogram.types import ReplyKeyboardMarkup, InlineKeyboardMarkup
+from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
-import datetime as DT
 
 from db.schemas import ProductPydantic, StreamPydantic, EnrollmentPydantic
-from db.select_methods import get_list_directions, get_enrollments_count_stream_id, get_product_info
-from utils.plategaio import PaymentMethod
+from payment_tools.plategaio import PaymentMethod
 
 
 # from utils.jira_functional.jira_functions import ensure_user, JIRA_BASE

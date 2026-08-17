@@ -1,12 +1,11 @@
 import logging
 
 from aiogram import Router, F
-from aiogram.types import CallbackQuery, FSInputFile, InputMediaPhoto, Message, InputMediaAnimation
+from aiogram.types import CallbackQuery, FSInputFile, InputMediaPhoto, InputMediaAnimation
 
 from aiogram.fsm.storage.base import StorageKey
 
 from aiogram.fsm.context import FSMContext
-import asyncio
 
 from db.add_methods_dao import add_payments_operation
 # from db.update_methods_dao import update_user_email
@@ -17,15 +16,10 @@ from settings.config import TECH_CHANNEL
 
 # from utils.jira_functional.jira_functions import onboard_user_with_tasks
 
-from utils.gen_ssl_key import get_signed_cert
 # from utils.get_links import get_subscribe_link
 # from utils.creds import get_creds
-from utils.calculate_expire_date import get_expire_time_sec
-import datetime as DT
-import os
-from utils.plategaio import PaymentMethod
-from utils.payments_operations import get_payment_link_data
-from utils.states import OrderPay
+from payment_tools.plategaio import PaymentMethod
+from payment_tools.payments_operations import get_payment_link_data
 
 router = Router()
 

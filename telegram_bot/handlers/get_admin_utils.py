@@ -1,19 +1,13 @@
 import datetime
 import logging
-from calendar import month
-from pprint import pprint
 
 from dateutil.relativedelta import relativedelta
 from aiogram import Router, F
-from aiogram.filters import Command, CommandStart, CommandObject
 from aiogram.fsm.storage.base import StorageKey
 from aiogram.types import Message, InputMediaPhoto
 
-from keyboards.get_menu import get_start_menu, get_stream_products_menu, get_start_button, get_admin_button
+from keyboards.get_menu import get_start_button, get_admin_button
 from aiogram.types import FSInputFile
-
-from db.select_methods import get_list_directions, get_product_info, get_user_info_by_tg_id, get_enrollmets_from_user_id
-from db.add_methods_dao import check_user_and_add
 
 from aiogram.fsm.context import FSMContext
 
@@ -22,10 +16,8 @@ from aiogram.types import CallbackQuery
 from settings.config import LOGIN_WEB_PLATEGA, PASSWORD_WEB_PLATEGA
 # from settings.config import START_DATE
 # from settings.config import START_DATE
-from utils.get_links import get_subscribe_link
-from utils.platega_api_web_panel import PlategaWebClient
+from payment_tools.platega_api_web_panel import PlategaWebClient
 from utils.states import OrderPay
-from utils.timezone import get_moscow_today
 
 router = Router()
 
