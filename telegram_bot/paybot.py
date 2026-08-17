@@ -1,6 +1,5 @@
 import asyncio
 import random
-from typing import Any
 
 from aiogram.types import FSInputFile
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -23,9 +22,9 @@ from settings.config import BOT_TOKEN, TECH_CHANNEL, USER, PASSWORD, bot, dp
 # from aiogram.fsm.storage.memory import MemoryStorage
 from db.select_methods import (get_userinfo_to_ban,
                                get_users_enrollments_to_ban,
-                               get_streaminfo_to_ban, select_all_users,
+                               select_all_users,
                                get_product_info)
-from utils.vlessuiapi import XUIClient
+from vpn_management.vlessuiapi import XUIClient
 
 from app.app import handle_webhook, home_page, payment_success
 from aiogram.webhook.aiohttp_server import setup_application

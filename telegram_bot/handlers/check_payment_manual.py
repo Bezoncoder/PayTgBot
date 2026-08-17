@@ -1,57 +1,39 @@
 import asyncio
 import logging
-from pprint import pprint
-import time
 
 from aiogram import Router, F
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import (
     CallbackQuery,
     FSInputFile,
-    InputMediaPhoto,
     Message,
-    InputMediaAnimation,
 )
 
 from aiogram.fsm.storage.base import StorageKey
 
 from aiogram.fsm.context import FSMContext
 
-from aiogram.filters import StateFilter
-
 from db.update_methods_dao import update_payment_data, update_referral_rewards
 from keyboards.get_menu import get_payment_verification_button, get_back_button, get_errors_button, get_start_button
 from utils.calculate_expire_date import get_expire_time_sec
-from utils.get_links import get_subscribe_link
-from utils.payments import tochka_bank
 # from utils.payments_operations import check_payment_status
 
-from settings.config import TECH_CHANNEL, USER, PASSWORD, API_VLESS_TOKEN
+from settings.config import TECH_CHANNEL, USER, PASSWORD
 
-from db.add_methods_dao import set_pay, add_new_enrollments
-
-from utils.passgen import get_password
-from utils.creds import get_creds
+from db.add_methods_dao import add_new_enrollments
 
 from utils.states import OrderPay
 
-from db.select_methods import get_product_info, get_stream_info, get_userinfo_by_id, get_user_info_by_tg_id, \
+
+from db.select_methods import get_product_info, get_stream_info, get_user_info_by_tg_id, \
     get_all_product_from_direction_id, get_enrollments_count_stream_id
-from utils.access_control import restore_chat_access
 
-from utils.gen_ssl_key import get_signed_cert
-
-from utils.user_veles_manager import UserVelesManagerAPI
+from vpn_management.vpn_subscription_manager import create_vpn_subscriptions
 
 from dateutil.relativedelta import relativedelta
 import datetime as DT
 
-import calendar
-import locale
 
-import os
-
-from utils.vlessuiapi import XUIClient
 
 """
 
@@ -245,79 +227,199 @@ async def approve_check(callback: CallbackQuery, state: FSMContext):
 
     #################### Vles VPN ###############################
 
-    base_url = product_info.base_url
-    # https://155.212.228.65:49699/IIVMNd0IoCAcUBOuKK
+
+    #################### НАЧАЛО ИЗМЕНЕНИЙ: VPN-ПОДПИСКИ ЧЕРЕЗ VPN_SUBSCRIPTION_MANAGER ####################
 
     try:
-        vless_client = XUIClient(base_url_from_panel=base_url,
-                                 username=USER,
-                                 password=PASSWORD,
-                                 api_token=product_info.api_vless_token,
-                                 verify_ssl=True,
-                                 public_inbound_key=product_info.public_key,
-                                 sid=product_info.short_id)
+        logging.info(
+            "Начинаем подготовку бонусных продуктов: main_product_id=%s",
+            product_info.id,
+        )
+
+        list_of_products = await get_all_product_from_direction_id(group_id=1)
+
+        bonus_products = []
+
+        for product_bonus in list_of_products:
+            if product_bonus.id == product_info.id:
+                continue
+
+            if product_bonus.capacity is None:
+                logging.warning(
+                    "Пропускаем бонусный продукт: product_id=%s, "
+                    "причина=capacity is None",
+                    product_bonus.id,
+                )
+                continue
+
+            enrollments_count = await get_enrollments_count_stream_id(
+                product_id=product_bonus.id,
+            )
+
+            if enrollments_count < product_bonus.capacity:
+                bonus_products.append(product_bonus)
+            else:
+                logging.info(
+                    "Пропускаем заполненный бонусный продукт: "
+                    "product_id=%s, enrollments_count=%s, capacity=%s",
+                    product_bonus.id,
+                    enrollments_count,
+                    product_bonus.capacity,
+                )
+
+        logging.info(
+            "Бонусные продукты подготовлены: main_product_id=%s, "
+            "bonus_products_count=%s",
+            product_info.id,
+            len(bonus_products),
+        )
 
         client_uuid_from_payment = str(payment_data.operation_id)
-        # link = vless_client.add_client(client_uuid=client_uuid_from_payment,
-        #                                flow="xtls-rprx-vision",
-        #                                inbound_id="1",
-        #                                expiry_time=expire_time_sec,
-        #                                email=f"{user_telegram_id}_{client_uuid_from_payment}").get('subscription_link')
-        link = vless_client.add_client(client_uuid=client_uuid_from_payment,
-                                       flow="xtls-rprx-vision",
-                                       total_gb=product_info.total_gb,
-                                       inbound_id=str(product_info.inbound_id),
-                                       expiry_time=expire_time_sec,
-                                       email=f"{client_uuid_from_payment}").get('subscription_link')
 
-        # add_client_external_links
-        list_of_products = await get_all_product_from_direction_id(group_id=1)
-        external_links=[]
-        i=0
-        for product_bonus in list_of_products:
-            enrollments_count = await get_enrollments_count_stream_id(product_id=product_bonus.id)
-            if product_bonus.capacity > enrollments_count and product_bonus.id != product_info.id :
+        vpn_result = create_vpn_subscriptions(
+            main_product=product_info,
+            bonus_products=bonus_products,
+            client_uuid=client_uuid_from_payment,
+            expire_time_sec=expire_time_sec,
+            username=USER,
+            password=PASSWORD,
+        )
 
-                i+=1
+        if not vpn_result["success"]:
+            error_text = (
+                vpn_result["errors"][0]["error"]
+                if vpn_result["errors"]
+                else "Причина ошибки отсутствует."
+            )
 
-                # vless_client_new = XUIClient(base_url_from_panel=product_bonus.base_url,
-                #                          username=USER,
-                #                          password=PASSWORD,
-                #                          api_token=product_bonus.api_vless_token,
-                #                          verify_ssl=True,
-                #                          public_inbound_key=product_bonus.public_key,
-                #                          sid=product_bonus.short_id)
+            logging.error(
+                "Не удалось выдать VPN: payment_id=%s, vpn_result=%s",
+                payment_data.id,
+                vpn_result,
+            )
 
-                bonus_subscription_link = vless_client.add_client(client_uuid=None,
-                                               flow="xtls-rprx-vision",
-                                               total_gb=4,
-                                               inbound_id=str(product_bonus.inbound_id),
-                                               expiry_time=expire_time_sec,
-                                               email=f"PROMO_{i}_{client_uuid_from_payment}",
-                                               sub_id=f"sub-{int(time.time())}{i}").get('subscription_link')
-                external_links.append(bonus_subscription_link)
+            raise RuntimeError(
+                f"{vpn_result['message']} Причина: {error_text}"
+            )
 
-        logging.info("Начинаем добавлять подписки...")
-        vless_client.add_client_external_links(email=client_uuid_from_payment,subscriptions_links=external_links)
+        link = vpn_result["main_subscription_link"]
 
+        logging.info(
+            "VPN успешно выдана: payment_id=%s, main_product_id=%s, "
+            "bonus_created_count=%s",
+            payment_data.id,
+            product_info.id,
+            vpn_result["bonus_created_count"],
+        )
 
+        if vpn_result["errors"]:
+            logging.warning(
+                "VPN выдана с частичными ошибками бонусных подписок: "
+                "payment_id=%s, errors=%s",
+                payment_data.id,
+                vpn_result["errors"],
+            )
+
+    #################### КОНЕЦ ИЗМЕНЕНИЙ: VPN-ПОДПИСКИ ЧЕРЕЗ VPN_SUBSCRIPTION_MANAGER ####################
 
     except Exception as exception_text:
-        # < code > текст < / code >
         buttons = get_errors_button()
-        new_caption = (f"❌ <b>Что-то пошло не так</b>… Повторите попытку позже\n\n"
-        f"📢 <b>Сообщите в поддержку</b> и прикрепите текст ошибки\n\n"
-        f"💡 <i>Чтобы скопировать — просто нажмите на текст</i>\n\n"
-        f"🔴 <b>Ошибка:</b>\n"
-        f"<code>{exception_text}</code>")
-        await callback.message.edit_caption(caption=new_caption,
-                                            parse_mode="HTML",
-                                            reply_markup=buttons)
 
-        await callback.bot.send_message(text=new_caption,
-                                        chat_id=user_telegram_id,
-                                        reply_markup=buttons)
+        new_caption = (
+            "❌ <b>Что-то пошло не так</b>… Повторите попытку позже\n\n"
+            "📢 <b>Сообщите в поддержку</b> и прикрепите текст ошибки\n\n"
+            "💡 <i>Чтобы скопировать — просто нажмите на текст</i>\n\n"
+            f"🔴 <b>Ошибка:</b>\n<code>{exception_text}</code>"
+        )
+
+        await callback.message.edit_caption(
+            caption=new_caption,
+            parse_mode="HTML",
+            reply_markup=buttons,
+        )
+
+        await callback.bot.send_message(
+            text=new_caption,
+            chat_id=user_telegram_id,
+            reply_markup=buttons,
+        )
         return
+
+
+
+    # base_url = product_info.base_url
+    # https://155.212.228.65:49699/IIVMNd0IoCAcUBOuKK
+
+    # try:
+    #     vless_client = XUIClient(base_url_from_panel=base_url,
+    #                              username=USER,
+    #                              password=PASSWORD,
+    #                              api_token=product_info.api_vless_token,
+    #                              verify_ssl=True,
+    #                              public_inbound_key=product_info.public_key,
+    #                              sid=product_info.short_id)
+    #
+    #     client_uuid_from_payment = str(payment_data.operation_id)
+    #     # link = vless_client.add_client(client_uuid=client_uuid_from_payment,
+    #     #                                flow="xtls-rprx-vision",
+    #     #                                inbound_id="1",
+    #     #                                expiry_time=expire_time_sec,
+    #     #                                email=f"{user_telegram_id}_{client_uuid_from_payment}").get('subscription_link')
+    #     link = vless_client.add_client(client_uuid=client_uuid_from_payment,
+    #                                    flow="xtls-rprx-vision",
+    #                                    total_gb=product_info.total_gb,
+    #                                    inbound_id=str(product_info.inbound_id),
+    #                                    expiry_time=expire_time_sec,
+    #                                    email=f"{client_uuid_from_payment}").get('subscription_link')
+    #
+    #     # add_client_external_links
+    #     list_of_products = await get_all_product_from_direction_id(group_id=1)
+    #     external_links=[]
+    #     i=0
+    #     for product_bonus in list_of_products:
+    #         enrollments_count = await get_enrollments_count_stream_id(product_id=product_bonus.id)
+    #         if product_bonus.capacity > enrollments_count and product_bonus.id != product_info.id :
+    #
+    #             i+=1
+    #
+    #             # vless_client_new = XUIClient(base_url_from_panel=product_bonus.base_url,
+    #             #                          username=USER,
+    #             #                          password=PASSWORD,
+    #             #                          api_token=product_bonus.api_vless_token,
+    #             #                          verify_ssl=True,
+    #             #                          public_inbound_key=product_bonus.public_key,
+    #             #                          sid=product_bonus.short_id)
+    #
+    #             bonus_subscription_link = vless_client.add_client(client_uuid=None,
+    #                                            flow="xtls-rprx-vision",
+    #                                            total_gb=4,
+    #                                            inbound_id=str(product_bonus.inbound_id),
+    #                                            expiry_time=expire_time_sec,
+    #                                            email=f"PROMO_{i}_{client_uuid_from_payment}",
+    #                                            sub_id=f"sub-{int(time.time())}{i}").get('subscription_link')
+    #             external_links.append(bonus_subscription_link)
+    #
+    #     logging.info("Начинаем добавлять подписки...")
+    #     vless_client.add_client_external_links(email=client_uuid_from_payment,subscriptions_links=external_links)
+    #
+    #
+    #
+    # except Exception as exception_text:
+    #     # < code > текст < / code >
+    #     buttons = get_errors_button()
+    #     new_caption = (f"❌ <b>Что-то пошло не так</b>… Повторите попытку позже\n\n"
+    #     f"📢 <b>Сообщите в поддержку</b> и прикрепите текст ошибки\n\n"
+    #     f"💡 <i>Чтобы скопировать — просто нажмите на текст</i>\n\n"
+    #     f"🔴 <b>Ошибка:</b>\n"
+    #     f"<code>{exception_text}</code>")
+    #     await callback.message.edit_caption(caption=new_caption,
+    #                                         parse_mode="HTML",
+    #                                         reply_markup=buttons)
+    #
+    #     await callback.bot.send_message(text=new_caption,
+    #                                     chat_id=user_telegram_id,
+    #                                     reply_markup=buttons)
+    #     return
 
     ############### Запись в БД Enrollments ################
 

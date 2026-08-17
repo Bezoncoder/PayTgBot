@@ -1,53 +1,34 @@
 import asyncio
 import logging
-from pprint import pprint
 
 from aiogram import Router, F
 from aiogram.types import (
     CallbackQuery,
     FSInputFile,
     InputMediaPhoto,
-    Message,
-    InputMediaAnimation,
 )
 
 from aiogram.fsm.storage.base import StorageKey
 
 from aiogram.fsm.context import FSMContext
 
-from aiogram.filters import StateFilter
-
 from db.update_methods_dao import update_payment_data, update_referral_rewards
-from keyboards.get_menu import get_payment_verification_button, get_back_button, get_errors_button
+from keyboards.get_menu import get_back_button, get_errors_button
 from utils.calculate_expire_date import get_expire_time_sec
-from utils.get_links import get_subscribe_link
-from utils.payments import tochka_bank
 from utils.payments_operations import check_payment_status
 
-from settings.config import USER, PASSWORD, TECH_CHANNEL, API_VLESS_TOKEN
+from settings.config import USER, PASSWORD, TECH_CHANNEL
 
-from db.add_methods_dao import set_pay, add_new_enrollments
-from utils.user_veles_manager import UserVelesManagerAPI
-
-from utils.passgen import get_password
-from utils.creds import get_creds
+from db.add_methods_dao import add_new_enrollments
 
 from utils.states import OrderPay
 
-from db.select_methods import get_product_info, get_stream_info, get_userinfo_by_id, get_user_info_by_tg_id
-from utils.access_control import restore_chat_access
-
-from utils.gen_ssl_key import get_signed_cert
+from db.select_methods import get_product_info, get_stream_info, get_user_info_by_tg_id
 
 from dateutil.relativedelta import relativedelta
 import datetime as DT
 
-import calendar
-import locale
-
-import os
-
-from utils.vlessuiapi import XUIClient
+from vpn_management.vlessuiapi import XUIClient
 
 """
 

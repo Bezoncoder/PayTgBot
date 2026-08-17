@@ -1,23 +1,16 @@
 import asyncio
 import logging
-from pprint import pprint
 
 from aiogram import Router, F
-from aiogram.filters import Command, CommandStart, CommandObject
-from aiogram.fsm.storage.base import StorageKey
-from aiogram.types import Message, InputMediaPhoto
-from aiogram.utils.deep_linking import create_start_link
-from sqlalchemy.sql.functions import count
+from aiogram.types import InputMediaPhoto
 
-from db.update_methods_dao import update_payment_data, update_referral_rewards, update_referral_rewards_month, \
-    update_user_reward
-from keyboards.get_menu import get_start_menu, get_stream_products_menu, get_choice_refer_button, get_start_button, \
-    get_refer_back_button, get_errors_button, get_back_button
+from db.update_methods_dao import update_user_reward
+from keyboards.get_menu import get_refer_back_button, get_errors_button
 from aiogram.types import FSInputFile
 
-from db.select_methods import get_list_directions, get_product_info, get_user_info_by_tg_id, \
-    get_enrollmets_from_user_id, get_referralrewards_from_user_id, get_stream_info, get_referralrewards_to_month_user_d
-from db.add_methods_dao import check_user_and_add, add_new_referral_rewards, add_new_enrollments
+from db.select_methods import get_product_info, get_user_info_by_tg_id, \
+    get_referralrewards_from_user_id, get_stream_info, get_referralrewards_to_month_user_d
+from db.add_methods_dao import add_new_enrollments
 
 from aiogram.fsm.context import FSMContext
 
@@ -27,10 +20,7 @@ from settings.config import TECH_CHANNEL, PASSWORD, USER
 from utils.calculate_expire_date import get_expire_time_sec
 # from settings.config import START_DATE
 # from settings.config import START_DATE
-from utils.get_links import get_subscribe_link
-from utils.states import OrderPay
-from utils.timezone import get_moscow_today
-from utils.vlessuiapi import XUIClient
+from vpn_management.vlessuiapi import XUIClient
 
 from dateutil.relativedelta import relativedelta
 import datetime as DT
