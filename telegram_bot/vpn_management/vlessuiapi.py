@@ -120,7 +120,7 @@ class XUIClient:
                    comment: str = "", expiry_time: int = 0, flow: str = "xtls-rprx-vision") -> Optional[Dict[str, Any]]:
         final_id = client_uuid if client_uuid else self._generate_client_uuid()
         final_email = email or f"user_{inbound_id}_{int(time.time())}@example.com"
-        final_sub_id = sub_id or f"sub-{int(time.time())}"
+        final_sub_id = sub_id or f"sub-{int(time.time())+1}"
 
         client_data = {
             "id": final_id,
