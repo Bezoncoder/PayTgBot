@@ -1,9 +1,13 @@
 import logging
+from asyncio import run
 from collections.abc import Sequence
+from pprint import pprint
 from typing import Any
 from uuid import uuid4
 
 from db.schemas import ProductPydantic
+from db.select_methods import get_all_product_from_direction_id
+# from settings.config import USER, PASSWORD
 from vpn_management.vlessuiapi import XUIClient
 
 
@@ -378,7 +382,7 @@ def create_vpn_subscriptions(
                 verify_ssl=verify_ssl,
             )
 
-            bonus_sub_id = _generate_bonus_sub_id()
+            bonus_sub_id = None
 
             logging.info(
                 "Начинаем создание бонусной VLESS-подписки: "
@@ -492,3 +496,19 @@ def create_vpn_subscriptions(
     )
 
     return result
+
+
+if __name__ == "__main__":
+    list_of_products = run(get_all_product_from_direction_id(group_id=1))
+    client_uuid_from_payment = str("SUKANAHUI10-jansdkjnjkdnkjs")
+
+    vpn_result = create_vpn_subscriptions(
+        main_product=list_of_products[0],
+        bonus_products=list_of_products,
+        client_uuid=client_uuid_from_payment,
+        expire_time_sec=1772620800000,
+        username="USER",
+        password="PASSWORD",
+    )
+    print()
+    pprint(vpn_result)
