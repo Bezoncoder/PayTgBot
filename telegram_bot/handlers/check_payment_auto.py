@@ -331,10 +331,7 @@ async def check_pay(callback: CallbackQuery, state: FSMContext):
             # < code > текст < / code >
             buttons = get_errors_button()
             await callback.message.edit_caption(caption=f"❌ <b>Что-то пошло не так</b>… Повторите попытку позже\n\n"
-                                                        f"📢 <b>Сообщите в поддержку</b> и прикрепите текст ошибки\n\n"
-                                                        f"💡 <i>Чтобы скопировать — просто нажмите на текст</i>\n\n"
-                                                        f"🔴 <b>Ошибка:</b>\n"
-                                                        f"<code>{exception_text}</code>",
+                                                        f"📢 <b>Сообщите в поддержку</b>\n\n",
                                                 parse_mode="HTML",
                                                 reply_markup=buttons)
             await callback.bot.send_message(chat_id=TECH_CHANNEL,

@@ -266,19 +266,20 @@ def create_vpn_subscriptions(
 
         client_obj = test_response.get("obj")
 
-        if not isinstance(client_obj, list):
-            raise RuntimeError(
-                "x-ui API вернул некорректный ответ при проверке клиента: "
-                f"client_uuid={client_uuid}, response={test_response!r}"
-            )
+        # if not isinstance(client_obj, list):
+        #     raise RuntimeError(
+        #         "x-ui API вернул некорректный ответ при проверке клиента: "
+        #         f"client_uuid={client_uuid}, response={test_response!r}"
+        #     )
 
-        if client_obj:
+        if client_obj or not isinstance(client_obj, list):
             logging.warning(
                 "Попытка повторно создать VLESS-клиента: client_uuid=%s",
                 client_uuid,
             )
             raise RuntimeError(
                 f"VLESS-клиент уже существует: client_uuid={client_uuid}"
+                f"client_uuid={client_uuid}, response={test_response!r}"
             )
 
         main_response = main_client.add_client(
