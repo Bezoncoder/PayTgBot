@@ -23,12 +23,14 @@ from db.add_methods_dao import add_new_enrollments
 
 from utils.states import OrderPay
 
-from db.select_methods import get_product_info, get_stream_info, get_user_info_by_tg_id
+from db.select_methods import get_product_info, get_stream_info, get_user_info_by_tg_id, \
+    get_all_product_from_direction_id, get_enrollments_count_stream_id
 
 from dateutil.relativedelta import relativedelta
 import datetime as DT
 
 from vpn_management.vlessuiapi import XUIClient
+from vpn_management.vpn_subscription_manager import create_vpn_subscriptions
 
 """
 
@@ -205,32 +207,125 @@ async def check_pay(callback: CallbackQuery, state: FSMContext):
                                                         f"<code>{exception_text}</code>",
                                                 parse_mode="HTML",
                                                 reply_markup=buttons)
+
         await asyncio.sleep(10)
+
         try:
-            vless_client = XUIClient(base_url_from_panel=base_url,
-                                     username=USER,
-                                     password=PASSWORD,
-                                     api_token=product_info.api_vless_token,
-                                     verify_ssl=True,
-                                     public_inbound_key=product_info.public_key,
-                                     sid=product_info.short_id)
+
+            logging.info(
+                "Начинаем подготовку бонусных продуктов: main_product_id=%s",
+                product_info.id,
+            )
+
+            list_of_products = await get_all_product_from_direction_id(group_id=1)
+
+            bonus_products = []
+
+            for product_bonus in list_of_products:
+                if product_bonus.id == product_info.id:
+                    continue
+
+                if product_bonus.capacity is None:
+                    logging.warning(
+                        "Пропускаем бонусный продукт: product_id=%s, "
+                        "причина=capacity is None",
+                        product_bonus.id,
+                    )
+                    continue
+
+                enrollments_count = await get_enrollments_count_stream_id(product_id=product_bonus.id)
+
+                if enrollments_count < product_bonus.capacity:
+                    bonus_products.append(product_bonus)
+                else:
+                    logging.info(
+                        "Пропускаем заполненный бонусный продукт: "
+                        "product_id=%s, enrollments_count=%s, capacity=%s",
+                        product_bonus.id,
+                        enrollments_count,
+                        product_bonus.capacity,
+                    )
+
+            logging.info(
+                "Бонусные продукты подготовлены: main_product_id=%s, "
+                "bonus_products_count=%s",
+                product_info.id,
+                len(bonus_products),
+            )
 
             client_uuid_from_payment = str(payment_data.operation_id)
 
-            obj = vless_client.get_client_traffic_by_id(client_uuid=client_uuid_from_payment).get("obj")
+            vpn_result = create_vpn_subscriptions(
+                main_product=product_info,
+                bonus_products=bonus_products,
+                client_uuid=client_uuid_from_payment,
+                expire_time_sec=expire_time_sec,
+                username=USER,
+                password=PASSWORD,
+            )
 
-            if isinstance(obj, list) and obj == []:
-                logging.info(f"📢 Создаем ссылку для клиента с UUID = {client_uuid_from_payment}")
-                link = vless_client.add_client(client_uuid=client_uuid_from_payment,
-                                               flow="xtls-rprx-vision",
-                                               total_gb=product_info.total_gb,
-                                               inbound_id=str(product_info.inbound_id),
-                                               expiry_time=expire_time_sec,
-                                               email=f"{client_uuid_from_payment}").get('subscription_link')
-            else:
-                logging.info(f"💡 Клиент c UUID = {client_uuid_from_payment} уже есть в 3xui")
-                logging.debug(obj)
-                link = None
+            if not vpn_result["success"]:
+                error_text = (
+                    vpn_result["errors"][0]["error"]
+                    if vpn_result["errors"]
+                    else "Причина ошибки отсутствует."
+                )
+
+                logging.error(
+                    "Не удалось выдать VPN: payment_id=%s, vpn_result=%s",
+                    payment_data.id,
+                    vpn_result,
+                )
+
+                raise RuntimeError(
+                    f"{vpn_result['message']} Причина: {error_text}"
+                )
+
+            link = vpn_result["main_subscription_link"]
+
+            logging.info(
+                "VPN успешно выдана: payment_id=%s, main_product_id=%s, "
+                "bonus_created_count=%s",
+                payment_data.id,
+                product_info.id,
+                vpn_result["bonus_created_count"],
+            )
+
+            if vpn_result["errors"]:
+                logging.warning(
+                    "VPN выдана с частичными ошибками бонусных подписок: "
+                    "payment_id=%s, errors=%s",
+                    payment_data.id,
+                    vpn_result["errors"],
+                )
+
+            # vless_client = XUIClient(base_url_from_panel=base_url,
+            #                          username=USER,
+            #                          password=PASSWORD,
+            #                          api_token=product_info.api_vless_token,
+            #                          verify_ssl=True,
+            #                          public_inbound_key=product_info.public_key,
+            #                          sid=product_info.short_id)
+            #
+            # client_uuid_from_payment = str(payment_data.operation_id)
+
+
+            # obj = vless_client.get_client_traffic_by_id(client_uuid=client_uuid_from_payment).get("obj")
+            #
+            # if isinstance(obj, list) and obj == []:
+            #     logging.info(f"📢 Создаем ссылку для клиента с UUID = {client_uuid_from_payment}")
+            #     link = vless_client.add_client(client_uuid=client_uuid_from_payment,
+            #                                    flow="xtls-rprx-vision",
+            #                                    total_gb=product_info.total_gb,
+            #                                    inbound_id=str(product_info.inbound_id),
+            #                                    expiry_time=expire_time_sec,
+            #                                    email=f"{client_uuid_from_payment}").get('subscription_link')
+            # else:
+            #     logging.info(f"💡 Клиент c UUID = {client_uuid_from_payment} уже есть в 3xui")
+            #     logging.debug(obj)
+            #     link = None
+
+
 
         except Exception as exception_text:
             # < code > текст < / code >
