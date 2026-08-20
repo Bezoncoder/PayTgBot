@@ -1,4 +1,5 @@
 import random
+from pprint import pprint
 from urllib.parse import urlparse
 import requests
 import json
@@ -6,6 +7,7 @@ import time
 import logging
 import uuid
 from typing import Dict, Any, Optional
+from urllib.parse import quote
 
 logger = logging.getLogger(__name__)
 
@@ -121,7 +123,7 @@ class XUIClient:
                    comment: str = "", expiry_time: int = 0, flow: str = "xtls-rprx-vision") -> Optional[Dict[str, Any]]:
         final_id = client_uuid if client_uuid else self._generate_client_uuid()
         final_email = email or f"user_{inbound_id}_{int(time.time())}@example.com"
-        final_sub_id = sub_id or f"sub-{int(time.time()) + random.randint(1, 100)}"
+        # final_sub_id = sub_id or f"sub-{int(time.time()) + random.randint(1, 100)}"
 
         client_data = {
             "id": final_id,
@@ -131,7 +133,7 @@ class XUIClient:
             "tgId": 0,
             "limitIp": limit_ip,
             "enable": enable,
-            "subId": final_sub_id,
+            "subId": sub_id or "",
             "comment": comment,
             "flow": flow,
         }
@@ -146,17 +148,55 @@ class XUIClient:
         result = self._make_request("clients/add", method="POST", json=payload)
         success = result.get('success', False)
 
+        # if success is True:
+        #     new_result = result
+        #     vless_link = self._generate_vless_link(client_uuid=final_id,
+        #                                            host=self.host,
+        #                                            profile_name=email)
+        #     new_result["vless_link"] = vless_link
+        #     new_base_url_list = str(self.base_url).split(":")
+        #     # sub_path: str = ":2096/1AWEJRPGmKLSZojNjB",
+        #     new_result["subscription_link"] = (new_base_url_list[0]+":"
+        #                                        +new_base_url_list[1]+self.sub_path
+        #                                        +"/"+str(client_data.get("subId")))
         if success is True:
             new_result = result
-            vless_link = self._generate_vless_link(client_uuid=final_id,
-                                                   host=self.host,
-                                                   profile_name=email)
-            new_result["vless_link"] = vless_link
-            new_base_url_list = str(self.base_url).split(":")
-            # sub_path: str = ":2096/1AWEJRPGmKLSZojNjB",
-            new_result["subscription_link"] = (new_base_url_list[0]+":"
-                                               +new_base_url_list[1]+self.sub_path
-                                               +"/"+str(client_data.get("subId")))
+
+            panel_client = self.get_client(final_email)
+
+            # print(panel_client)
+
+            if not panel_client:
+                raise RuntimeError(
+                    f"Клиент {final_email!r} создан, "
+                    "но не удалось получить его данные из панели"
+                )
+
+            panel_sub_id = panel_client.get("subId")
+
+            if not panel_sub_id:
+                raise RuntimeError(
+                    f"Панель не вернула subId для клиента {final_email!r}"
+                )
+
+            new_result["subId"] = panel_sub_id
+
+            new_result["vless_link"] = self._generate_vless_link(
+                client_uuid=panel_client.get("id", final_id),
+                host=self.host,
+                profile_name=final_email,
+            )
+
+            # sub_path: str = ":2096/1AWEJRPGmKLSZojNjB"
+            # new_base_url_list = str(self.base_url).split(":")
+            # new_result["subscription_link"] = (new_base_url_list[0]+":"
+            #                                    +new_base_url_list[1]+self.sub_path
+            #                                    +"/"+str(panel_sub_id))
+            new_result["subscription_link"] = (
+                f"{self.base_url.split(':', 1)[0]}:"
+                f"{self.base_url.split(':', 2)[1]}"
+                f"{self.sub_path}/{panel_sub_id}"
+            )
         else:
             new_result = result
             raise ValueError(new_result.get('msg'))
@@ -221,6 +261,53 @@ class XUIClient:
 
         return self._make_request(endpoint=f"clients/{email}/externalLinks", method="POST", json=payload)
 
+    def get_client(self, email: str) -> Optional[Dict[str, Any]]:
+        """
+        Получает данные клиента 3X-UI по email.
+
+        Возвращает именно объект клиента:
+        {
+            "id": 99,
+            "email": "...",
+            "subId": "...",
+            "uuid": "...",
+            ...
+        }
+        """
+        email_encoded = quote(email, safe="")
+
+        logger.info("Получение клиента по email: %s", email)
+
+        response = self._make_request(
+            endpoint=f"clients/get/{email_encoded}",
+            method="GET",
+        )
+
+        if not response:
+            return None
+
+        if not response.get("success"):
+            logger.warning(
+                "Клиент %r не найден: %s",
+                email,
+                response.get("msg", "Unknown error"),
+            )
+            return None
+
+        obj = response.get("obj")
+
+        if not obj:
+            logger.warning("3X-UI вернул пустой obj для %r", email)
+            return None
+
+        client = obj.get("client", obj)
+
+        if not client:
+            logger.warning("3X-UI не вернул данные клиента для %r", email)
+            return None
+
+        return client
+
 
     def get_client_traffic_by_id(self, client_uuid: str):
         # //panel/api/clients/get/:email
@@ -264,18 +351,43 @@ class XUIClient:
         logger.info("Отправка бэкапа в Telegram bot")
         return self._make_request("backuptotgbot", method="POST")
 
-if __name__=="__main__":
-    API_VLESS_TOKEN = ""
 
-    BASE_URL = "https://origin.illiriaakva.online:49699/9RWEJRPGmKLSZojNjB"
+
+
+
+
+
+if __name__=="__main__":
+    API_VLESS_TOKEN = "KAuYWOt5neJjJZIuPnbryp4x15MrDmEHYcihBDHFaVRdVlL2"
+
+    BASE_URL = "https://connect.quantumturbovpn.com:49699/9RWEJRPGmKLSZojNjB"
     # "https://quantumturbovpn.ddns.net:49699/9RWEJRPGmKLSZojNjB"
+    # client = XUIClient(
+    #     base_url_from_panel="https://origin.illiriaakva.online:49699/9RWEJRPGmKLSZojNjB",
+    #     api_token=API_VLESS_TOKEN,
+    #     verify_ssl=True
+    # )
+    #
+
+
     client = XUIClient(
-        base_url_from_panel="https://origin.illiriaakva.online:49699/9RWEJRPGmKLSZojNjB",
+        base_url_from_panel=BASE_URL,
         api_token=API_VLESS_TOKEN,
-        verify_ssl=True
+        verify_ssl=True,
+
     )
 
+    test_email = "SUKA__ZAEBALA_TRI_RAZA_TVAR100"
 
+    result = client.add_client(
+        inbound_id="2",
+        email=test_email,
+        total_gb=50,
+        limit_ip=1,
+        expiry_time=0,
+    )
+
+    pprint(result)
 
     # print(client.get_list_inbounds())
 
@@ -292,7 +404,7 @@ if __name__=="__main__":
     # print(result["subscription_link"])
     # remove_client(self, client_id: str, inbound_id: str = "1")
 
-    print(client.remove_client(client_id="SUKA_TEST", inbound_id="2"))
+    # print(client.remove_client(client_id="SUKA_TEST", inbound_id="2"))
 
     # print(client.get_client_traffic_by_id(client_uuid="SUKA_TEST"))
     #
@@ -305,4 +417,10 @@ if __name__=="__main__":
     # print(link)
 
 
-
+    # 'https://connect.quantumturbovpn.com:49699/9RWEJRPGmKLSZojNjB/f691370e-2335-4a7a-b194-b403d276b75f' GOVNO
+    #
+    # 'https://connect.quantumturbovpn.com:2096/1AWEJRPGmKLSZojNjB/f691370e-2335-4a7a-b194-b403d276b75f'
+    #
+    # 'https://connect.quantumturbovpn.com:2096/9RWEJRPGmKLSZojNjB/f691370e-2335-4a7a-b194-b403d276b75f'
+    #
+    # '/1AWEJRPGmKLSZojNjB/'
