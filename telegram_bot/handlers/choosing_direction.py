@@ -8,7 +8,7 @@ import asyncio
 
 from keyboards.get_menu import get_products_menu
 from db.select_methods import get_all_product_from_direction_id
-from settings.config import URL
+from settings.config import URL, HOME_PAGE
 # from utils.jira_functional.jira_functions import onboard_user_with_tasks
 
 from utils.gen_ssl_key import get_signed_cert
@@ -58,7 +58,7 @@ async def set_group(callback: CallbackQuery, state: FSMContext):
                 f"⚡ Ускорение Интернета.\n"
                 f"🛡️ Техподдержка 24/7 в чате.\n"
                 f"🎯 У нас есть {choice_text} для тебя!!!\n\n"
-                f'🌐 Все детали на:\n\n https://quantumturbovpn.ddns.net/\n\n'
+                f'🌐 Все детали на:\n\n f"{HOME_PAGE}"\n\n'
                 f"👇 Выбери то, что тебе нужно\n",
         parse_mode='HTML'
     )

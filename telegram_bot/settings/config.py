@@ -13,7 +13,7 @@ PASSWORD = os.getenv("PASSWORD")
 LOGIN_WEB_PLATEGA = os.getenv("LOGIN_WEB_PLATEGA")
 PASSWORD_WEB_PLATEGA = os.getenv("PASSWORD_WEB_PLATEGA")
 API_VLESS_TOKEN = os.getenv("API_VLESS_TOKEN")
-
+HOME_PAGE = "https://quantumturbovpn.com/"
 dp = Dispatcher(storage=MemoryStorage())
 bot = Bot(token=BOT_TOKEN)
 
