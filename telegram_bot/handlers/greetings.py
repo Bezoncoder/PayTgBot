@@ -27,12 +27,11 @@ from utils.timezone import get_moscow_today
 router = Router()
 
 
-
 START_CAPTION = (f'🚀 **Добро пожаловать!**\n\n'
                 f'✅ Отличный выбор!\n\n'
                 f'📡 Самый быстрый VPN с серверами по всему миру и защитой.\n\n'
                 f'🗝️ Один ключ на два устройства.\n\n'
-                f'🌐 Наш Сайт: {HOME_PAGE}.\n\n'
+                f'🌐 Наш Сайт: <a href="{HOME_PAGE}">QuantumTurboVPN</a>.\n\n'
                 f'📺 Как подключить: <a href="https://t.me/QuantumTurboVPN/409">Инструкция для самых маленьких</a>.\n\n'
                 f'🛠️️ Техподдержка 24/7 в чате.\n\n'
                 f'👇 Выбери нужный вариант!\n\n')

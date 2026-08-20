@@ -58,7 +58,7 @@ async def set_group(callback: CallbackQuery, state: FSMContext):
                 f"⚡ Ускорение Интернета.\n"
                 f"🛡️ Техподдержка 24/7 в чате.\n"
                 f"🎯 У нас есть {choice_text} для тебя!!!\n\n"
-                f'🌐 Все детали на:\n\n f"{HOME_PAGE}"\n\n'
+                f'🌐 Все детали на:\n\n {HOME_PAGE}\n\n'
                 f"👇 Выбери то, что тебе нужно\n",
         parse_mode='HTML'
     )
