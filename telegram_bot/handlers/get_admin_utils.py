@@ -6,48 +6,20 @@ from aiogram import Router, F
 from aiogram.fsm.storage.base import StorageKey
 from aiogram.types import Message, InputMediaPhoto
 
-from keyboards.get_menu import get_start_button, get_admin_button
+from keyboards.get_menu import get_start_button, get_admin_button, get_errors_button
 from aiogram.types import FSInputFile
 
 from aiogram.fsm.context import FSMContext
 
 from aiogram.types import CallbackQuery
 
-from settings.config import LOGIN_WEB_PLATEGA, PASSWORD_WEB_PLATEGA
+from settings.config import LOGIN_WEB_PLATEGA, PASSWORD_WEB_PLATEGA, TECH_CHANNEL
 # from settings.config import START_DATE
 # from settings.config import START_DATE
 from payment_tools.platega_api_web_panel import PlategaWebClient
 from utils.states import OrderPay
 
 router = Router()
-
-# forward_chat_id: -1003976745616
-# forward_message_id: 3
-
-# forward_chat_id: -1003976745616
-# forward_message_id: 5
-
-# forward_chat_id: -1003976745616
-# forward_message_id: 6
-
-# forward_chat_id: -1003976745616
-# forward_message_id: 7
-
-# forward_chat_id: -1003976745616
-# forward_message_id: 8
-
-# forward_chat_id: -1003976745616
-# forward_message_id: 9
-
-# forward_chat_id: -1003976745616
-# forward_message_id: 10
-
-# [3,5,6,7,8,9,10]
-
-# del_info_message
-# builder.button(text="Баланс", callback_data=f"get_balance")
-# builder.button(text="За сегодня", callback_data=f"get_statistics")
-
 
 @router.callback_query(F.data == "get_utils")
 async def get_utils(callback: CallbackQuery, state: FSMContext):
@@ -128,10 +100,23 @@ async def get_balance(callback: CallbackQuery, state: FSMContext):
 
     logging.debug(f"Состояние для пользователя user_id = {callback.from_user.id} установлено: {state_from_user}")
 
-    #####################################################################################################
+    ################################ PlategaWebClient #####################################################
 
-    platega_web_client = PlategaWebClient(login=LOGIN_WEB_PLATEGA,
-                                          password=PASSWORD_WEB_PLATEGA)
+    try:
+        logging.debug("💳 Подключаемся к платежному шлюзу WEB API")
+        platega_web_client = PlategaWebClient(login=LOGIN_WEB_PLATEGA,
+                                              password=PASSWORD_WEB_PLATEGA)
+
+    except Exception as exception_text:
+        # < code > текст < / code >
+        buttons = get_errors_button()
+        await callback.message.edit_caption(caption=(f"❌ <b>Что-то пошло не так</b>… Повторите попытку позже\n\n"
+                                                    f"📢 <b>Ошибка: </b>\n\n"
+                                                    f"<code>{exception_text}</code>"),
+                                            parse_mode="HTML",
+                                            reply_markup=buttons)
+        return
+
 
     balance_rub = platega_web_client.get_balance()
     balance_usdt = platega_web_client.get_balance(currencycode="USDT")
@@ -182,11 +167,7 @@ async def get_balance(callback: CallbackQuery, state: FSMContext):
         f"  {month_to_now_date} RUB\n"
         f"• Сегодня: {today_sale} RUB"
     )
-    # Вариант с изменением сообщения без удаления.
-    # media = InputMediaPhoto(
-    #     media=photo,
-    #     caption=caption,
-    #     parse_mode="HTML")
+
 
     await callback.bot.delete_message(chat_id=callback.message.chat.id,
                                       message_id=callback.message.message_id)
@@ -204,50 +185,6 @@ async def get_balance(callback: CallbackQuery, state: FSMContext):
                                   reply_markup=buttons)
 
     logging.debug("Сообщение 'get_balance' отправлено.")
-
-
-# @router.callback_query(F.data == "get_statistics")
-# async def set_start(callback: CallbackQuery, state: FSMContext):
-#     await callback.answer("Вы выбрали Админ Меню")
-#
-#     photo = FSInputFile('source/pictures/vpn_main_menu.jpg')
-#
-#     storage = state.storage
-#
-#     key = StorageKey(
-#         bot_id=callback.bot.id,
-#         chat_id=callback.message.chat.id,  # личный чат пользователя
-#         user_id=callback.from_user.id  # сам пользователь
-#
-#     )
-#
-#     admin_user_data = dict(
-#         message_id=callback.message.message_id
-#     )
-#
-#     await state.storage.update_data(key=key, data=admin_user_data)
-#
-#
-#     # await storage.set_state(key, OrderPay.check_id_message)
-#     state_from_user = await storage.get_state(key)
-#
-#     logging.debug(f"Состояние для пользователя user_id = {callback.from_user.id} установлено: {state_from_user}")
-#
-#     #####################################################################################################
-#
-#     buttons = get_admin_button()
-#
-#
-#     # Вариант с изменением сообщения без удаления.
-#     media = InputMediaPhoto(
-#         media=photo,
-#         caption="Перешли любое сообщение, чтобы узнать его ID",
-#         parse_mode="HTML")
-#
-#     await callback.bot.edit_message_media(media=media,
-#                                           chat_id=callback.from_user.id,
-#                                           message_id=callback.message.message_id,
-#                                           reply_markup=buttons)
 
 
 @router.callback_query(F.data == "get_id_message")

@@ -94,10 +94,10 @@ def get_payment_notification_button(
 ) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     # set_stream:stream_id:price
-    builder.button(
-        text=f"Я оплатил",
-        callback_data=f"check_pay:{stream_id}:{price}:{directions_id}",
-    )
+    # builder.button(
+    #     text=f"Я оплатил",
+    #     callback_data=f"check_pay:{stream_id}:{price}:{directions_id}",
+    # )
 
     # back_callback_menu = f"get_choosing_method:{stream_id}:{price_menu}:{product_id}"
 
