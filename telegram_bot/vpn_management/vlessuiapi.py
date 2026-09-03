@@ -1,6 +1,6 @@
 import random
 from pprint import pprint
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urlunparse
 import requests
 import json
 import time
@@ -17,8 +17,10 @@ class XUIClient:
                  public_inbound_key: str = None, sid: str = None, sni: str = "ya.ru",
                  username: str = None, password: str = None, two_factor: str = None,
                  api_token: str = None,
-                 sub_path: str = ":2096/1AWEJRPGmKLSZojNjB",
+                 sub_path: str = "/1AWEJRPGmKLSZojNjB",
+                 sub_port: int = None,
                  verify_ssl: bool = False, auto_login: bool = True):
+
 
         if not base_url_from_panel:
             raise ValueError("base_url_from_panel is required")
@@ -32,12 +34,15 @@ class XUIClient:
         }
 
         self.base_url = base_url_from_panel.rstrip('/')
+        self.scheme = parsed.scheme
         self.host = parsed.hostname
         self.port = parsed.port or (443 if parsed.scheme == 'https' else 80)
+        self.netloc = parsed.netloc
         self.web_path = parsed.path.rstrip('/') if parsed.path else ''
         self.use_https = parsed.scheme == 'https'
         self.verify_ssl = verify_ssl
         self.sub_path = sub_path
+        self.sub_port = sub_port
 
         self.username = username
         self.password = password
@@ -80,7 +85,15 @@ class XUIClient:
             logger.warning("⚠️ Не авторизован!")
             return None
 
-        url = f"{self.base_url}/panel/api/{endpoint.lstrip('/')}"
+        # url = f"{self.base_url}{self.port}/{self.web_path}/panel/api/{endpoint.lstrip('/')}"
+        url = urlunparse((  self.scheme,  # "https"
+                            self.netloc,  # "example.com:8443"
+                            f"{self.web_path}/panel/api/{endpoint.lstrip('/')}",  # путь
+                            '',  # params
+                            '',  # query
+                            ''  # fragment
+                        ))
+        print(url)
         logger.info(url)
 
         try:
@@ -146,7 +159,12 @@ class XUIClient:
         logging.info(f"Добавление клиента {final_id[:8]}... в inbound {inbound_id}: {final_email}")
 
         result = self._make_request("clients/add", method="POST", json=payload)
-        success = result.get('success', False)
+
+        if result:
+            success = result.get('success', False)
+            pprint(result)
+        else:
+            success = False
 
         # if success is True:
         #     new_result = result
@@ -160,6 +178,7 @@ class XUIClient:
         #                                        +new_base_url_list[1]+self.sub_path
         #                                        +"/"+str(client_data.get("subId")))
         if success is True:
+
             new_result = result
 
             panel_client = self.get_client(final_email)
@@ -172,14 +191,14 @@ class XUIClient:
                     "но не удалось получить его данные из панели"
                 )
 
-            panel_sub_id = panel_client.get("subId")
+            client_sub_id = panel_client.get("subId")
 
-            if not panel_sub_id:
+            if not client_sub_id:
                 raise RuntimeError(
                     f"Панель не вернула subId для клиента {final_email!r}"
                 )
 
-            new_result["subId"] = panel_sub_id
+            new_result["subId"] = client_sub_id
 
             new_result["vless_link"] = self._generate_vless_link(
                 client_uuid=panel_client.get("id", final_id),
@@ -191,12 +210,39 @@ class XUIClient:
             # new_base_url_list = str(self.base_url).split(":")
             # new_result["subscription_link"] = (new_base_url_list[0]+":"
             #                                    +new_base_url_list[1]+self.sub_path
-            #                                    +"/"+str(panel_sub_id))
-            new_result["subscription_link"] = (
-                f"{self.base_url.split(':', 1)[0]}:"
-                f"{self.base_url.split(':', 2)[1]}"
-                f"{self.sub_path}/{panel_sub_id}"
-            )
+            #                                    +"/"+str(client_sub_id))
+            # new_result["subscription_link"] = (
+            #     f"{self.base_url.split(':', 1)[0]}:"
+            #     f"{self.base_url.split(':', 2)[1]}"
+            #     f"{self.sub_path}/{client_sub_id}"
+            # )
+            '''
+            | Свойство        | Описание                                           | Пример                       |
+            | --------------- | -------------------------------------------------- | ---------------------------- |
+            | parsed.scheme   | Протокол                                           | "https"                      |
+            | parsed.netloc   | Сетевое расположение (домен + порт + пользователь) | "user:pass@example.com:8443" |
+            | parsed.path     | Путь после домена                                  | "/path"                      |
+            | parsed.params   | Параметры пути (после ;)                           | "params"                     |
+            | parsed.query    | Query-строка (после ?)                             | "query=value"                |
+            | parsed.fragment | Фрагмент (после #)                                 | "fragment"                   |
+            | parsed.username | Пользователь из URL                                | "user"                       |
+            | parsed.password | Пароль из URL                                      | "pass"                       |
+            | parsed.hostname | Только домен (без порта)                           | "example.com"                |
+            | parsed.port     | Только порт (как int или None)                     | 8443                         |
+            '''
+            # parsed = urlparse(self.base_url)
+            # sub_path: str = ":2096/1AWEJRPGmKLSZojNjB"
+            # (scheme, netloc, path, params, query, fragment)
+            netloc = f"{self.host}:{self.sub_port}" if self.sub_port else self.host
+            url = urlunparse((self.scheme, netloc, f"{self.sub_path}/{client_sub_id}", '', '', ''))
+            print(url)
+            # https://connect.quantumturbovpn.com:2096/1AWEJRPGmKLSZojNjB
+            new_result["subscription_link"] = url
+
+            # new_result["subscription_link"] = (
+            #     f'{self.scheme}://{}/{self.sub_path}/{client_sub_id}'
+            # )
+
         else:
             new_result = result
             raise ValueError(new_result.get('msg'))
@@ -309,6 +355,14 @@ class XUIClient:
         return client
 
 
+    def get_client_subLink_by_subid(self, sub_id: str):
+        # {{baseUrl}}/panel/api/clients/subLinks/:subId
+        endpoint = f"clients/subLinks/{sub_id}"
+
+        response = self._make_request(endpoint=endpoint, method="GET")
+
+        return response
+
     def get_client_traffic_by_id(self, client_uuid: str):
         # //panel/api/clients/get/:email
         endpoint = f"clients/get/{client_uuid}"
@@ -374,20 +428,29 @@ if __name__=="__main__":
         base_url_from_panel=BASE_URL,
         api_token=API_VLESS_TOKEN,
         verify_ssl=True,
+        sub_port=2096
 
     )
 
-    test_email = "SUKA__ZAEBALA_TRI_RAZA_TVAR100"
+    test_email = "SUKA_041002713100_NAHUI"
+    subId = "4fddd9a5-45cc-449f-a34b-08b06591ba79"
 
-    result = client.add_client(
+    result_test = client.add_client(
         inbound_id="2",
         email=test_email,
         total_gb=50,
         limit_ip=1,
         expiry_time=0,
     )
+    #
 
-    pprint(result)
+    # result_test = client.get_client(email=test_email)
+    # result_test = client.get_client_subLink_by_subid(sub_id=subId)
+    pprint(result_test)
+
+    # for i, el in enumerate(result_test.get('obj')):
+    #     print(i," ",el)
+
 
     # print(client.get_list_inbounds())
 
