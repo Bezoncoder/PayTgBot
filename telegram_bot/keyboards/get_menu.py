@@ -295,7 +295,7 @@ def get_refer_back_button() -> InlineKeyboardMarkup:
     return builder.as_markup(resize_keyboard=True)
 
 def get_admin_button() -> InlineKeyboardMarkup:
-    # check_pay:{stream_id}:{price}:{directions_id}
+    # callback_data=f"check_pay:{stream_id}:{price}:{directions_id}"
     builder = InlineKeyboardBuilder()
 
     builder.button(text="Баланс", callback_data=f"get_balance")

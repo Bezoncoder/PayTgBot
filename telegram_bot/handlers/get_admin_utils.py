@@ -57,7 +57,7 @@ async def get_utils(callback: CallbackQuery, state: FSMContext):
         f"Выберите нужное действие:\n\n"
         f"💰 Посмотреть баланс\n"
         f"🆔 Узнать ID\n"
-        f"💰🛠️ Тестовая покупка"
+        f"💰🛠️ Тестовая покупка\n"
         f"🏠 Вернуться в главное меню"
     )
 
