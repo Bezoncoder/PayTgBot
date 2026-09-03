@@ -93,8 +93,8 @@ async def check_pay(callback: CallbackQuery, state: FSMContext):
 
     user_data = await state.storage.get_data(key=key)
     logging.debug(f"user_data = {user_data}")
-    directions_id = user_data.get("directions_id")
-    pay_method = user_data.get("pay_method")
+    directions_id = user_data.get("directions_id", list_data_buttons[3])
+    pay_method = user_data.get("pay_method", "SPB")
 
     ################# Получаем Статус Оплаты в PlategaAPI ########################################
 
@@ -394,7 +394,7 @@ async def check_pay(callback: CallbackQuery, state: FSMContext):
         #                  payment_id=payment_data_to_provider.id)
 
         payment_data = await update_payment_data(payment_id=user_data.get("payment_id", '000000'),
-                                                 new_operation_id=user_data.get("operation_id", "None"),
+                                                 new_operation_id=user_data.get("operation_id", '000000'),
                                                  new_status=payment_status,
                                                  stream_id=stream_info.id)
 
