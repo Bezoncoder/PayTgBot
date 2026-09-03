@@ -62,6 +62,7 @@ async def on_startup(app):
     Выполняется при запуске приложения.
     """
     # await set_default_commands()
+    await bot.delete_webhook()
     await bot.set_webhook(f"https://bot.quantumturbovpn.com/{BOT_TOKEN}")
     for admin_id in ADMINS:
         try:
