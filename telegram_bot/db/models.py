@@ -78,7 +78,7 @@ class Product(Base):  # Продукты по направлениям
     base_url: Mapped[str | None]
     public_key: Mapped[str | None] = mapped_column(Text)
     short_id: Mapped[str | None] = mapped_column(Text)
-    # sub_port: Mapped[int | None]
+    sub_port: Mapped[int | None]
     total_gb: Mapped[int | None]
     inbound_id: Mapped[int | None]
     api_vless_token: Mapped[str | None]
