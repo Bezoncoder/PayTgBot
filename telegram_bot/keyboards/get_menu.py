@@ -302,7 +302,7 @@ def get_admin_button() -> InlineKeyboardMarkup:
     # builder.button(text="За сегодня", callback_data=f"get_statistics")
     builder.button(text="Узнать ID", callback_data=f"get_id_message")
     builder.button(text="Сводка по аккаунту", callback_data=f"get_account_summary_menu")
-    builder.button(text="Тестовая покупка", callback_data=f"check_pay:12:30:1")
+    builder.button(text="Тестовая покупка", callback_data=f"test_payment")
     builder.button(text="Главное меню", callback_data=f"set: start")
 
     builder.adjust(1)
