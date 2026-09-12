@@ -88,15 +88,20 @@ async def check_account_summary_from_message(message: Message, state: FSMContext
 
     admin_user_data = await state.storage.get_data(key=key)
 
-    # GET USER ENROLMENTS
+    buttons = get_account_summary_button(user_tg_id=None)
+
     if message.forward_from is None:
         await message.bot.delete_message(chat_id=message.from_user.id, message_id=message.message_id)
         await message.bot.edit_message_caption(chat_id=message.from_user.id,
                                                message_id=admin_user_data.get("message_id", 000),
                                                caption=(f"⚠️ У пользователя закрыт Telegram ID.\n\n"
                                                         f"Не удалось определить автора пересланного сообщения.\n"
-                                                        f"Попросите пользователя прислать свой Telegram ID."))
+                                                        f"Попросите пользователя прислать свой Telegram ID."),
+                                               reply_markup=buttons)
         return
+
+    # GET USER ENROLMENTS
+
     user_info = await get_user_info_by_tg_id(tg_user_id=int(message.forward_from.id))
 
     # user_enrolments = [EnrollmentPydantic]
