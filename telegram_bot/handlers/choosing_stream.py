@@ -8,7 +8,7 @@ from aiogram.fsm.context import FSMContext
 
 from keyboards.get_menu import get_stream_payment_buttons
 from db.select_methods import get_stream_info, get_product_info
-from settings.config import HOST_URL
+from settings.config import HOST_URL, HOME_PAGE
 
 '''
 
@@ -71,8 +71,8 @@ async def set_stream(callback: CallbackQuery, state: FSMContext):
     #                f"Нажимая кнопку «Оплатить», вы соглашаетесь с условиями оферты {link_part}.\n\n"
     #                f'\n⚠️ Оплата производится исключительно с карты физического лица!\n\n')
 
-    politika_url = HOST_URL+"/policy"
-    polzovatelskoe_url = HOST_URL+"/soglashenie"
+    politika_url = HOME_PAGE+"policy"
+    polzovatelskoe_url = HOME_PAGE+"soglashenie"
 
     new_caption = (f"🧾 Вы выбрали: {stream_info.title} за {stream_info.price} ₽.\n\n"
                    f"✅ Нажмите «Продолжить» для перехода к оплате!\n\n"
