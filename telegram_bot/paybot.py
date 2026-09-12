@@ -28,6 +28,7 @@ from vpn_management.vlessuiapi import XUIClient
 
 from app.app import handle_webhook, home_page, payment_success
 from aiogram.webhook.aiohttp_server import setup_application
+from aiogram.types import ErrorEvent
 from aiohttp import web
 
 
@@ -43,6 +44,25 @@ ADMINS = [5866726660, 1773955529]
 #  -1002917599861 Bootcamp Supergroup_ID
 # await bot.ban_chat_member(chat_id, user_id)
 # await bot.unban_chat_member(chat_id, user_id)
+
+
+
+@dp.error()
+async def global_error_handler(event: ErrorEvent) -> None:
+    exception = event.exception
+    update_id = event.update.update_id if event.update else "unknown"
+
+    logging.error(
+        "Aiogram handler crashed. update_id=%s; %s: %s",
+        update_id,
+        type(exception).__name__,
+        exception,
+        exc_info=(
+            type(exception),
+            exception,
+            exception.__traceback__,
+        ),
+    )
 
 async def start_scheduler(app):
     scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
