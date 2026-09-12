@@ -77,11 +77,22 @@ async def check_account_summary_from_message(message: Message, state: FSMContext
 
     #TODO ДЕЛАЕМ ЗАПРОС В БД, ЧТОБЫ УЗНАТЬ ПОДПИСКИ!!!!!!!!!!!!!!!!!!!
 
+    key = StorageKey(
+        bot_id=message.bot.id,
+        chat_id=message.chat.id,  # личный чат пользователя
+        user_id=message.from_user.id  # сам пользователь
+
+    )
+
+    await state.storage.set_state(key, None)
+
+    admin_user_data = await state.storage.get_data(key=key)
+
     # GET USER ENROLMENTS
     if message.forward_from is None:
         await message.bot.delete_message(chat_id=message.from_user.id, message_id=message.message_id)
         await message.bot.edit_message_caption(chat_id=message.from_user.id,
-                                               message_id=message.message_id,
+                                               message_id=admin_user_data.get("message_id", 000),
                                                caption=(f"⚠️ У пользователя закрыт Telegram ID.\n\n"
                                                         f"Не удалось определить автора пересланного сообщения.\n"
                                                         f"Попросите пользователя прислать свой Telegram ID."))
@@ -116,16 +127,7 @@ async def check_account_summary_from_message(message: Message, state: FSMContext
     await message.bot.delete_message(chat_id=message.from_user.id, message_id=message.message_id)
 
 
-    key = StorageKey(
-        bot_id=message.bot.id,
-        chat_id=message.chat.id,  # личный чат пользователя
-        user_id=message.from_user.id  # сам пользователь
 
-    )
-
-    await state.storage.set_state(key, None)
-
-    admin_user_data = await state.storage.get_data(key=key)
 
     buttons = get_account_summary_button(user_tg_id=int(message.forward_from.id))
 
