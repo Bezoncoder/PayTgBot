@@ -95,11 +95,10 @@ def get_payment_notification_button(
     # set_stream:stream_id:price
 
     if one_user_info['telegram_id'] == "5866726660" or one_user_info['telegram_id'] == 5866726660 or one_user_info['telegram_id'] == 1773955529:
-        builder.button(text="🛠 Инструменты", callback_data="get_utils")
-    builder.button(
-        text=f"Я оплатил",
-        callback_data=f"check_pay:{stream_id}:{price}:{directions_id}",
-    )
+        builder.button(
+            text=f"Я оплатил",
+            callback_data=f"check_pay:{stream_id}:{price}:{directions_id}",
+        )
 
     # back_callback_menu = f"get_choosing_method:{stream_id}:{price_menu}:{product_id}"
 
