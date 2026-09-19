@@ -293,6 +293,7 @@ def create_vpn_subscriptions(
             inbound_id=str(main_product.inbound_id),
             expiry_time=expire_time_sec,
             email=client_uuid,
+            sub_url=main_product.subscription_url
         )
 
         main_subscription_link = main_response.get("subscription_link")

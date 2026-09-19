@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Данные аккаунта — QuantumTurbo VPN</title>
+  </head>
+
+  <body style="margin:0; padding:0; background-color:#0a0a0a; color:#ffffff; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;">
+    <table
+      role="presentation"
+      width="100%"
+      cellspacing="0"
+      cellpadding="0"
+      border="0"
+      style="width:100%; background-color:#0a0a0a;"
+    >
+      <tr>
+        <td align="center" style="padding:40px 16px;">
+          <table
+            role="presentation"
+            width="100%"
+            cellspacing="0"
+            cellpadding="0"
+            border="0"
+            style="width:100%; max-width:600px;"
+          >
+            <!-- Бренд -->
+            <tr>
+              <td align="center" style="padding:0 0 22px;">
+                <div style="font-size:26px; line-height:32px; font-weight:700; letter-spacing:-0.4px; color:#ffffff;">
+                  Quantum<span style="color:#00d4ff;">Turbo</span> VPN
+                </div>
+
+                <div style="margin-top:6px; font-size:12px; line-height:18px; letter-spacing:1.4px; text-transform:uppercase; color:#8e9aae;">
+                  Secure connection · Simple access
+                </div>
+              </td>
+            </tr>
+
+            <!-- Основная карточка -->
+            <tr>
+              <td style="background-color:#1a1a1e; border:1px solid #333333; border-radius:14px; overflow:hidden;">
+                <!-- Голубой акцент -->
+                <div style="height:4px; line-height:4px; font-size:4px; background-color:#00d4ff;">
+                  &nbsp;
+                </div>
+
+                <table
+                  role="presentation"
+                  width="100%"
+                  cellspacing="0"
+                  cellpadding="0"
+                  border="0"
+                >
+                  <tr>
+                    <td style="padding:38px 32px 34px;">
+                      <!-- Бейдж -->
+                      <table
+                        role="presentation"
+                        cellspacing="0"
+                        cellpadding="0"
+                        border="0"
+                        style="margin:0 0 20px;"
+                      >
+                        <tr>
+                          <td style="padding:7px 12px; border:1px solid #35556b; border-radius:20px; font-size:12px; line-height:16px; font-weight:700; letter-spacing:0.7px; text-transform:uppercase; color:#8cddf5;">
+                            Ваш аккаунт
+                          </td>
+                        </tr>
+                      </table>
+
+                      <h1 style="margin:0 0 18px; font-size:28px; line-height:36px; font-weight:700; letter-spacing:-0.4px; color:#ffffff;">
+                        Данные для входа
+                      </h1>
+
+                      <p style="margin:0 0 16px; font-size:16px; line-height:25px; color:#e5e5e7;">
+                        Здравствуйте{% if user_name %}, {{ user_name }}{% endif %}.
+                      </p>
+
+                      <p style="margin:0 0 26px; font-size:16px; line-height:25px; color:#c7c7cc;">
+                        Для вас создан аккаунт QuantumTurbo VPN. Ниже указаны
+                        данные для входа и VPN-подписка.
+                      </p>
+
+                      <!-- Карточка: данные аккаунта -->
+                      <table
+                        role="presentation"
+                        width="100%"
+                        cellspacing="0"
+                        cellpadding="0"
+                        border="0"
+                      >
+                        <tr>
+                          <td style="padding:18px; background-color:#252529; border:1px solid #404040; border-radius:9px;">
+                            <p style="margin:0 0 12px; font-size:13px; line-height:18px; font-weight:700; letter-spacing:0.7px; text-transform:uppercase; color:#8cddf5;">
+                              Данные аккаунта
+                            </p>
+
+                            <p style="margin:0; font-size:15px; line-height:24px; color:#e5e5e7;">
+                              <span style="color:#a9a9b0;">Ваш логин:</span>
+                              <span style="font-weight:700; color:#ffffff;">{{ login }}</span>
+                            </p>
+
+                            <p style="margin:8px 0 0; font-size:15px; line-height:24px; color:#e5e5e7;">
+                              <span style="color:#a9a9b0;">Ваш пароль:</span>
+                              <span style="font-weight:700; color:#ffffff;">{{ password }}</span>
+                            </p>
+                          </td>
+                        </tr>
+                      </table>
+
+                      <!-- Карточка: VPN-подписка -->
+                      <table
+                        role="presentation"
+                        width="100%"
+                        cellspacing="0"
+                        cellpadding="0"
+                        border="0"
+                        style="margin-top:18px;"
+                      >
+                        <tr>
+                          <td style="padding:18px; background-color:#1e2a30; border:1px solid #35556b; border-radius:9px;">
+                            <p style="margin:0 0 12px; font-size:13px; line-height:18px; font-weight:700; letter-spacing:0.7px; text-transform:uppercase; color:#8cddf5;">
+                              VPN-подписка
+                            </p>
+
+                            <p style="margin:0; font-size:15px; line-height:24px; color:#e5e5e7;">
+                              <span style="color:#a9a9b0;">Ваша подписка:</span>
+                            </p>
+
+                            <p style="margin:8px 0 0; font-size:12px; line-height:19px; word-break:break-all;">
+                              <a
+                                href="{{ vpn_subscription_url }}"
+                                target="_blank"
+                                style="color:#00d4ff; text-decoration:underline; font-weight:700;"
+                              >
+                                {{ vpn_subscription_url }}
+                              </a>
+                            </p>
+
+                            <p style="margin:14px 0 0; font-size:13px; line-height:21px; color:#a9a9b0;">
+                              Откройте ссылку в поддерживаемом VPN-клиенте или добавьте её вручную в настройках подписки.
+                            </p>
+                          </td>
+                        </tr>
+                      </table>
+
+                      <!-- Разделитель -->
+                      <div style="height:1px; margin:28px 0 22px; background-color:#36363b; font-size:1px; line-height:1px;">
+                        &nbsp;
+                      </div>
+
+                      <!-- Защита -->
+                      <p style="margin:0; font-size:14px; line-height:22px; color:#a9a9b0;">
+                        <span style="color:#ffffff; font-weight:700;">Не ожидали это письмо?</span>
+                        Не переходите по ссылке и обратитесь в поддержку.
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Подвал -->
+            <tr>
+              <td align="center" style="padding:22px 12px 0;">
+                <p style="margin:0; font-size:12px; line-height:19px; color:#71717a;">
+                  Это автоматическое письмо от QuantumTurbo VPN.
+                </p>
+
+                <p style="margin:5px 0 0; font-size:12px; line-height:19px; color:#71717a;">
+                  Нужна помощь?
+                  <a
+                    href="mailto:support@quantumturbovpn.com"
+                    style="color:#8cddf5; text-decoration:underline;"
+                  >
+                    support@quantumturbovpn.com
+                  </a>
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

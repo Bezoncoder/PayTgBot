@@ -132,8 +132,10 @@ class XUIClient:
         return f"vless://{client_uuid}@{host}:{vless_port}?{params_str}#{profile_name}"
 
     def add_client(self, inbound_id: str = "1", client_uuid: str = None, email: str = "",
-                   total_gb: float = 0, limit_ip: int = 3, enable: bool = True, sub_id: str = None,
+                   total_gb: float = 0, limit_ip: int = 3, enable: bool = True,
+                   sub_url: str = None, sub_id: str = None,
                    comment: str = "", expiry_time: int = 0, flow: str = "xtls-rprx-vision") -> Optional[Dict[str, Any]]:
+
         final_id = client_uuid if client_uuid else self._generate_client_uuid()
         final_email = email or f"user_{inbound_id}_{int(time.time())}@example.com"
         # final_sub_id = sub_id or f"sub-{int(time.time()) + random.randint(1, 100)}"
@@ -233,9 +235,16 @@ class XUIClient:
             # parsed = urlparse(self.base_url)
             # sub_path: str = ":2096/1AWEJRPGmKLSZojNjB"
             # (scheme, netloc, path, params, query, fragment)
-            netloc = f"{self.host}:{self.sub_port}" if self.sub_port else self.host
+
+            if sub_url is not None:
+                # sub_host = "access.quantumturbovpn.com"
+                sub_host = sub_url
+            else:
+                sub_host = self.host
+
+            netloc = f"{sub_host}:{self.sub_port}" if self.sub_port else self.host
             url = urlunparse((self.scheme, netloc, f"{self.sub_path}/{client_sub_id}", '', '', ''))
-            print(url)
+            # print(url)
             # https://connect.quantumturbovpn.com:2096/1AWEJRPGmKLSZojNjB
             new_result["subscription_link"] = url
 
@@ -412,9 +421,10 @@ class XUIClient:
 
 
 if __name__=="__main__":
-    API_VLESS_TOKEN = "KAuYWOt5neJjJZIuPnbryp4x15MrDmEHYcihBDHFaVRdVlL2"
+    API_VLESS_TOKEN = "RnUeRYC4AZW82ZCCFEvZlt86ycjskZZ3G6uY846dieOebcYx"
 
-    BASE_URL = "https://connect.quantumturbovpn.com:49699/9RWEJRPGmKLSZojNjB"
+    BASE_URL = "https://sub-msk02.quantumturbovpn.com/9RWEJRPGmKLSZojNjB"
+    # BASE_URL = "https://access.quantumturbovpn.com/9RWEJRPGmKLSZojNjB"
     # "https://quantumturbovpn.ddns.net:49699/9RWEJRPGmKLSZojNjB"
     # client = XUIClient(
     #     base_url_from_panel="https://origin.illiriaakva.online:49699/9RWEJRPGmKLSZojNjB",
@@ -428,11 +438,11 @@ if __name__=="__main__":
         base_url_from_panel=BASE_URL,
         api_token=API_VLESS_TOKEN,
         verify_ssl=True,
-        sub_port=2096
+        sub_port=None
 
     )
 
-    test_email = "SUKA_041002713100_NAHUI"
+    test_email = "SUKA_04100_EBANAJA_PODPISKA_27131400_NAHUI"
     subId = "4fddd9a5-45cc-449f-a34b-08b06591ba79"
 
     result_test = client.add_client(

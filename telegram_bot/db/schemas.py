@@ -24,6 +24,7 @@ class ProductPydantic(BaseModel):  # Продукты по направлени�
     capacity: int | None
     direction_id: int
     base_url: str | None
+    subscription_url: str | None
     total_gb: int | None
     inbound_id: int | None
     api_vless_token: str | None
