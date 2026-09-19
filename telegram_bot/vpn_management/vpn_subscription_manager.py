@@ -285,7 +285,7 @@ def create_vpn_subscriptions(
                 f"VLESS-клиент уже существует: client_uuid={client_uuid}"
                 f"client_uuid={client_uuid}, response={test_response!r}"
             )
-
+        print(main_product.subscription_url)
         main_response = main_client.add_client(
             client_uuid=client_uuid,
             flow=flow,

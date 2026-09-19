@@ -239,13 +239,16 @@ class XUIClient:
             if sub_url is None:
                 sub_host = self.host
                 logger.debug(f"sub_url = {sub_url}")
+
             else:
                 # sub_host = "access.quantumturbovpn.com"
                 sub_host = sub_url
                 logger.debug(f"sub_url = {sub_url}")
 
-            netloc = f"{sub_host}:{self.sub_port}" if self.sub_port else self.host
+            netloc = f"{sub_host}:{self.sub_port}" if self.sub_port else sub_host
+            # print(netloc)
             url = urlunparse((self.scheme, netloc, f"{self.sub_path}/{client_sub_id}", '', '', ''))
+            # print(url)
             # print(url)
             # https://connect.quantumturbovpn.com:2096/1AWEJRPGmKLSZojNjB
             new_result["subscription_link"] = url
