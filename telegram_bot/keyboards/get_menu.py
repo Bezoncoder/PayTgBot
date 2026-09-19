@@ -227,9 +227,11 @@ def get_subscribe_menu(enrolments: list[EnrollmentPydantic] = None) -> InlineKey
     return builder.as_markup(resize_keyboard=True)
 
 
-def get_main_menu_button(user_bd_id: int) -> InlineKeyboardMarkup:
+def get_main_menu_button(user_bd_id: int, vless_url: str = None) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
+    builder.button(ext="🌐 Подробная информация",
+                   url=vless_url)
     builder.button(text="Назад",
                    callback_data=f"get_my_subscribe:{user_bd_id}")
     builder.button(text="Главное меню",

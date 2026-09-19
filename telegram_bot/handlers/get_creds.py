@@ -49,13 +49,15 @@ async def get_creds_message(callback: CallbackQuery, state: FSMContext):
 
     ####################### ЕБАНЫЕ КНОПКИ НАЗАД ВПЕРЕД ####################################
 
-    buttons_reply_markup = get_main_menu_button(user_bd_id=enrollment_info.user_id)
+    buttons_reply_markup = get_main_menu_button(user_bd_id=enrollment_info.user_id,
+                                                vless_url=enrollment_info.vless_link)
 
     ########################################################################################
 
     veles_link_caption = (f"{enrollment_info.title_product} "
                           f"до {enrollment_info.expire_date}\n\n"
-                          f"Ссылка для подключения:\n\n<code>{enrollment_info.vless_link}</code>")
+                          f"Ссылка для подключения:\n\n<code>{enrollment_info.vless_link}</code>\n\n"
+                          f"👆  Нажми на ссылку, чтобы скопировать.")
     qrcode_path = get_qr_code(veless_url=enrollment_info.vless_link)
 
     if os.path.exists(qrcode_path):
