@@ -236,11 +236,13 @@ class XUIClient:
             # sub_path: str = ":2096/1AWEJRPGmKLSZojNjB"
             # (scheme, netloc, path, params, query, fragment)
 
-            if sub_url == None:
+            if sub_url is None:
                 sub_host = self.host
+                logger.debug(f"sub_url = {sub_url}")
             else:
                 # sub_host = "access.quantumturbovpn.com"
                 sub_host = sub_url
+                logger.debug(f"sub_url = {sub_url}")
 
             netloc = f"{sub_host}:{self.sub_port}" if self.sub_port else self.host
             url = urlunparse((self.scheme, netloc, f"{self.sub_path}/{client_sub_id}", '', '', ''))

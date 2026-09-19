@@ -83,7 +83,11 @@ async def on_startup(app):
     """
     # await set_default_commands()
     await bot.delete_webhook()
-    await bot.set_webhook(f"https://bot.quantumturbovpn.com/{BOT_TOKEN}")
+    # await bot.set_webhook(f"https://bot.quantumturbovpn.com/{BOT_TOKEN}")
+    await bot.set_webhook(
+        url=f"https://bot.quantumturbovpn.com/{BOT_TOKEN}",
+        allowed_updates=dp.resolve_used_update_types(),
+    )
     for admin_id in ADMINS:
         try:
             await bot.send_message(admin_id, 'Бот запущен 🥳.')
