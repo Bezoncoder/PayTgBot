@@ -114,8 +114,8 @@ async def get_statistics(callback: CallbackQuery, state: FSMContext):
         )
     else:
         caption = (
-            "📊 <b>Статистика проекта</b>\n"
-            "━━━━━━━━━━━━━━━━━━\n\n"
+            "📊 <b>Статистика QuantumTurboVPN</b>\n"
+            "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
 
             "👥 <b>Пользователи</b>\n"
             f"• Всего: <b>{users_statistics.all_users}</b>\n"
@@ -123,7 +123,7 @@ async def get_statistics(callback: CallbackQuery, state: FSMContext):
             f"• Активных: <b>{users_statistics.active_users}</b>\n"
             f"• Повторных покупателей: "
             f"<b>{users_statistics.users_with_two_or_more_purchases}</b>\n\n"
-
+            "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
             "💳 <b>Покупки по тарифам</b>\n"
         )
 
