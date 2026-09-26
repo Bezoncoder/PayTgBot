@@ -122,7 +122,7 @@ async def get_statistics(callback: CallbackQuery, state: FSMContext):
             f"• Активных: <b>{users_statistics.active_users}</b>\n"
             f"• Повторных покупателей: "
             f"<b>{users_statistics.users_with_two_or_more_purchases}</b>\n\n"
-            "💳 <b>Покупки по тарифам</b>\n\n"
+            "💳 <b>Покупки по тарифам</b>\n"
         )
 
         if products_statistics is None:
