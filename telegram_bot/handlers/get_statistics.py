@@ -122,7 +122,7 @@ async def get_statistics(callback: CallbackQuery, state: FSMContext):
             f"• Активных: <b>{users_statistics.active_users}</b>\n"
             f"• Повторных покупателей: "
             f"<b>{users_statistics.users_with_two_or_more_purchases}</b>\n\n"
-            "💳 <b>Покупки по тарифам</b>\n"
+            "💳 <b>Покупки по тарифам</b>\n\n"
         )
 
         if products_statistics is None:
@@ -136,7 +136,7 @@ async def get_statistics(callback: CallbackQuery, state: FSMContext):
                 stream_title = item.stream_title or "Без названия"
 
                 caption += (
-                    f"🔹 <b>{stream_title}</b>\n"
+                    f"• <b>{stream_title}</b>\n"
                     f"   Прошлый месяц: <b>{item.purchases_last_month}</b>\n"
                     f"   Текущий месяц: <b>{item.purchases_this_month}</b>\n"
                 )
