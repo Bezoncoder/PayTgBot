@@ -115,8 +115,7 @@ async def get_statistics(callback: CallbackQuery, state: FSMContext):
     else:
         caption = (
             "📊 <b>Статистика QuantumTurboVPN</b>\n"
-            "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
-
+            f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
             "👥 <b>Пользователи</b>\n"
             f"• Всего: <b>{users_statistics.all_users}</b>\n"
             f"• Новых за текущий месяц: <b>{users_statistics.new_users_this_month}</b>\n"
@@ -124,7 +123,6 @@ async def get_statistics(callback: CallbackQuery, state: FSMContext):
             f"• Повторных покупателей: "
             f"<b>{users_statistics.users_with_two_or_more_purchases}</b>\n\n"
             "💳 <b>Покупки по тарифам</b>\n"
-            "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
         )
 
         if products_statistics is None:
