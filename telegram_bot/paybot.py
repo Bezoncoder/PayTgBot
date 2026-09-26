@@ -10,7 +10,7 @@ from handlers import (greetings, get_subscribe, check_payment_auto, check_paymen
                       choosing_direction, choosing_product,
                       get_payment, choosing_stream, check_fio, how_to_pay, check_email,
                       choosing_payment_method, get_admin_utils, get_referral_link,
-                      get_referal_program, get_account_summary)
+                      get_referal_program, get_account_summary, get_statistics)
 from datetime import datetime, timedelta
 from logging.handlers import RotatingFileHandler
 import logging
@@ -396,7 +396,8 @@ if __name__ == "__main__":
                        get_admin_utils.router,
                        get_referral_link.router,
                        get_referal_program.router,
-                       get_account_summary.router)
+                       get_account_summary.router,
+                       get_statistics.router)
 
     # Запуск бота
     # Создаем приложение и запускаем его
