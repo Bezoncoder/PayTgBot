@@ -170,8 +170,20 @@ async def check_and_ban():
                                      public_inbound_key=product_info.public_key,
                                      sid=product_info.short_id)
 
-            status = vless_client.remove_client(client_id=new_enrollment.vless_user_name)
-            vless_info.setdefault(enrollment.user_id, []).append(status)
+            # status = vless_client.remove_client(client_id=new_enrollment.vless_user_name)
+            # vless_info.setdefault(enrollment.user_id, []).append(status)
+            try:
+                status = await asyncio.to_thread(
+                    vless_client.remove_client,
+                    client_id=new_enrollment.vless_user_name,
+                )
+                vless_info.setdefault(enrollment.user_id, []).append(status)
+            except Exception:
+                logging.exception(
+                    "Не удалось удалить VLESS-клиента: enrollment_id=%s, user_id=%s",
+                    enrollment.id,
+                    enrollment.user_id,
+                )
 
 
     info_banned_users = dict(list_id_users=list_id_user,
@@ -352,7 +364,7 @@ if __name__ == "__main__":
     handler.setFormatter(formatter)
 
     file_handler = RotatingFileHandler(
-        filename=f'InfraSharing_Bot_Logs.log',
+        filename=f'PayTG_Bot.log',
         maxBytes=2000000,
         backupCount=1,
         encoding="UTF-8"

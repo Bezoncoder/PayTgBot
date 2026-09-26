@@ -90,6 +90,22 @@ class UsernameIdPydantic(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class UsersStatisticsPydantic(BaseModel):
+    all_users: int
+    new_users_this_month: int
+    active_users: int
+    users_with_two_or_more_purchases: int
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ProductStatisticsPydantic(BaseModel):
+    stream_title: str | None
+    purchases_last_month: int
+    purchases_this_month: int
+
+    model_config = ConfigDict(from_attributes=True)
+
 if __name__ == "__main__":
     print()
     # user = UserPydantic.from_orm()
