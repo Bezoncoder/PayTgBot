@@ -42,35 +42,80 @@ USERS_STATISTICS_SQL = text("""
     FROM users AS u
 """)
 
+from sqlalchemy import text
+
 
 PRODUCTS_STATISTICS_SQL = text("""
     SELECT
-        s.title AS stream_title,
+        f.title AS stream_title,
+        g.tariffs_purchases_at_last_month AS purchases_last_month,
+        f.tariffs_purchases_at_this_month AS purchases_this_month
 
-        COUNT(p.id) FILTER (
-            WHERE p.created_at >= date_trunc(
+    FROM (
+        SELECT
+            s.title,
+            SUM(t.count) AS tariffs_purchases_at_this_month
+
+        FROM (
+            SELECT
+                p.stream_id,
+                COUNT(p.id) AS count
+
+            FROM payments AS p
+
+            WHERE DATE_PART(
+                'month',
+                CAST(p.created_at AS date)
+            ) = DATE_PART(
+                'month',
+                CURRENT_DATE
+            )
+            AND p.status = 'CONFIRMED'
+
+            GROUP BY p.stream_id
+        ) AS t
+
+        JOIN streams AS s
+            ON t.stream_id = s.id
+
+        GROUP BY s.title
+    ) AS f
+
+    JOIN (
+        SELECT
+            s.title,
+            SUM(t.count) AS tariffs_purchases_at_last_month
+
+        FROM (
+            SELECT
+                p.stream_id,
+                COUNT(p.id) AS count
+
+            FROM payments AS p
+
+            WHERE DATE_PART(
+                'month',
+                CAST(p.created_at AS date)
+            ) = DATE_PART(
                 'month',
                 CURRENT_DATE - INTERVAL '1 month'
             )
-              AND p.created_at < date_trunc('month', CURRENT_DATE)
-        ) AS purchases_last_month,
+            AND p.status = 'CONFIRMED'
 
-        COUNT(p.id) FILTER (
-            WHERE p.created_at >= date_trunc('month', CURRENT_DATE)
-              AND p.created_at < date_trunc('month', CURRENT_DATE)
-                                 + INTERVAL '1 month'
-        ) AS purchases_this_month
+            GROUP BY p.stream_id
+        ) AS t
 
-    FROM streams AS s
+        JOIN streams AS s
+            ON t.stream_id = s.id
 
-    LEFT JOIN payments AS p
-        ON p.stream_id = s.id
-       AND p.status = 'CONFIRMED'
+        GROUP BY s.title
+    ) AS g
+        ON f.title = g.title
 
-    GROUP BY s.id, s.title
-    ORDER BY purchases_this_month DESC, purchases_last_month DESC, s.title
+    ORDER BY
+        f.tariffs_purchases_at_this_month DESC,
+        f.title
 """)
-
 
 @connection
 async def get_users_statistics(
