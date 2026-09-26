@@ -102,55 +102,46 @@ async def get_statistics(callback: CallbackQuery, state: FSMContext):
 
     ################################ GET_STATISTICS #####################################################
 
+    from db.statistics import get_products_statistics, get_users_statistics
+
     users_statistics = await get_users_statistics()
     products_statistics = await get_products_statistics()
 
     if users_statistics is None:
         caption = (
             "⚠️ <b>Статистика временно недоступна</b>\n\n"
-            "Не удалось получить данные."
+            "Не удалось получить данные по пользователям."
         )
     else:
         caption = (
             "📊 <b>Статистика проекта</b>\n"
             "━━━━━━━━━━━━━━━━━━\n\n"
 
-            "<b>👥 Пользователи</b>\n"
-            "<pre>"
-            f"Всего пользователей : {users_statistics.all_users}\n"
-            f"Новых за месяц      : {users_statistics.new_users_this_month}\n"
-            f"Активных            : {users_statistics.active_users}\n"
-            f"Повторных покупок   : "
-            f"{users_statistics.users_with_two_or_more_purchases}\n"
-            "</pre>\n"
+            "👥 <b>Пользователи</b>\n"
+            f"• Всего: <b>{users_statistics.all_users}</b>\n"
+            f"• Новых за текущий месяц: <b>{users_statistics.new_users_this_month}</b>\n"
+            f"• Активных: <b>{users_statistics.active_users}</b>\n"
+            f"• Повторных покупателей: "
+            f"<b>{users_statistics.users_with_two_or_more_purchases}</b>\n\n"
 
-            "<b>💳 Покупки по тарифам</b>\n"
+            "💳 <b>Покупки по тарифам</b>\n"
         )
 
         if products_statistics is None:
-            caption += "⚠️ Данные по тарифам временно недоступны."
+            caption += "• Данные по тарифам временно недоступны.\n"
 
         elif not products_statistics:
-            caption += "ℹ️ Тарифы пока не найдены."
+            caption += "• Тарифы пока не найдены.\n"
 
         else:
-            caption += (
-                "<pre>"
-                "Тариф                 Прошл.  Текущ.\n"
-                "────────────────────  ──────  ──────\n"
-            )
-
             for item in products_statistics:
-                title = (item.stream_title or "Без названия")[:20]
+                stream_title = item.stream_title or "Без названия"
 
                 caption += (
-                    f"{title:<20}  "
-                    f"{item.purchases_last_month:>6}  "
-                    f"{item.purchases_this_month:>6}\n"
+                    f"\n🔹 <b>{stream_title}</b>\n"
+                    f"   Прошлый месяц: <b>{item.purchases_last_month}</b>\n"
+                    f"   Текущий месяц: <b>{item.purchases_this_month}</b>\n"
                 )
-
-            caption += "</pre>"
-
 
     #####################################################################################################
 
