@@ -57,7 +57,7 @@ async def get_account_summary_menu(callback: CallbackQuery, state: FSMContext):
     caption = (
         f"📊 Сводка по аккаунту\n\n"
         f"Хотите получить полную информацию о пользователе?\n"
-        f"Просто перешлите сообщение от него в этот чат — и бот автоматически сформирует сводку.\n\n"
+        f"Просто перешлите сообщение от него в этот чат, либо отправьте его Vless_name — и бот автоматически сформирует сводку.\n\n"
         f"💡 Доступная статистика и активные покупки будут отображены в ответе."
     )
 
@@ -122,7 +122,7 @@ async def check_account_summary_from_message(message: Message, state: FSMContext
 
     caption = (
         f"📋 Активные подписки пользователя\n"
-        f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
     )
 
     user_enrolments = user_info.enrollments
@@ -200,8 +200,8 @@ async def get_user_summary(callback: CallbackQuery, state: FSMContext):
 
     caption = (
         f"📊 Статистика по пользователю\n"
-        f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
-        f"🪪 <b>Telegram:</b> {user_info.username}\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+        f"🪪 <b>Telegram:</b> @{user_info.username}\n"
         f"✅ Активных подписок: {active_link}\n"
         f"📦 Всего подписок: {len(user_enrolments)}"
 
