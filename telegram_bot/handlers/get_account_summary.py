@@ -146,7 +146,9 @@ async def check_account_summary_from_message(message: Message, state: FSMContext
 
 
 
-    buttons = get_account_summary_button(user_tg_id=int(message.forward_from.id))
+
+
+    buttons = get_account_summary_button(user_tg_id=int(user_info.telegram_id))
 
     # Вариант с изменением сообщения без удаления.
     photo = FSInputFile('source/pictures/check_account_summary.jpg')
