@@ -201,6 +201,7 @@ async def get_user_summary(callback: CallbackQuery, state: FSMContext):
     caption = (
         f"📊 Статистика по пользователю\n"
         f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+        f"🪪 <b>Telegram:</b> {user_info.username}\n"
         f"✅ Активных подписок: {active_link}\n"
         f"📦 Всего подписок: {len(user_enrolments)}"
 
