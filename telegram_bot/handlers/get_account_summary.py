@@ -122,7 +122,7 @@ async def check_account_summary_from_message(message: Message, state: FSMContext
 
     caption = (
         f"📋 Активные подписки пользователя\n"
-        f"━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━━━\n"
     )
 
     user_enrolments = user_info.enrollments
