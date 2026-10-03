@@ -7,7 +7,7 @@ from aiogram.types import Message, InputMediaPhoto
 from keyboards.get_menu import get_account_summary_button
 from aiogram.types import FSInputFile
 
-from db.select_methods import get_user_info_by_tg_id
+from db.select_methods import get_user_info_by_tg_id, get_enrollmets_from_vless_user_name, get_userinfo_by_id
 
 from aiogram.fsm.context import FSMContext
 
@@ -75,7 +75,6 @@ async def get_account_summary_menu(callback: CallbackQuery, state: FSMContext):
 @router.message(OrderPay.get_account_summary)
 async def check_account_summary_from_message(message: Message, state: FSMContext):
 
-    #TODO ДЕЛАЕМ ЗАПРОС В БД, ЧТОБЫ УЗНАТЬ ПОДПИСКИ!!!!!!!!!!!!!!!!!!!
 
     key = StorageKey(
         bot_id=message.bot.id,
@@ -90,7 +89,8 @@ async def check_account_summary_from_message(message: Message, state: FSMContext
 
     buttons = get_account_summary_button(user_tg_id=None)
 
-    if message.forward_from is None:
+
+    if message.forward_from is None and message.text is None:
         await message.bot.delete_message(chat_id=message.from_user.id, message_id=message.message_id)
         await message.bot.edit_message_caption(chat_id=message.from_user.id,
                                                message_id=admin_user_data.get("message_id", 000),
@@ -100,9 +100,21 @@ async def check_account_summary_from_message(message: Message, state: FSMContext
                                                reply_markup=buttons)
         return
 
+    if message.text and message.forward_from is None:
+        enrollment = await get_enrollmets_from_vless_user_name(vless_user_name=message.text)
+        user_info = await get_userinfo_by_id(user_id=enrollment.user_id)
+
+    if message.forward_from:
+        user_info = await get_user_info_by_tg_id(tg_user_id=int(message.forward_from.id))
+
+
+
+
+
+
     # GET USER ENROLMENTS
 
-    user_info = await get_user_info_by_tg_id(tg_user_id=int(message.forward_from.id))
+
 
     # user_enrolments = [EnrollmentPydantic]
 

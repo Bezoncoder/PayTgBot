@@ -183,6 +183,17 @@ async def get_enrollmets_from_user_id(session, id_user: int,
     return enrolments_list
 
 @connection
+async def get_enrollmets_from_vless_user_name(session, vless_user_name: str) -> EnrollmentPydantic:
+    logging.debug("Запрос get_enrollmets_userid vless_user_name = %s", vless_user_name)
+
+    enrollment_raw = await EnrollmentDAO.get_enrollment_vless_user_name(session=session,
+                                                                        vless_user_name=vless_user_name)
+
+    logging.debug("Ответ на get_enrollmets_userid получен:\n%s", enrollment_raw)
+    result = EnrollmentPydantic.model_validate(enrollment_raw)
+    return result
+
+@connection
 async def get_enrollmet_info(session, id_enrollment: int):
     info = await EnrollmentDAO.get_enrollment(session=session, enrollment_id=id_enrollment)
     enrollment = EnrollmentPydantic.model_validate(info)

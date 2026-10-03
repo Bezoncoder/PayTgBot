@@ -194,6 +194,18 @@ class EnrollmentDAO(BaseDAO):
         logging.debug("enrollment_info %s", enrollment_info)
         return enrollment_info
 
+    # vless_user_name
+    @classmethod
+    async def get_enrollment_vless_user_name(cls, session: AsyncSession, vless_user_name: str):
+        # query = select(cls.model).filter_by(telegram_id=user_id)
+        query = select(cls.model).filter(cls.model.vless_user_name == vless_user_name)
+        logging.info("Делаем запрос данных пользователя в БД")
+        result = await session.execute(query)
+        logging.info("Получен Ответ из БД")
+        enrollment_info = result.scalar_one_or_none()
+        logging.debug("enrollment_info %s", enrollment_info)
+        return enrollment_info
+
     @classmethod
     async def get_enrollmets_userid(
         cls,
