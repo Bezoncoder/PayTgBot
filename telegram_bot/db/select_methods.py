@@ -67,10 +67,10 @@ async def get_userinfo_to_ban(session, user_ids: list) -> list[UserPydantic]:
 
 @connection
 async def get_userinfo_by_id(session, user_id: int) -> UserPydantic | None:
-    res = await UserDAO.get_user_ids_info(session=session, ids_list=[user_id])
+    res = await UserDAO.get_user_info_id(session=session, user_id=user_id)
     if not res:
         return None
-    return UserPydantic.model_validate(res[0])
+    return UserPydantic.model_validate(res)
 
 
 @connection
@@ -281,28 +281,28 @@ if "__main__" == __name__:
     #     print(user.telegram_id)
     #     print(user.enrollments)
     #     print()
-    async def test():
-        for i in range(3, 0, -1):
-            user_ids=[]
-            date_to_check = datetime.now() + timedelta(days=i)
-            await asyncio.sleep(2)
-
-            users_enrollments_to_posting = await get_users_enrollments_to_ban(now_date=date_to_check.date())
-            # print(f"users_enrollments_to_posting = {users_enrollments_to_posting}")
-
-
-            for enrollment_paydantic in users_enrollments_to_posting:
-                user_ids.append(enrollment_paydantic.user_id)
-
-            print(f"user_ids = {user_ids}\n\n")
-            users_to_post_paydantic = await get_userinfo_to_ban(user_ids=user_ids)
-            user_tg_list = []
-            for user in users_to_post_paydantic:
-                user_tg_list.append(user.telegram_id)
-            # print(f"user_tg_list = {user_tg_list}\n")
-            # print(f"users_to_post_paydantic= {users_to_post_paydantic}")
-
-            # await asyncio.sleep(3)
+    # async def test():
+    #     for i in range(3, 0, -1):
+    #         user_ids=[]
+    #         date_to_check = datetime.now() + timedelta(days=i)
+    #         await asyncio.sleep(2)
+    #
+    #         users_enrollments_to_posting = await get_users_enrollments_to_ban(now_date=date_to_check.date())
+    #         # print(f"users_enrollments_to_posting = {users_enrollments_to_posting}")
+    #
+    #
+    #         for enrollment_paydantic in users_enrollments_to_posting:
+    #             user_ids.append(enrollment_paydantic.user_id)
+    #
+    #         print(f"user_ids = {user_ids}\n\n")
+    #         users_to_post_paydantic = await get_userinfo_to_ban(user_ids=user_ids)
+    #         user_tg_list = []
+    #         for user in users_to_post_paydantic:
+    #             user_tg_list.append(user.telegram_id)
+    #         # print(f"user_tg_list = {user_tg_list}\n")
+    #         # print(f"users_to_post_paydantic= {users_to_post_paydantic}")
+    #
+    #         # await asyncio.sleep(3)
 
 
     # run(get_userinfo_by_id_operation_id(operation_id="a6231146-de93-4a79-aeeb-0c6ed14b6108"))
@@ -310,7 +310,7 @@ if "__main__" == __name__:
 
 
 
-    rez = run(get_all_product_from_direction_id(group_id=1))
+    rez = run(get_userinfo_by_id(user_id=1))
     print(rez)
     # rez = run(get_stream_info(id_stream=2))
     # print(rez.title)

@@ -51,6 +51,18 @@ class UserDAO(BaseDAO):
         return user_info
 
     @classmethod
+    async def get_user_info_id(cls, session: AsyncSession, user_id: int):
+        # query = select(cls.model).filter_by(telegram_id=user_id)
+        query = select(cls.model).filter(cls.model.id == user_id)
+        logging.info("Делаем запрос данных пользователя в БД")
+        result = await session.execute(query)
+        logging.info("Получен Ответ из БД")
+        user_info = result.unique().scalar_one_or_none()
+        # user_info = result.scalars().unique().scalar_one_or_none()
+        logging.debug("user_info %s", user_info)
+        return user_info
+
+    @classmethod
     async def get_user_ids_info(cls, session: AsyncSession, ids_list: list[int]):
         query = select(cls.model).filter(cls.model.id.in_(ids_list))
         logging.info(f"Делаем запрос данных пользователей в БД для {len(ids_list)} id")
