@@ -1,77 +1,15 @@
-import datetime
 import logging
-
-from dateutil.relativedelta import relativedelta
 from aiogram import Router, F
 from aiogram.fsm.storage.base import StorageKey
-from aiogram.types import Message, InputMediaPhoto
-
-from keyboards.get_menu import get_start_button, get_admin_button, get_errors_button
 from aiogram.types import FSInputFile
-
 from aiogram.fsm.context import FSMContext
-
 from aiogram.types import CallbackQuery
-
-from db.statistics import get_products_statistics, get_users_statistics
-
-from payment_tools.platega_api_web_panel import PlategaWebClient
+from db.statistics import get_products_statistics, get_users_statistics, get_products_by_title_statistics
+from keyboards.get_menu import get_admin_button
 from utils.states import OrderPay
 
 router = Router()
 
-# @router.callback_query(F.data == "get_statistics")
-# async def get_utils(callback: CallbackQuery, state: FSMContext):
-#     await callback.answer("Вы выбрали Админ Меню")
-#
-#     photo = FSInputFile('source/pictures/admin_utils.jpg')
-#
-#     storage = state.storage
-#
-#     key = StorageKey(
-#         bot_id=callback.bot.id,
-#         chat_id=callback.message.chat.id,  # личный чат пользователя
-#         user_id=callback.from_user.id  # сам пользователь
-#
-#     )
-#
-#     admin_user_data = dict(
-#         message_id=callback.message.message_id
-#     )
-#
-#     await state.storage.update_data(key=key, data=admin_user_data)
-#
-#
-#     # await storage.set_state(key, OrderPay.check_id_message)
-#     state_from_user = await storage.get_state(key)
-#
-#     logging.debug(f"Состояние для пользователя user_id = {callback.from_user.id} установлено: {state_from_user}")
-#
-#     #####################################################################################################
-#
-#     buttons = get_admin_button()
-#
-#     caption = (
-#         f"⚙️ Админ-панель\n\n"
-#         f"Выберите нужное действие:\n\n"
-#         f"💰 Посмотреть баланс\n"
-#         f"🆔 Узнать ID\n"
-#         f"💰🛠️ Тестовая покупка\n"
-#         f"🏠 Вернуться в главное меню"
-#     )
-#
-#     # Вариант с изменением сообщения без удаления.
-#     media = InputMediaPhoto(
-#         media=photo,
-#         caption=caption,
-#         parse_mode="HTML")
-#
-#     await callback.bot.edit_message_media(media=media,
-#                                           chat_id=callback.from_user.id,
-#                                           message_id=callback.message.message_id,
-#                                           reply_markup=buttons)
-#
-#
 
 @router.callback_query(F.data == "get_statistics")
 async def get_statistics(callback: CallbackQuery, state: FSMContext):
@@ -102,10 +40,9 @@ async def get_statistics(callback: CallbackQuery, state: FSMContext):
 
     ################################ GET_STATISTICS #####################################################
 
-    from db.statistics import get_products_statistics, get_users_statistics
-
     users_statistics = await get_users_statistics()
     products_statistics = await get_products_statistics()
+    products_by_title_statistics = await get_products_by_title_statistics()
 
     if users_statistics is None:
         caption = (
@@ -137,6 +74,24 @@ async def get_statistics(callback: CallbackQuery, state: FSMContext):
 
                 caption += (
                     f"• <b>{stream_title}</b>\n"
+                    f"   Прошлый месяц: <b>{item.purchases_last_month}</b>\n"
+                    f"   Текущий месяц: <b>{item.purchases_this_month}</b>\n"
+                )
+
+        caption += "\n🛒 <b>Покупки по продуктам</b>\n"
+
+        if products_by_title_statistics is None:
+            caption += "• Данные по продуктам временно недоступны.\n"
+
+        elif not products_by_title_statistics:
+            caption += "• Продукты пока не найдены.\n"
+
+        else:
+            for item in products_by_title_statistics:
+                product_title = item.stream_title or "Без названия"
+
+                caption += (
+                    f"• <b>{product_title}</b>\n"
                     f"   Прошлый месяц: <b>{item.purchases_last_month}</b>\n"
                     f"   Текущий месяц: <b>{item.purchases_this_month}</b>\n"
                 )

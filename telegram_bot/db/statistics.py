@@ -42,7 +42,7 @@ USERS_STATISTICS_SQL = text("""
     FROM users AS u
 """)
 
-from sqlalchemy import text
+
 
 
 PRODUCTS_STATISTICS_SQL = text("""
@@ -115,6 +115,58 @@ PRODUCTS_STATISTICS_SQL = text("""
     ORDER BY
         f.tariffs_purchases_at_this_month DESC,
         f.title
+""")
+
+
+PRODUCTS_BY_TITLE_STATISTICS_SQL = text("""
+    SELECT
+        s.title_product AS stream_title,
+        s.purchases_at_last_month AS purchases_last_month,
+        COALESCE(
+            t.purchases_at_this_month,
+            0
+        ) AS purchases_this_month
+
+    FROM (
+        SELECT
+            e.title_product,
+            COUNT(1) AS purchases_at_this_month
+
+        FROM enrollments AS e
+
+        WHERE DATE_PART(
+            'month',
+            CAST(e.created_at AS date)
+        ) = DATE_PART(
+            'month',
+            CURRENT_DATE
+        )
+
+        GROUP BY e.title_product
+    ) AS t
+
+    RIGHT JOIN (
+        SELECT
+            e.title_product,
+            COUNT(1) AS purchases_at_last_month
+
+        FROM enrollments AS e
+
+        WHERE DATE_PART(
+            'month',
+            CAST(e.created_at AS date)
+        ) = DATE_PART(
+            'month',
+            CURRENT_DATE - INTERVAL '1 month'
+        )
+
+        GROUP BY e.title_product
+    ) AS s
+        ON t.title_product = s.title_product
+
+    ORDER BY
+        s.purchases_at_last_month DESC,
+        s.title_product
 """)
 
 @connection
@@ -224,5 +276,60 @@ async def get_products_statistics(
     except Exception:
         logging.exception(
             "Непредвиденная ошибка при получении статистики покупок по тарифам"
+        )
+        return None
+
+@connection
+async def get_products_by_title_statistics(
+    session: AsyncSession,
+) -> list[ProductStatisticsPydantic] | None:
+    """
+    Возвращает статистику покупок продуктов за текущий и прошлый месяцы:
+
+    - title_product: название продукта;
+    - purchases_at_last_month: число покупок за прошлый месяц;
+    - purchases_at_this_month: число покупок за текущий месяц.
+    """
+    try:
+        logging.info("Запрашиваем статистику покупок по продуктам")
+
+        result = await session.execute(PRODUCTS_BY_TITLE_STATISTICS_SQL)
+        rows = result.mappings().all()
+
+        if not rows:
+            logging.info(
+                "Статистика покупок по продуктам не найдена: "
+                "таблица enrollments пуста"
+            )
+            return None
+
+        statistics = [
+            ProductStatisticsPydantic.model_validate(dict(row))
+            for row in rows
+        ]
+
+        logging.info(
+            "Статистика покупок по продуктам получена: "
+            "количество продуктов=%s",
+            len(statistics),
+        )
+
+        return statistics
+
+    except ValidationError:
+        logging.exception(
+            "Ошибка валидации Pydantic при формировании статистики по продуктам"
+        )
+        return None
+
+    except SQLAlchemyError:
+        logging.exception(
+            "Ошибка SQLAlchemy при получении статистики покупок по продуктам"
+        )
+        return None
+
+    except Exception:
+        logging.exception(
+            "Непредвиденная ошибка при получении статистики покупок по продуктам"
         )
         return None
