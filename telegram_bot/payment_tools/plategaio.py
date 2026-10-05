@@ -21,6 +21,35 @@ HTTP_STATUS_EMOJIS = {
     500: "🟥", 502: "🔥", 503: "🔥", 504: "💥"
 }
 
+
+class PaymentStatus(Enum):
+    PENDING = "pending"
+    CANCELED = "canceled"
+    CONFIRMED = "confirmed"
+    CHARGEBACKED = "chargebacked"
+
+
+class PaymentMethod(Enum):
+    SBP_QR = 2
+    # CARD_ACQUIRING = 11
+    CRYPTOCURRENCY = 13
+    INTERNATIONAL = 12
+
+
+@dataclass
+class Payment:
+    payment_method: PaymentMethod
+    transaction_id: str
+    redirect: str
+    return_url: str
+    payment_details: str
+    status: PaymentStatus
+    expires_in: str
+    merchant_id: str
+    usdt_rate: float
+
+
+
 class PlategaAPIError(Exception):
     """Базовый класс исключений для Platega API"""
 
@@ -61,31 +90,6 @@ class ValidationError(PlategaAPIError):
     def is_validation_error(self) -> bool:
         return getattr(self, '_is_validation_error', False)
 
-
-class PaymentStatus(Enum):
-    PENDING = "pending"
-    CANCELED = "canceled"
-    CONFIRMED = "confirmed"
-    CHARGEBACKED = "chargebacked"
-
-
-class PaymentMethod(Enum):
-    SBP_QR = 2
-    # CARD_ACQUIRING = 11
-    CRYPTOCURRENCY = 13
-
-
-@dataclass
-class Payment:
-    payment_method: PaymentMethod
-    transaction_id: str
-    redirect: str
-    return_url: str
-    payment_details: str
-    status: PaymentStatus
-    expires_in: str
-    merchant_id: str
-    usdt_rate: float
 
 
 class PlategaAPI:

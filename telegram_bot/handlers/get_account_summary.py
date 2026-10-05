@@ -122,7 +122,7 @@ async def check_account_summary_from_message(message: Message, state: FSMContext
 
     caption = (
         f"📋 Активные подписки пользователя\n"
-        f"━━━━━━━━━━━━━━━━━━━━━━━━\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━━━━\n"
     )
 
     user_enrolments = user_info.enrollments
@@ -135,7 +135,7 @@ async def check_account_summary_from_message(message: Message, state: FSMContext
 
     if active_link==0:
         caption += "У данного пользователя нет активных подписок.\n"
-        caption += f"TG_NAME: {message.forward_from.username}\n"
+        caption += f"TG_NAME: @{message.forward_from.username}\n"
         caption += f"TG_ID: {message.forward_from.id}\n"
 
 

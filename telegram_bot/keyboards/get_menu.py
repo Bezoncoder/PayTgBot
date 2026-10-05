@@ -121,8 +121,8 @@ def get_choosing_pay_method_buttons(price: str, stream_id_int: int, product_id: 
 
         if method == PaymentMethod.SBP_QR:
             text_button = "🏦 СБП"
-        # elif method == PaymentMethod.CARD_ACQUIRING:
-        #     text_button = "💳 Оплата картой"
+        elif method == PaymentMethod.INTERNATIONAL:
+            text_button = "💳 Международная оплата"
         else:
             text_button = "💰 Криптовалюта"
 
