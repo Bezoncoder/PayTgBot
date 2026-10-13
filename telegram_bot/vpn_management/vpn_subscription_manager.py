@@ -130,7 +130,7 @@ def create_vpn_subscriptions(
     *,
     main_product: ProductPydantic,
     bonus_products: Sequence[ProductPydantic] | None = None,
-    client_uuid: str,
+    client_uuid: str | None,
     expire_time_sec: int,
     username: str,
     password: str,
@@ -218,6 +218,10 @@ def create_vpn_subscriptions(
                 ],
             }
     """
+
+    if client_uuid is None:
+        client_uuid = f"ref_{uuid4().hex[:12]}"
+
     bonus_products = bonus_products or ()
 
     result: dict[str, Any] = {
@@ -500,17 +504,17 @@ def create_vpn_subscriptions(
 
 
 if __name__ == "__main__":
-    list_of_products = run(get_all_product_from_direction_id(group_id=1))
-    client_uuid_from_payment = str("SUKANAHUI10-jansdkjnjkdnkjs")
-
-    vpn_result = create_vpn_subscriptions(
-        main_product=list_of_products[0],
-        bonus_products=list_of_products,
-        client_uuid=client_uuid_from_payment,
-        expire_time_sec=1772620800000,
-        username="USER",
-        password="PASSWORD",
-    )
+    # list_of_products = run(get_all_product_from_direction_id(group_id=1))
+    # client_uuid_from_payment = str("SUKANAHUI10-jansdkjnjkdnkjs")
+    #
+    # vpn_result = create_vpn_subscriptions(
+    #     main_product=list_of_products[0],
+    #     bonus_products=list_of_products,
+    #     client_uuid=client_uuid_from_payment,
+    #     expire_time_sec=1772620800000,
+    #     username="USER",
+    #     password="PASSWORD",
+    # )
     print()
-    pprint(vpn_result)
+    pprint(f"ref_{uuid4().hex[:12]}")
 

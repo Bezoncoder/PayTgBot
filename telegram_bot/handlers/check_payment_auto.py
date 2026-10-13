@@ -170,7 +170,7 @@ async def check_pay(callback: CallbackQuery, state: FSMContext):
         today = DT.datetime.now()
 
         if delta == "day":
-            expire_date = today + relativedelta(days=1)
+            expire_date = today + relativedelta(days=2)
         elif delta == "month":
             expire_date = today + relativedelta(months=1)
         elif delta == "year":
@@ -298,34 +298,6 @@ async def check_pay(callback: CallbackQuery, state: FSMContext):
                     payment_data.id,
                     vpn_result["errors"],
                 )
-
-            # vless_client = XUIClient(base_url_from_panel=base_url,
-            #                          username=USER,
-            #                          password=PASSWORD,
-            #                          api_token=product_info.api_vless_token,
-            #                          verify_ssl=True,
-            #                          public_inbound_key=product_info.public_key,
-            #                          sid=product_info.short_id)
-            #
-            # client_uuid_from_payment = str(payment_data.operation_id)
-
-
-            # obj = vless_client.get_client_traffic_by_id(client_uuid=client_uuid_from_payment).get("obj")
-            #
-            # if isinstance(obj, list) and obj == []:
-            #     logging.info(f"📢 Создаем ссылку для клиента с UUID = {client_uuid_from_payment}")
-            #     link = vless_client.add_client(client_uuid=client_uuid_from_payment,
-            #                                    flow="xtls-rprx-vision",
-            #                                    total_gb=product_info.total_gb,
-            #                                    inbound_id=str(product_info.inbound_id),
-            #                                    expiry_time=expire_time_sec,
-            #                                    email=f"{client_uuid_from_payment}").get('subscription_link')
-            # else:
-            #     logging.info(f"💡 Клиент c UUID = {client_uuid_from_payment} уже есть в 3xui")
-            #     logging.debug(obj)
-            #     link = None
-
-
 
         except Exception as exception_text:
             # < code > текст < / code >

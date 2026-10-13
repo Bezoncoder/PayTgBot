@@ -9,7 +9,8 @@ from keyboards.get_menu import get_refer_back_button, get_errors_button
 from aiogram.types import FSInputFile
 
 from db.select_methods import get_product_info, get_user_info_by_tg_id, \
-    get_referralrewards_from_user_id, get_stream_info, get_referralrewards_to_month_user_d
+    get_referralrewards_from_user_id, get_stream_info, get_referralrewards_to_month_user_d, \
+    get_enrollments_count_stream_id, get_all_product_from_direction_id
 from db.add_methods_dao import add_new_enrollments
 
 from aiogram.fsm.context import FSMContext
@@ -24,6 +25,8 @@ from vpn_management.vlessuiapi import XUIClient
 
 from dateutil.relativedelta import relativedelta
 import datetime as DT
+
+from vpn_management.vpn_subscription_manager import create_vpn_subscriptions
 
 router = Router()
 
@@ -228,39 +231,85 @@ async def get_free_month(callback: CallbackQuery, state: FSMContext):
                                                 parse_mode="HTML",
                                                 reply_markup=buttons)
         await asyncio.sleep(10)
+
         try:
-            vless_client = XUIClient(base_url_from_panel=base_url,
-                                     username=USER,
-                                     password=PASSWORD,
-                                     verify_ssl=True,
-                                     public_inbound_key=product_info.public_key,
-                                     sid=product_info.short_id)
 
-            client_uuid_from_payment = vless_client._generate_client_uuid()
+            logging.info(
+                "Начинаем подготовку бонусных продуктов: main_product_id=%s",
+                product_info.id,
+            )
 
-            obj = vless_client.get_client_traffic_by_id(client_uuid=client_uuid_from_payment).get("obj")
+            list_of_products = await get_all_product_from_direction_id(group_id=1)
 
-            if isinstance(obj, list) and obj == []:
-                logging.info(f"📢 Создаем ссылку для клиента с UUID = {client_uuid_from_payment}")
-                link = vless_client.add_client(client_uuid=client_uuid_from_payment,
-                                               flow="xtls-rprx-vision",
-                                               inbound_id="1",
-                                               expiry_time=expire_time_sec,
-                                               email=f"{callback.from_user.id}_{client_uuid_from_payment}").get(
-                    'subscription_link')
-            else:
-                logging.info(f"💡 Клиент c UUID = {client_uuid_from_payment} уже есть в 3xui")
-                logging.debug(obj)
-                link = None
+            bonus_products = []
+
+            for product_bonus in list_of_products:
+                if product_bonus.id == product_info.id:
+                    continue
+
+                if product_bonus.capacity is None:
+                    logging.warning(
+                        "Пропускаем бонусный продукт: product_id=%s, "
+                        "причина=capacity is None",
+                        product_bonus.id,
+                    )
+                    continue
+
+                enrollments_count = await get_enrollments_count_stream_id(product_id=product_bonus.id)
+
+                if enrollments_count < product_bonus.capacity:
+                    bonus_products.append(product_bonus)
+                else:
+                    logging.info(
+                        "Пропускаем заполненный бонусный продукт: "
+                        "product_id=%s, enrollments_count=%s, capacity=%s",
+                        product_bonus.id,
+                        enrollments_count,
+                        product_bonus.capacity,
+                    )
+
+            logging.info(
+                "Бонусные продукты подготовлены: main_product_id=%s, "
+                "bonus_products_count=%s",
+                product_info.id,
+                len(bonus_products),
+            )
+
+            client_uuid_from_payment = None
+
+            vpn_result = create_vpn_subscriptions(
+                main_product=product_info,
+                bonus_products=bonus_products,
+                client_uuid=client_uuid_from_payment,
+                expire_time_sec=expire_time_sec,
+                username=USER,
+                password=PASSWORD,
+            )
+
+            if not vpn_result["success"]:
+                error_text = (
+                    vpn_result["errors"][0]["error"]
+                    if vpn_result["errors"]
+                    else "Причина ошибки отсутствует."
+                )
+
+                logging.error(
+                    "Не удалось выдать VPN: payment_id=%s, vpn_result=%s",
+                    payment_data.id,
+                    vpn_result,
+                )
+
+                raise RuntimeError(
+                    f"{vpn_result['message']} Причина: {error_text}"
+                )
+
+            link = vpn_result["main_subscription_link"]
 
         except Exception as exception_text:
             # < code > текст < / code >
             buttons = get_errors_button()
             await callback.message.edit_caption(caption=f"❌ <b>Что-то пошло не так</b>… Повторите попытку позже\n\n"
-                                                        f"📢 <b>Сообщите в поддержку</b> и прикрепите текст ошибки\n\n"
-                                                        f"💡 <i>Чтобы скопировать — просто нажмите на текст</i>\n\n"
-                                                        f"🔴 <b>Ошибка:</b>\n"
-                                                        f"<code>{exception_text}</code>",
+                                                        f"📢 <b>Сообщите в поддержку</b>\n\n",
                                                 parse_mode="HTML",
                                                 reply_markup=buttons)
             await callback.bot.send_message(chat_id=TECH_CHANNEL,
@@ -271,6 +320,49 @@ async def get_free_month(callback: CallbackQuery, state: FSMContext):
                                             parse_mode="HTML",
                                             reply_markup=None)
             return
+        # try:
+        #     vless_client = XUIClient(base_url_from_panel=base_url,
+        #                              username=USER,
+        #                              password=PASSWORD,
+        #                              verify_ssl=True,
+        #                              public_inbound_key=product_info.public_key,
+        #                              sid=product_info.short_id)
+        #
+        #     client_uuid_from_payment = vless_client._generate_client_uuid()
+        #
+        #     obj = vless_client.get_client_traffic_by_id(client_uuid=client_uuid_from_payment).get("obj")
+        #
+        #     if isinstance(obj, list) and obj == []:
+        #         logging.info(f"📢 Создаем ссылку для клиента с UUID = {client_uuid_from_payment}")
+        #         link = vless_client.add_client(client_uuid=client_uuid_from_payment,
+        #                                        flow="xtls-rprx-vision",
+        #                                        inbound_id="1",
+        #                                        expiry_time=expire_time_sec,
+        #                                        email=f"{callback.from_user.id}_{client_uuid_from_payment}").get(
+        #             'subscription_link')
+        #     else:
+        #         logging.info(f"💡 Клиент c UUID = {client_uuid_from_payment} уже есть в 3xui")
+        #         logging.debug(obj)
+        #         link = None
+        #
+        # except Exception as exception_text:
+        #     # < code > текст < / code >
+        #     buttons = get_errors_button()
+        #     await callback.message.edit_caption(caption=f"❌ <b>Что-то пошло не так</b>… Повторите попытку позже\n\n"
+        #                                                 f"📢 <b>Сообщите в поддержку</b> и прикрепите текст ошибки\n\n"
+        #                                                 f"💡 <i>Чтобы скопировать — просто нажмите на текст</i>\n\n"
+        #                                                 f"🔴 <b>Ошибка:</b>\n"
+        #                                                 f"<code>{exception_text}</code>",
+        #                                         parse_mode="HTML",
+        #                                         reply_markup=buttons)
+        #     await callback.bot.send_message(chat_id=TECH_CHANNEL,
+        #                                     text=(f"❌ <b>Ошибка создания VLess ссылки</b>\n\n"
+        #                                           f"📢 user_tg_id = {callback.from_user.id} user_name = {callback.from_user.username}\n"
+        #                                           f"🔴 <b>Ошибка:</b>\n"
+        #                                           f"<code>{exception_text}</code>"),
+        #                                     parse_mode="HTML",
+        #                                     reply_markup=None)
+        #     return
 
         ############### Запись в БД Enrollments ################
         if link:
