@@ -105,6 +105,9 @@ def _build_xui_client(
         sid=product.short_id,
     )
 
+def generate_client_ref_uid():
+    client_uuid = f"ref_{uuid4().hex[:12]}"
+    return client_uuid
 
 def _generate_bonus_sub_id() -> str:
     """
@@ -130,7 +133,7 @@ def create_vpn_subscriptions(
     *,
     main_product: ProductPydantic,
     bonus_products: Sequence[ProductPydantic] | None = None,
-    client_uuid: str | None,
+    client_uuid: str,
     expire_time_sec: int,
     username: str,
     password: str,
@@ -218,9 +221,6 @@ def create_vpn_subscriptions(
                 ],
             }
     """
-
-    if client_uuid is None:
-        client_uuid = f"ref_{uuid4().hex[:12]}"
 
     bonus_products = bonus_products or ()
 

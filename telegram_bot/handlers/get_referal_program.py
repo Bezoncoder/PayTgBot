@@ -26,7 +26,7 @@ from vpn_management.vlessuiapi import XUIClient
 from dateutil.relativedelta import relativedelta
 import datetime as DT
 
-from vpn_management.vpn_subscription_manager import create_vpn_subscriptions
+from vpn_management.vpn_subscription_manager import create_vpn_subscriptions, generate_client_ref_uid
 
 router = Router()
 
@@ -275,7 +275,7 @@ async def get_free_month(callback: CallbackQuery, state: FSMContext):
                 len(bonus_products),
             )
 
-            client_uuid_from_payment = None
+            client_uuid_from_payment = generate_client_ref_uid()
 
             vpn_result = create_vpn_subscriptions(
                 main_product=product_info,
@@ -291,12 +291,6 @@ async def get_free_month(callback: CallbackQuery, state: FSMContext):
                     vpn_result["errors"][0]["error"]
                     if vpn_result["errors"]
                     else "Причина ошибки отсутствует."
-                )
-
-                logging.error(
-                    "Не удалось выдать VPN: payment_id=%s, vpn_result=%s",
-                    payment_data.id,
-                    vpn_result,
                 )
 
                 raise RuntimeError(
@@ -320,49 +314,6 @@ async def get_free_month(callback: CallbackQuery, state: FSMContext):
                                             parse_mode="HTML",
                                             reply_markup=None)
             return
-        # try:
-        #     vless_client = XUIClient(base_url_from_panel=base_url,
-        #                              username=USER,
-        #                              password=PASSWORD,
-        #                              verify_ssl=True,
-        #                              public_inbound_key=product_info.public_key,
-        #                              sid=product_info.short_id)
-        #
-        #     client_uuid_from_payment = vless_client._generate_client_uuid()
-        #
-        #     obj = vless_client.get_client_traffic_by_id(client_uuid=client_uuid_from_payment).get("obj")
-        #
-        #     if isinstance(obj, list) and obj == []:
-        #         logging.info(f"📢 Создаем ссылку для клиента с UUID = {client_uuid_from_payment}")
-        #         link = vless_client.add_client(client_uuid=client_uuid_from_payment,
-        #                                        flow="xtls-rprx-vision",
-        #                                        inbound_id="1",
-        #                                        expiry_time=expire_time_sec,
-        #                                        email=f"{callback.from_user.id}_{client_uuid_from_payment}").get(
-        #             'subscription_link')
-        #     else:
-        #         logging.info(f"💡 Клиент c UUID = {client_uuid_from_payment} уже есть в 3xui")
-        #         logging.debug(obj)
-        #         link = None
-        #
-        # except Exception as exception_text:
-        #     # < code > текст < / code >
-        #     buttons = get_errors_button()
-        #     await callback.message.edit_caption(caption=f"❌ <b>Что-то пошло не так</b>… Повторите попытку позже\n\n"
-        #                                                 f"📢 <b>Сообщите в поддержку</b> и прикрепите текст ошибки\n\n"
-        #                                                 f"💡 <i>Чтобы скопировать — просто нажмите на текст</i>\n\n"
-        #                                                 f"🔴 <b>Ошибка:</b>\n"
-        #                                                 f"<code>{exception_text}</code>",
-        #                                         parse_mode="HTML",
-        #                                         reply_markup=buttons)
-        #     await callback.bot.send_message(chat_id=TECH_CHANNEL,
-        #                                     text=(f"❌ <b>Ошибка создания VLess ссылки</b>\n\n"
-        #                                           f"📢 user_tg_id = {callback.from_user.id} user_name = {callback.from_user.username}\n"
-        #                                           f"🔴 <b>Ошибка:</b>\n"
-        #                                           f"<code>{exception_text}</code>"),
-        #                                     parse_mode="HTML",
-        #                                     reply_markup=None)
-        #     return
 
         ############### Запись в БД Enrollments ################
         if link:
@@ -406,31 +357,6 @@ async def get_free_month(callback: CallbackQuery, state: FSMContext):
         ################################ MANUAL MODE ###################################
         # TODO Сделать Видео или GIF о том как отправить квитанцию
         # Обновить запись в БД об оплате
-
-        # Пример user_data
-        # user_data = dict(stream_id_int=stream_id_int,
-        #                  price=price,
-        #                  directions_id=directions_id,
-        #                  operation_id=payments_operation_data.get('operation_id', '*********'),
-        #                  payment_id=payment_data_to_provider.id)
-
-        # payment_data = await update_payment_data(payment_id=user_data.get("payment_id", '000000'),
-        #                                          new_operation_id=user_data.get("operation_id", "None"),
-        #                                          new_status=refer_status,
-        #                                          stream_id=stream_info.id)
-
-        # logging.info("Проверка оплаты не прошла:\n%s", )
-
-        # caption = (
-        #     f"💁🏻‍♂️ Оплатили?\n\n🧾 Тогда отправьте сюда (В ЭТОТ БОТ) квитанцию платежа: скриншот или документ.\n\n"
-        #     f"Нажмите на «Скрепку» в левом или правом нижнем углу (рядом с полем, где вы пишете текст). "
-        #     f"Выберите скриншот или документ.\n\n"
-        #     f"Чтобы «Отправить», нажмите на синюю кнопку со стрелочкой в правом нижнем углу.\n\n"
-        #     f"На квитанции должны быть четко видны: дата, время и сумма платежа.\n___________________________\n\n"
-        #     f"Наши Контакты:\n\n👉 @user_post\n\n__________________________\n"
-        #     f"За спам вы можете быть заблокированы!"
-        # )
-        #
 
         caption = (
             f"✨ Бесплатных месяцев пока нет.\n\n"
