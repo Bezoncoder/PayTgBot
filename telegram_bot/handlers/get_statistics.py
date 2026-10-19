@@ -4,7 +4,10 @@ from aiogram.fsm.storage.base import StorageKey
 from aiogram.types import FSInputFile
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
-from db.statistics import get_products_statistics, get_users_statistics, get_products_by_title_statistics
+from db.statistics import (get_products_statistics,
+                           get_users_statistics,
+                           get_products_by_title_statistics,
+                           get_new_users_with_enrollments_this_month)
 from keyboards.get_menu import get_admin_button
 from utils.states import OrderPay
 
@@ -43,7 +46,7 @@ async def get_statistics(callback: CallbackQuery, state: FSMContext):
     users_statistics = await get_users_statistics()
     products_statistics = await get_products_statistics()
     products_by_title_statistics = await get_products_by_title_statistics()
-
+    new_user_payed_vpn = await get_new_users_with_enrollments_this_month()
     if users_statistics is None:
         caption = (
             "⚠️ <b>Статистика временно недоступна</b>\n\n"
@@ -58,7 +61,9 @@ async def get_statistics(callback: CallbackQuery, state: FSMContext):
             f"• Новых за текущий месяц: <b>{users_statistics.new_users_this_month}</b>\n"
             f"• Активных: <b>{users_statistics.active_users}</b>\n"
             f"• Повторных покупателей: "
-            f"<b>{users_statistics.users_with_two_or_more_purchases}</b>\n\n"
+            f"<b>{users_statistics.users_with_two_or_more_purchases}</b>\n"
+            f"• Новых покупателей за месяц: "
+            f"<b>{new_user_payed_vpn}</b>\n\n"
             "💳 <b>Покупки по тарифам</b>\n"
         )
 

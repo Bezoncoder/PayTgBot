@@ -151,6 +151,13 @@ NEW_USERS_WITH_ENROLLMENTS_THIS_MONTH_SQL = text("""
         'month',
         CURRENT_DATE
     )
+    AND DATE_PART(
+        'year',
+        CAST(e.created_at AS date)
+    ) = DATE_PART(
+        'year',
+        CURRENT_DATE
+    )
     AND e.user_id IN (
         SELECT u.id
         FROM users AS u
@@ -159,6 +166,13 @@ NEW_USERS_WITH_ENROLLMENTS_THIS_MONTH_SQL = text("""
             CAST(u.created_at AS date)
         ) = DATE_PART(
             'month',
+            CURRENT_DATE
+        )
+        AND DATE_PART(
+            'year',
+            CAST(u.created_at AS date)
+        ) = DATE_PART(
+            'year',
             CURRENT_DATE
         )
     )
