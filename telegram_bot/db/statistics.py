@@ -137,6 +137,35 @@ PRODUCTS_BY_TITLE_STATISTICS_SQL = text("""
         s.title_product
 """)
 
+
+NEW_USERS_WITH_ENROLLMENTS_THIS_MONTH_SQL = text("""
+    SELECT
+        COUNT(DISTINCT e.user_id) AS users_count
+
+    FROM enrollments AS e
+
+    WHERE DATE_PART(
+        'month',
+        CAST(e.created_at AS date)
+    ) = DATE_PART(
+        'month',
+        CURRENT_DATE
+    )
+    AND e.user_id IN (
+        SELECT u.id
+        FROM users AS u
+        WHERE DATE_PART(
+            'month',
+            CAST(u.created_at AS date)
+        ) = DATE_PART(
+            'month',
+            CURRENT_DATE
+        )
+    )
+""")
+
+
+
 @connection
 async def get_users_statistics(
     session: AsyncSession,
@@ -299,5 +328,54 @@ async def get_products_by_title_statistics(
     except Exception:
         logging.exception(
             "Непредвиденная ошибка при получении статистики покупок по продуктам"
+        )
+        return None
+
+
+@connection
+async def get_new_users_with_enrollments_this_month(
+    session: AsyncSession,
+) -> int | None:
+    """
+    Возвращает количество уникальных пользователей, у которых
+    месяц регистрации и месяц создания Enrollment совпадают
+    с номером текущего месяца.
+
+    Условия SQL сохранены из исходного запроса: год не учитывается.
+
+    Возвращает:
+    - int: количество пользователей, включая 0;
+    - None: при ошибке выполнения запроса.
+    """
+    try:
+        logging.info(
+            "Запрашиваем количество новых пользователей "
+            "с записями Enrollment за текущий месяц"
+        )
+
+        result = await session.execute(
+            NEW_USERS_WITH_ENROLLMENTS_THIS_MONTH_SQL
+        )
+        users_count = result.scalar_one()
+
+        logging.info(
+            "Количество новых пользователей с записями Enrollment "
+            "за текущий месяц получено: users_count=%s",
+            users_count,
+        )
+
+        return users_count
+
+    except SQLAlchemyError:
+        logging.exception(
+            "Ошибка SQLAlchemy при получении количества новых "
+            "пользователей с записями Enrollment за текущий месяц"
+        )
+        return None
+
+    except Exception:
+        logging.exception(
+            "Непредвиденная ошибка при получении количества новых "
+            "пользователей с записями Enrollment за текущий месяц"
         )
         return None
