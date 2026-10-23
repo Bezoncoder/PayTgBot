@@ -37,7 +37,7 @@ async def set_stream(callback: CallbackQuery, state: FSMContext):
     user_info = await get_user_info_by_tg_id(tg_user_id=int(callback.from_user.id))
     if not user_info.enrollments:
         price = str(
-                    round(float(stream_info.price) * 0.7)
+                    round(float(stream_info.price) * 0.3)
                     )
     else:
         price = str(stream_info.price)
