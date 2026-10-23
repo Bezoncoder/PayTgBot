@@ -99,15 +99,17 @@ async def set_product(callback: CallbackQuery, state: FSMContext):
                        "👈 Нажмите «Назад» для выбора альтернативы")
 
     ####################### DISCOUNT ######################
-
+    logging.info("⚠️ ПРОВЕРКА СКИДКИ")
     user_info = await get_user_info_by_tg_id(tg_user_id=int(callback.from_user.id))
+    logging.info(f"⚠️ ПРОВЕРКА СКИДКИ {user_info}")
     if not user_info.enrollments:
+        logging.info(f"⚠️ ПРОВЕРКА СКИДКИ IF {user_info.enrollments}")
         new_caption += (f"{new_caption}\n\n"
                        "Вам доступна скидка 70%, выберите тариф для перехода к оплате!n")
 
     #######################################################
 
-
+    logging.info(f"⚠️ ПРОВЕРКА СКИДКИ new_caption \n{new_caption}")
     media = InputMediaPhoto(media=new_photo, caption=new_caption, parse_mode="HTML")
 
     await callback.message.edit_media(media=media, reply_markup=buttons)
