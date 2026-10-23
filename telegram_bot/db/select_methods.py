@@ -310,8 +310,9 @@ if "__main__" == __name__:
 
 
 
-    rez = run(get_userinfo_by_id(user_id=1))
+    rez = run(get_user_info_by_tg_id(tg_user_id=6501080094))
     print(rez)
+
     # rez = run(get_stream_info(id_stream=2))
     # print(rez.title)
     # zalupa = ProductPydantic.model_validate(rez)

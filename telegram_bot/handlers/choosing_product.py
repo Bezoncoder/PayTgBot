@@ -102,7 +102,8 @@ async def set_product(callback: CallbackQuery, state: FSMContext):
 
     user_info = await get_user_info_by_tg_id(tg_user_id=int(callback.from_user.id))
     if not user_info.enrollments:
-        new_caption += ("\nВам доступна скидка 70%, выберите тариф для перехода к оплате!\n")
+        new_caption += (f"{new_caption}\n\n"
+                       "Вам доступна скидка 70%, выберите тариф для перехода к оплате!n")
 
     #######################################################
 
