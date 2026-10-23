@@ -7,7 +7,7 @@ from aiogram.fsm.context import FSMContext
 
 
 from keyboards.get_menu import get_stream_payment_buttons
-from db.select_methods import get_stream_info, get_product_info
+from db.select_methods import get_stream_info, get_product_info, get_user_info_by_tg_id
 from settings.config import HOST_URL, HOME_PAGE
 
 '''
@@ -34,8 +34,13 @@ async def set_stream(callback: CallbackQuery, state: FSMContext):
 
     logging.info("Выбран поток: %s", stream_id)
     stream_info = await get_stream_info(id_stream=stream_id)
-
-    price = str(stream_info.price)
+    user_info = await get_user_info_by_tg_id(tg_user_id=int(callback.from_user.id))
+    if not user_info.enrollments:
+        price = str(
+                    round(float(stream_info.price) * 0.7)
+                    )
+    else:
+        price = str(stream_info.price)
 
     ########################## Получаем Информацию о Продукте ##########################
 
@@ -54,27 +59,14 @@ async def set_stream(callback: CallbackQuery, state: FSMContext):
 
     await state.storage.update_data(user_key, data=user_data)  # <— сохраняем для ЭТОГО пользователя
 
-    # product_description = str(product_pydantic.description)
-
     ######################################################################################
 
     ################# Формируем сообщение для пользователя ########################
-    # start_date = stream_info.start_date
-    # end_date = stream_info.end_date
-
-    # new_photo = FSInputFile(f'source/pictures/payment.png')
-    # offerta_link = "https://roadmappers.ru/oferta"  # сюда подставь ссылку, если есть
-    # link_part = f" ({offerta_link})" if offerta_link else ""
-    # new_caption = (f'Вы выбрали поток: {start_date} - {end_date}\n'
-    #                f'Стоимость {price}.\n\n'
-    #                f'Нажмите Оплатить для оплаты.\n\n'
-    #                f"Нажимая кнопку «Оплатить», вы соглашаетесь с условиями оферты {link_part}.\n\n"
-    #                f'\n⚠️ Оплата производится исключительно с карты физического лица!\n\n')
 
     politika_url = HOME_PAGE+"policy"
     polzovatelskoe_url = HOME_PAGE+"soglashenie"
 
-    new_caption = (f"🧾 Вы выбрали: {stream_info.title} за {stream_info.price} ₽.\n\n"
+    new_caption = (f"🧾 Вы выбрали: {stream_info.title} за {price} ₽.\n\n"
                    f"✅ Нажмите «Продолжить» для перехода к оплате!\n\n"
                    f"📚 Пакет включает доступ и поддержку на весь период!\n\n"
                    f"🚀 Ждём вас на высоких скоростях! ✨\n\n"

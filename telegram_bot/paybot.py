@@ -35,7 +35,7 @@ from aiohttp import web
 BASE_URL_BOT = "https://bot.quantumturbovpn.com"
 # bot = Bot(token=BOT_TOKEN)
 
-ADT_MESSAGE_LIST=[3,5,6,7,8,10,11,12,13]
+ADT_MESSAGE_LIST=[3,5,6,7,8,10,11,12,13,16]
 
 ADMINS = [5866726660, 1773955529]
 

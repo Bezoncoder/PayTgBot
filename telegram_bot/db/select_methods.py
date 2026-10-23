@@ -103,7 +103,7 @@ async def get_user_info_by_tg_id(session, tg_user_id: int) -> UserPydantic:
     user_info = await UserDAO.get_user_info(session=session, telegram_id=tg_user_id)
     logging.debug("get_user_info_by_tg_id %s", user_info)
     # print(user_info)
-    # TODO СДЕЛАТЬ PAIDANTIC ВАЛИДАЦИЮ !!!!!
+
     if user_info:
         result = UserPydantic.model_validate(user_info)
     else:

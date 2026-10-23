@@ -98,6 +98,15 @@ async def set_product(callback: CallbackQuery, state: FSMContext):
                        "Все лицензии для этого сервера распроданы\n\n"
                        "👈 Нажмите «Назад» для выбора альтернативы")
 
+    ####################### DISCOUNT ######################
+
+    user_info = await get_user_info_by_tg_id(tg_user_id=int(callback.from_user.id))
+    if not user_info.enrollments:
+        new_caption += ("\nВам доступна скидка 70%, выберите тариф для перехода к оплате!\n")
+
+    #######################################################
+
+
     media = InputMediaPhoto(media=new_photo, caption=new_caption, parse_mode="HTML")
 
     await callback.message.edit_media(media=media, reply_markup=buttons)
