@@ -101,11 +101,10 @@ async def set_product(callback: CallbackQuery, state: FSMContext):
     ####################### DISCOUNT ######################
     logging.info("⚠️ ПРОВЕРКА СКИДКИ")
     user_info = await get_user_info_by_tg_id(tg_user_id=int(callback.from_user.id))
-    logging.info(f"⚠️ ПРОВЕРКА СКИДКИ {user_info}")
+
     if not user_info.enrollments:
-        logging.info(f"⚠️ ПРОВЕРКА СКИДКИ IF {user_info.enrollments}")
-        new_caption += (f"{new_caption}\n\n"
-                       "Вам доступна скидка 70%, выберите тариф для перехода к оплате!n")
+
+        new_caption += ("\nВам доступна скидка 70%, выберите тариф для перехода к оплате!\n")
 
     #######################################################
 
