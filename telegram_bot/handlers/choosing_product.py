@@ -103,12 +103,14 @@ async def set_product(callback: CallbackQuery, state: FSMContext):
     user_info = await get_user_info_by_tg_id(tg_user_id=int(callback.from_user.id))
 
     if not user_info.enrollments:
-
-        new_caption += ("\nВам доступна скидка 70%, выберите тариф для перехода к оплате!\n")
+        new_caption += (
+            "\n🎁 <b>Вам доступна скидка 70%!</b>\n\n"
+            "Выберите тариф, чтобы получить скидку "
+            "и перейти к оплате!\n"
+        )
 
     #######################################################
 
-    logging.info(f"⚠️ ПРОВЕРКА СКИДКИ new_caption \n{new_caption}")
     media = InputMediaPhoto(media=new_photo, caption=new_caption, parse_mode="HTML")
 
     await callback.message.edit_media(media=media, reply_markup=buttons)
